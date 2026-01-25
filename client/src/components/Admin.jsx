@@ -17,6 +17,7 @@ import {
 } from '@mui/icons-material';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import { API_URL } from '../config';
 
 const drawerWidth = 260;
 
@@ -32,7 +33,7 @@ class CustomUploadAdapter {
                 const formData = new FormData();
                 formData.append('file', file);
 
-                fetch('http://localhost:3000/api/upload', {
+                fetch('${API_URL}/api/upload', {
                     method: 'POST',
                     body: formData
                 })
@@ -77,7 +78,7 @@ const SingleImageUpload = ({ value, onChange, label }) => {
             const formData = new FormData();
             formData.append('file', file);
 
-            const res = await fetch('http://localhost:3000/api/upload', {
+            const res = await fetch('${API_URL}/api/upload', {
                 method: 'POST',
                 body: formData
             });
@@ -149,7 +150,7 @@ const ImageUpload = ({ gallery, setGallery }) => {
                 const formData = new FormData();
                 formData.append('file', file);
 
-                const res = await fetch('http://localhost:3000/api/upload', {
+                const res = await fetch('${API_URL}/api/upload', {
                     method: 'POST',
                     body: formData
                 });
@@ -249,8 +250,8 @@ const Admin = () => {
     const fetchDropdowns = async () => {
         try {
             const [gemCats, jewCats] = await Promise.all([
-                fetch('http://localhost:3000/api/gemstone-categories').then(res => res.json()),
-                fetch('http://localhost:3000/api/jewelry-categories').then(res => res.json())
+                fetch('${API_URL}/api/gemstone-categories').then(res => res.json()),
+                fetch('${API_URL}/api/jewelry-categories').then(res => res.json())
             ]);
             setGemstoneCategories(gemCats);
             setJewelryCategories(jewCats);
@@ -278,7 +279,7 @@ const Admin = () => {
         }
 
         try {
-            const res = await fetch(`http://localhost:3000${endpoint}`);
+            const res = await fetch(`${API_URL}${endpoint}`);
             const data = await res.json();
             setItems(data);
             if (activeTab === 'products' || activeTab === 'jewelry') {
@@ -291,7 +292,7 @@ const Admin = () => {
 
     const loadSettings = async () => {
         try {
-            const res = await fetch('http://localhost:3000/api/settings');
+            const res = await fetch('${API_URL}/api/settings');
             const data = await res.json();
             setSettings(prev => ({ ...prev, ...data }));
         } catch (error) {
@@ -322,7 +323,7 @@ const Admin = () => {
 
     const saveSettings = async () => {
         try {
-            const res = await fetch('http://localhost:3000/api/settings', {
+            const res = await fetch('${API_URL}/api/settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(settings)
@@ -343,7 +344,7 @@ const Admin = () => {
                 const endpoint = activeTab === 'products' ? `/api/gemstones/${item.id}` :
                     activeTab === 'jewelry' ? `/api/jewelry-items/${item.id}` :
                         `/api/collections/${item.id}`;
-                const res = await fetch(`http://localhost:3000${endpoint}`);
+                const res = await fetch(`${API_URL}${endpoint}`);
                 if (res.ok) fullItem = await res.json();
             } catch (err) { console.error(err); }
         }
@@ -352,8 +353,8 @@ const Admin = () => {
         if (activeTab === 'collections') {
             try {
                 const [gems, jews] = await Promise.all([
-                    fetch('http://localhost:3000/api/gemstones').then(r => r.json()),
-                    fetch('http://localhost:3000/api/jewelry-items').then(r => r.json())
+                    fetch('${API_URL}/api/gemstones').then(r => r.json()),
+                    fetch('${API_URL}/api/jewelry-items').then(r => r.json())
                 ]);
                 setAllGemstones(gems);
                 setAllJewelry(jews);
@@ -427,7 +428,7 @@ const Admin = () => {
         else if (activeTab === 'blogs') endpoint = '/api/posts';
         else if (activeTab === 'collections') endpoint = '/api/collections';
 
-        const url = editingId ? `http://localhost:3000${endpoint}/${editingId}` : `http://localhost:3000${endpoint}`;
+        const url = editingId ? `${API_URL}${endpoint}/${editingId}` : `${API_URL}${endpoint}`;
         const method = editingId ? 'PUT' : 'POST';
 
         const payload = { ...formData };
@@ -465,7 +466,7 @@ const Admin = () => {
         else if (activeTab === 'hero-slides') endpoint = '/api/hero-slides';
 
         try {
-            await fetch(`http://localhost:3000${endpoint}/${id}`, { method: 'DELETE' });
+            await fetch(`${API_URL}${endpoint}/${id}`, { method: 'DELETE' });
             loadDataForTab();
         } catch (error) {
             console.error('Error deleting:', error);

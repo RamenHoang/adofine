@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './CollectionsSection.css';
+import { API_URL } from '../config';
 
 const CollectionsSection = () => {
     const [collections, setCollections] = useState([]);
@@ -8,7 +9,7 @@ const CollectionsSection = () => {
     useEffect(() => {
         const fetchCollections = async () => {
             try {
-                const res = await fetch('http://localhost:3000/api/collections');
+                const res = await fetch('${API_URL}/api/collections');
                 if (res.ok) {
                     const data = await res.json();
                     setCollections(data.filter(c => c.is_visible));
