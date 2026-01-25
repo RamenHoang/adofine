@@ -6,18 +6,150 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const { body, validationResult } = require('express-validator');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors());
+// Security middleware
+app.use(helmet());
+
+// CORS with credentials
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5174', 'http://localhost:5173'];
+app.use(cors({
+    origin: allowedOrigins,
+    credentials: true
+}));
+
 app.use(express.json());
+app.use(cookieParser());
+
+// Rate limiter for login attempts
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // 5 attempts
+    message: 'Too many login attempts, please try again later',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Authentication middleware
+const authenticateToken = (req, res, next) => {
+    const token = req.cookies.token;
+
+    if (!token) {
+        return res.status(401).json({ error: 'Access denied. No token provided.' });
+    }
+
+    try {
+        const verified = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = verified;
+        next();
+    } catch (err) {
+        return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+};
 
 // Configure Multer
 const upload = multer({ dest: 'uploads/' });
 
 app.get('/', (req, res) => {
     res.send('Red ART API is running');
+});
+
+// --- AUTHENTICATION ENDPOINTS ---
+// Login
+app.post('/api/auth/login', loginLimiter, [
+    body('username').trim().notEmpty().withMessage('Username is required'),
+    body('password').notEmpty().withMessage('Password is required')
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ error: 'Invalid credentials' });
+    }
+
+    try {
+        const { username, password } = req.body;
+
+        // Find user
+        const [users] = await db.query(
+            'SELECT * FROM admin_users WHERE username = ? AND is_active = TRUE',
+            [username.trim()]
+        );
+
+        if (users.length === 0) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        const user = users[0];
+
+        // Verify password
+        const validPassword = await bcrypt.compare(password, user.password_hash);
+        if (!validPassword) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        // Update last login
+        await db.query('UPDATE admin_users SET last_login = NOW() WHERE id = ?', [user.id]);
+
+        // Generate JWT
+        const token = jwt.sign(
+            { id: user.id, username: user.username, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+        );
+
+        // Set httpOnly cookie
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 3600000 // 1 hour
+        });
+
+        res.json({
+            message: 'Login successful',
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (err) {
+        console.error('Login error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Get current user (verify session)
+app.get('/api/auth/me', authenticateToken, async (req, res) => {
+    try {
+        const [users] = await db.query(
+            'SELECT id, username, email, role, is_active, last_login, created_at FROM admin_users WHERE id = ?',
+            [req.user.id]
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({ user: users[0] });
+    } catch (err) {
+        console.error('Get user error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Logout
+app.post('/api/auth/logout', (req, res) => {
+    res.clearCookie('token');
+    res.json({ message: 'Logged out successfully' });
 });
 
 // --- SETTINGS API (Cloudinary Config) ---
@@ -33,7 +165,7 @@ app.get('/api/settings', async (req, res) => {
     }
 });
 
-app.post('/api/settings', async (req, res) => {
+app.post('/api/settings', authenticateToken, async (req, res) => {
     try {
         const settings = req.body; // { CLOUD_NAME: '...', API_KEY: '...', ... }
         for (const [key, value] of Object.entries(settings)) {
@@ -47,7 +179,7 @@ app.post('/api/settings', async (req, res) => {
 });
 
 // --- CLOUDINARY UPLOAD ---
-app.post('/api/upload', upload.single('file'), async (req, res) => {
+app.post('/api/upload', authenticateToken, upload.single('file'), async (req, res) => {
     try {
         // 1. Fetch credentials from DB
         const [rows] = await db.query('SELECT * FROM app_settings');
@@ -146,7 +278,7 @@ app.get('/api/gemstones/:id', async (req, res) => {
     }
 });
 
-app.post('/api/gemstones', async (req, res) => {
+app.post('/api/gemstones', authenticateToken, async (req, res) => {
     try {
         const { title, gemstone_category_id, image, price, description, gallery,
             weight, dimensions, color, clarity, cut, origin } = req.body;
@@ -166,7 +298,7 @@ app.post('/api/gemstones', async (req, res) => {
     }
 });
 
-app.put('/api/gemstones/:id', async (req, res) => {
+app.put('/api/gemstones/:id', authenticateToken, async (req, res) => {
     try {
         const { title, gemstone_category_id, image, price, description, gallery,
             weight, dimensions, color, clarity, cut, origin } = req.body;
@@ -186,7 +318,7 @@ app.put('/api/gemstones/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/gemstones/:id', async (req, res) => {
+app.delete('/api/gemstones/:id', authenticateToken, async (req, res) => {
     try {
         const [result] = await db.query('DELETE FROM gemstones WHERE id = ?', [req.params.id]);
         if (result.affectedRows === 0) return res.status(404).json({ error: 'Not found' });
@@ -248,7 +380,7 @@ app.get('/api/jewelry-items/:id', async (req, res) => {
     }
 });
 
-app.post('/api/jewelry-items', async (req, res) => {
+app.post('/api/jewelry-items', authenticateToken, async (req, res) => {
     try {
         const { title, jewelry_category_id, image, price, description, gemstone_category_ids, gallery } = req.body;
 
@@ -273,7 +405,7 @@ app.post('/api/jewelry-items', async (req, res) => {
     }
 });
 
-app.put('/api/jewelry-items/:id', async (req, res) => {
+app.put('/api/jewelry-items/:id', authenticateToken, async (req, res) => {
     try {
         const { title, jewelry_category_id, image, price, description, gemstone_category_ids, gallery } = req.body;
 
@@ -298,7 +430,7 @@ app.put('/api/jewelry-items/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/jewelry-items/:id', async (req, res) => {
+app.delete('/api/jewelry-items/:id', authenticateToken, async (req, res) => {
     try {
         const [result] = await db.query('DELETE FROM jewelry_items WHERE id = ?', [req.params.id]);
         if (result.affectedRows === 0) return res.status(404).json({ error: 'Not found' });
@@ -334,7 +466,7 @@ app.get('/api/gemstone-categories', async (req, res) => {
     }
 });
 
-app.post('/api/gemstone-categories', async (req, res) => {
+app.post('/api/gemstone-categories', authenticateToken, async (req, res) => {
     try {
         const { name, description } = req.body;
         const [result] = await db.query('INSERT INTO gemstone_categories (name, description) VALUES (?, ?)', [name, description]);
@@ -345,7 +477,7 @@ app.post('/api/gemstone-categories', async (req, res) => {
     }
 });
 
-app.put('/api/gemstone-categories/:id', async (req, res) => {
+app.put('/api/gemstone-categories/:id', authenticateToken, async (req, res) => {
     try {
         const { name, description } = req.body;
         const [result] = await db.query('UPDATE gemstone_categories SET name=?, description=? WHERE id=?', [name, description, req.params.id]);
@@ -357,7 +489,7 @@ app.put('/api/gemstone-categories/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/gemstone-categories/:id', async (req, res) => {
+app.delete('/api/gemstone-categories/:id', authenticateToken, async (req, res) => {
     try {
         const [result] = await db.query('DELETE FROM gemstone_categories WHERE id = ?', [req.params.id]);
         if (result.affectedRows === 0) return res.status(404).json({ error: 'Not found' });
@@ -378,7 +510,7 @@ app.get('/api/jewelry-categories', async (req, res) => {
     }
 });
 
-app.post('/api/jewelry-categories', async (req, res) => {
+app.post('/api/jewelry-categories', authenticateToken, async (req, res) => {
     try {
         const { name, description } = req.body;
         const [result] = await db.query('INSERT INTO jewelry_categories (name, description) VALUES (?, ?)', [name, description]);
@@ -389,7 +521,7 @@ app.post('/api/jewelry-categories', async (req, res) => {
     }
 });
 
-app.put('/api/jewelry-categories/:id', async (req, res) => {
+app.put('/api/jewelry-categories/:id', authenticateToken, async (req, res) => {
     try {
         const { name, description } = req.body;
         const [result] = await db.query('UPDATE jewelry_categories SET name=?, description=? WHERE id=?', [name, description, req.params.id]);
@@ -401,7 +533,7 @@ app.put('/api/jewelry-categories/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/jewelry-categories/:id', async (req, res) => {
+app.delete('/api/jewelry-categories/:id', authenticateToken, async (req, res) => {
     try {
         const [result] = await db.query('DELETE FROM jewelry_categories WHERE id = ?', [req.params.id]);
         if (result.affectedRows === 0) return res.status(404).json({ error: 'Not found' });
@@ -423,7 +555,7 @@ app.get('/api/hero-slides', async (req, res) => {
     }
 });
 
-app.post('/api/hero-slides', async (req, res) => {
+app.post('/api/hero-slides', authenticateToken, async (req, res) => {
     try {
         const { image_url, title, subtitle, link, sort_order } = req.body;
         const [result] = await db.query(
@@ -437,7 +569,7 @@ app.post('/api/hero-slides', async (req, res) => {
     }
 });
 
-app.put('/api/hero-slides/:id', async (req, res) => {
+app.put('/api/hero-slides/:id', authenticateToken, async (req, res) => {
     try {
         const { image_url, title, subtitle, link, sort_order, is_active } = req.body;
         const [result] = await db.query(
@@ -452,7 +584,7 @@ app.put('/api/hero-slides/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/hero-slides/:id', async (req, res) => {
+app.delete('/api/hero-slides/:id', authenticateToken, async (req, res) => {
     try {
         const [result] = await db.query('DELETE FROM hero_slides WHERE id = ?', [req.params.id]);
         if (result.affectedRows === 0) return res.status(404).json({ error: 'Not found' });
@@ -485,7 +617,7 @@ app.get('/api/posts/:id', async (req, res) => {
     }
 });
 
-app.post('/api/posts', async (req, res) => {
+app.post('/api/posts', authenticateToken, async (req, res) => {
     try {
         const { title, excerpt, content, image_url, author } = req.body;
         // Simple slug generation
@@ -502,7 +634,7 @@ app.post('/api/posts', async (req, res) => {
     }
 });
 
-app.put('/api/posts/:id', async (req, res) => {
+app.put('/api/posts/:id', authenticateToken, async (req, res) => {
     try {
         const { title, excerpt, content, image_url, author } = req.body;
         const [result] = await db.query(
@@ -517,7 +649,7 @@ app.put('/api/posts/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/posts/:id', async (req, res) => {
+app.delete('/api/posts/:id', authenticateToken, async (req, res) => {
     try {
         const [result] = await db.query('DELETE FROM posts WHERE id = ?', [req.params.id]);
         if (result.affectedRows === 0) return res.status(404).json({ error: 'Not found' });
@@ -572,7 +704,7 @@ app.get('/api/collections/:id', async (req, res) => {
     }
 });
 
-app.post('/api/collections', async (req, res) => {
+app.post('/api/collections', authenticateToken, async (req, res) => {
     try {
         const { title, description, image, is_visible, items } = req.body;
         // items: [{ type: 'gemstone'|'jewelry', id: 1 }, ...]
@@ -604,7 +736,7 @@ app.post('/api/collections', async (req, res) => {
     }
 });
 
-app.put('/api/collections/:id', async (req, res) => {
+app.put('/api/collections/:id', authenticateToken, async (req, res) => {
     try {
         const { title, description, image, is_visible, items } = req.body;
 
@@ -637,7 +769,7 @@ app.put('/api/collections/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/collections/:id', async (req, res) => {
+app.delete('/api/collections/:id', authenticateToken, async (req, res) => {
     try {
         const [result] = await db.query('DELETE FROM collections WHERE id = ?', [req.params.id]);
         if (result.affectedRows === 0) return res.status(404).json({ error: 'Not found' });

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 import { Link } from 'react-router-dom';
 
@@ -46,6 +47,7 @@ const HeroSkeleton = () => (
 );
 
 const Hero = () => {
+  const { t } = useTranslation();
   const [slides, setSlides] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -91,8 +93,8 @@ const Hero = () => {
   // Default Fallback content if no slides
   const defaultSlide = {
     image_url: 'https://placehold.co/1920x1080/222/FFF?text=Hero+Image',
-    title: 'Tinh hoa & SANG TRỌNG',
-    subtitle: 'CHÀO MỪNG BẠN ĐẾN VỚI THẾ GIỚI ĐÁ QUÝ',
+    title: t('hero.subtitle'),
+    subtitle: t('hero.welcome'),
     link: ''
   };
 

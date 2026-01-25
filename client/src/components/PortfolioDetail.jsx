@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 
 const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
+    const { t } = useTranslation();
     const { id } = useParams();
     const [item, setItem] = useState(null);
 
@@ -27,7 +29,7 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
         fetchDetail();
     }, [id, type]);
 
-    if (!item) return <div className="text-white text-center py-5">Loading...</div>;
+    if (!item) return <div className="text-white text-center py-5">{t('common.loading')}</div>;
 
     // Handle different fields between Gemstone/Jewelry if needed
     // Gemstone: detail_client, detail_author...
@@ -37,21 +39,21 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
     const detailsList = [];
     if (type === 'gemstone') {
         if (item.price) detailsList.push({ icon: '💲', text: item.price });
-        if (item.weight) detailsList.push({ icon: '⚖️', text: `Trọng lượng: ${item.weight} ct` });
-        if (item.dimensions) detailsList.push({ icon: '📐', text: `Kích thước: ${item.dimensions}` });
-        if (item.color) detailsList.push({ icon: '🎨', text: `Màu sắc: ${item.color}` });
-        if (item.clarity) detailsList.push({ icon: '✨', text: `Độ tinh khiết: ${item.clarity}` });
-        if (item.cut) detailsList.push({ icon: '💎', text: `Giác cắt: ${item.cut}` });
-        if (item.origin) detailsList.push({ icon: '🌍', text: `Xuất xứ: ${item.origin}` });
+        if (item.weight) detailsList.push({ icon: '⚖️', text: `${t('gemstones.weight')}: ${item.weight} ct` });
+        if (item.dimensions) detailsList.push({ icon: '📐', text: `${t('gemstones.dimensions')}: ${item.dimensions}` });
+        if (item.color) detailsList.push({ icon: '🎨', text: `${t('gemstones.color')}: ${item.color}` });
+        if (item.clarity) detailsList.push({ icon: '✨', text: `${t('gemstones.clarity')}: ${item.clarity}` });
+        if (item.cut) detailsList.push({ icon: '💎', text: `${t('gemstones.cut')}: ${item.cut}` });
+        if (item.origin) detailsList.push({ icon: '🌍', text: `${t('gemstones.origin')}: ${item.origin}` });
 
         // Keep category if available
-        if (item.category_name) detailsList.push({ icon: '🏷️', text: `Loại đá: ${item.category_name}` });
+        if (item.category_name) detailsList.push({ icon: '🏷️', text: `${t('gemstones.category')}: ${item.category_name}` });
     } else if (type === 'jewelry') {
         // Jewelry specific details
-        if (item.category_name) detailsList.push({ icon: '💍', text: `Loại: ${item.category_name}` });
+        if (item.category_name) detailsList.push({ icon: '💍', text: `${t('jewelry.category')}: ${item.category_name}` });
         if (item.price) detailsList.push({ icon: '💲', text: item.price });
         if (item.composition && item.composition.length > 0) {
-            detailsList.push({ icon: '💎', text: `Đá chủ: ${item.composition.map(c => c.name).join(', ')}` });
+            detailsList.push({ icon: '💎', text: `${t('jewelry.composition')}: ${item.composition.map(c => c.name).join(', ')}` });
         }
     }
 
@@ -75,7 +77,7 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
                 </div>
 
                 <div className="content-right">
-                    <h2 className="details-header">THÔNG TIN CHI TIẾT</h2>
+                    <h2 className="details-header">{t('gemstones.specifications').toUpperCase()}</h2>
                     <ul className="details-list">
                         {detailsList.map((d, i) => (
                             <li key={i}><span className="icon">{d.icon}</span> {d.text}</li>
@@ -84,7 +86,7 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
 
                     <div style={{ marginTop: '30px' }}>
                         <a href="tel:0912345678" className="btn btn-primary" style={{ width: '100%', textAlign: 'center', display: 'block' }}>
-                            LIÊN HỆ TƯ VẤN NGAY
+                            {t('common.contactUs').toUpperCase()}
                         </a>
                     </div>
                 </div>
@@ -93,7 +95,7 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
             {/* GALLERY SECTION */}
             {galleryImages.length > 0 && (
                 <div className="container" style={{ marginBottom: '80px' }}>
-                    <h2 className="section-title text-center mb-5">HÌNH ẢNH CHI TIẾT</h2>
+                    <h2 className="section-title text-center mb-5">{t('gemstones.gallery').toUpperCase()}</h2>
                     <div className="gallery-grid">
                         {galleryImages.map((img, index) => (
                             <div key={index} className="gallery-item">
@@ -105,7 +107,7 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
             )}
 
             <div className="container" style={{ marginBottom: '50px' }}>
-                <Link to="/" className="btn btn-primary">&larr; QUAY LẠI TRANG CHỦ</Link>
+                <Link to="/" className="btn btn-primary">&larr; {t('gemstones.backToList').toUpperCase()}</Link>
             </div>
 
             <style jsx>{`

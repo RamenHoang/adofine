@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 
 const Navbar = () => {
+  const { t } = useTranslation();
   const [logoSettings, setLogoSettings] = useState({
     LOGO_IMAGE: '',
     LOGO_TEXT_PREFIX: 'red',
@@ -59,11 +61,11 @@ const Navbar = () => {
           </Link>
         </div>
         <ul className="nav-links d-flex">
-          <li><Link to="/" className="active">TRANG CHỦ</Link></li>
+          <li><Link to="/" className="active">{t('nav.home').toUpperCase()}</Link></li>
           {/* <li><a href="#pages">TRANG</a></li> */}
-          <li><a href="/collections">BỘ SƯU TẬP</a></li>
+          <li><a href="/collections">{t('nav.collections').toUpperCase()}</a></li>
           {/* <li><a href="#gallery">CÁC LOẠI ĐÁ</a></li> */}
-          <li><Link to="/news">TIN TỨC</Link></li>
+          <li><Link to="/news">{t('nav.news').toUpperCase()}</Link></li>
           {/* <li><a href="#contact">LIÊN HỆ</a></li> */}
           {/* <li><a href="#shop">CỬA HÀNG</a></li> */}
           <li><Link to="/admin" style={{ color: '#d31e44' }}>ADMIN</Link></li>

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import './CollectionDetail.css';
 import { API_URL } from '../config';
 
 const CollectionDetail = () => {
+    const { t } = useTranslation();
     const { id } = useParams();
     const [collection, setCollection] = useState(null);
 
@@ -23,7 +25,7 @@ const CollectionDetail = () => {
         fetchCollection();
     }, [id]);
 
-    if (!collection) return <div className="loading">Loading...</div>;
+    if (!collection) return <div className="loading">{t('common.loading')}</div>;
 
     return (
         <div className="collection-detail-page">
@@ -43,7 +45,7 @@ const CollectionDetail = () => {
                 {collection.items && collection.items.filter(item => item.type === 'gemstone').length > 0 && (
                     <div style={{ marginBottom: '80px' }}>
                         <h2 className="section-title" style={{ marginBottom: '40px', fontSize: '2rem', textAlign: 'left' }}>
-                            ĐÁ QUÝ
+                            {t('gemstones.title').toUpperCase()}
                         </h2>
                         <div className="items-grid">
                             {collection.items.filter(item => item.type === 'gemstone').map(item => (
@@ -54,7 +56,7 @@ const CollectionDetail = () => {
                                         </div>
                                         <div className="item-info">
                                             <h3 className="item-title">{item.title}</h3>
-                                            <p className="item-price">{item.price ? `${Number(item.price).toLocaleString()} USD` : 'Liên hệ'}</p>
+                                            <p className="item-price">{item.price ? `${Number(item.price).toLocaleString()} USD` : t('common.contactUs')}</p>
                                         </div>
                                     </Link>
                                 </div>
@@ -67,7 +69,7 @@ const CollectionDetail = () => {
                 {collection.items && collection.items.filter(item => item.type === 'jewelry').length > 0 && (
                     <div style={{ marginBottom: '80px' }}>
                         <h2 className="section-title" style={{ marginBottom: '40px', fontSize: '2rem', textAlign: 'left' }}>
-                            TRANG SỨC
+                            {t('jewelry.title').toUpperCase()}
                         </h2>
                         <div className="items-grid">
                             {collection.items.filter(item => item.type === 'jewelry').map(item => (
@@ -78,7 +80,7 @@ const CollectionDetail = () => {
                                         </div>
                                         <div className="item-info">
                                             <h3 className="item-title">{item.title}</h3>
-                                            <p className="item-price">{item.price ? `${Number(item.price).toLocaleString()} USD` : 'Liên hệ'}</p>
+                                            <p className="item-price">{item.price ? `${Number(item.price).toLocaleString()} USD` : t('common.contactUs')}</p>
                                         </div>
                                     </Link>
                                 </div>
@@ -88,7 +90,7 @@ const CollectionDetail = () => {
                 )}
 
                 {(!collection.items || collection.items.length === 0) && (
-                    <p className="text-center" style={{ color: '#888' }}>Chưa có sản phẩm nào trong bộ sưu tập này.</p>
+                    <p className="text-center" style={{ color: '#888' }}>{t('common.noData')}</p>
                 )}
             </div>
 

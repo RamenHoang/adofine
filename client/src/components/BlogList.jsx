@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 
 const BlogList = () => {
+    const { t } = useTranslation();
     const [posts, setPosts] = useState([]);
 
     useEffect(() => {
@@ -23,8 +25,8 @@ const BlogList = () => {
     return (
         <div className="blog-page">
             <div className="container">
-                <h1 className="page-title text-center">TIN TỨC & SỰ KIỆN</h1>
-                <p className="page-subtitle text-center">Cập nhật những xu hướng mới nhất về đá quý và trang sức</p>
+                <h1 className="page-title text-center">{t('blog.title').toUpperCase()}</h1>
+                <p className="page-subtitle text-center">{t('blog.title')}</p>
 
                 <div className="blog-grid">
                     {posts.map(post => (
@@ -36,7 +38,7 @@ const BlogList = () => {
                                 <div className="blog-content">
                                     <h3 className="blog-title">{post.title}</h3>
                                     <p className="blog-excerpt">{post.excerpt}</p>
-                                    <span className="read-more">ĐỌC THÊM &rarr;</span>
+                                    <span className="read-more">{t('blog.readMore').toUpperCase()} &rarr;</span>
                                 </div>
                             </div>
                         </Link>

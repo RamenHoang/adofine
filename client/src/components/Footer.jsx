@@ -1,35 +1,37 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const Footer = () => {
+    const { t } = useTranslation();
     return (
         <footer className="footer" id="contact">
             <div className="container">
                 <div className="footer-grid">
                     <div className="footer-col">
-                        <h3 className="footer-title">LIÊN HỆ</h3>
-                        <p>123 Phố Đá Quý, Quận 1, TP.HCM</p>
-                        <p>Điện thoại: +084 123 456 789</p>
-                        <p>Email: contact@gemstone.com</p>
+                        <h3 className="footer-title">{t('footer.contact').toUpperCase()}</h3>
+                        <p>{t('footer.address')}</p>
+                        <p>{t('footer.phone')}</p>
+                        <p>{t('footer.email')}</p>
                     </div>
                     <div className="footer-col">
-                        <h3 className="footer-title">BÀI VIẾT MỚI</h3>
+                        <h3 className="footer-title">{t('blog.title').toUpperCase()}</h3>
                         <ul className="footer-links">
-                            <li><a href="#">Cách chọn Ruby tự nhiên</a></li>
-                            <li><a href="#">Bảo quản trang sức bền đẹp</a></li>
-                            <li><a href="#">Xu hướng trang sức 2025</a></li>
+                            <li><a href="#">{t('blog.title')}</a></li>
+                            <li><a href="#">{t('blog.title')}</a></li>
+                            <li><a href="#">{t('blog.title')}</a></li>
                         </ul>
                     </div>
                     <div className="footer-col">
-                        <h3 className="footer-title">ĐĂNG KÝ NHẬN TIN</h3>
-                        <p>Đăng ký để nhận ưu đãi mới nhất.</p>
+                        <h3 className="footer-title">{t('footer.followUs').toUpperCase()}</h3>
+                        <p>{t('footer.aboutText')}</p>
                         <div className="newsletter-form">
-                            <input type="email" placeholder="Nhập email của bạn" />
-                            <button className="btn btn-primary">ĐĂNG KÝ</button>
+                            <input type="email" placeholder="Email" />
+                            <button className="btn btn-primary">{t('common.contactUs').toUpperCase()}</button>
                         </div>
                     </div>
                 </div>
                 <div className="footer-bottom">
-                    <p>&copy; 2025 Red ART. All Rights Reserved.</p>
+                    <p>{t('footer.copyright')}</p>
                     <div className="social-links">
                         <a href="#">FB</a>
                         <a href="#">TW</a>
