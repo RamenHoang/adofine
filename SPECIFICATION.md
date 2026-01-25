@@ -16,9 +16,9 @@
 ## 🎯 Overview
 
 **ADO Fine Jewelry** là hệ thống website thương mại điện tử cao cấp chuyên về đá quý và trang sức. Hệ thống bao gồm:
-- **Frontend**: Website hiển thị sản phẩm với thiết kế premium, dark theme
-- **Admin Panel**: Quản lý toàn bộ nội dung (sản phẩm, bộ sưu tập, tin tức, cấu hình)
-- **Backend API**: RESTful API xử lý dữ liệu và logic nghiệp vụ
+- **Public Frontend** (`client/`): Website hiển thị sản phẩm với thiết kế premium, dark theme
+- **Admin Panel** (`admin/`): Ứng dụng React độc lập để quản lý toàn bộ nội dung (sản phẩm, bộ sưu tập, tin tức, cấu hình)
+- **Backend API** (`server/`): RESTful API xử lý dữ liệu và logic nghiệp vụ
 
 ---
 
@@ -49,13 +49,22 @@
 
 ```
 adofine/
-├── client/                 # Frontend React App
+├── client/                 # Public Frontend React App
 │   ├── src/
-│   │   ├── components/    # React Components
+│   │   ├── components/    # React Components (Public)
 │   │   ├── App.jsx        # Main App & Routing
 │   │   └── index.css      # Global Styles
 │   ├── dist/              # Build Output
 │   └── package.json
+│
+├── admin/          # Admin Panel (Separate App)
+│   ├── src/
+│   │   ├── AdminApp.jsx   # Admin Main Component
+│   │   ├── App.jsx        # Admin App Wrapper
+│   │   ├── main.jsx       # Entry Point
+│   │   └── config.js      # API Configuration
+│   ├── dist/              # Build Output
+│   └── package.json       # Independent Dependencies
 │
 ├── server/                # Backend API
 │   ├── index.js          # Express Server
@@ -200,8 +209,10 @@ adofine/
 
 ### Base URL
 ```
-http://localhost:3000/api
+http://localhost:5000/api
 ```
+
+**Note**: Backend server runs on port 5000. Both client (port 5173) and admin (port 5174) connect to this API.
 
 ### Endpoints
 
@@ -326,7 +337,10 @@ Body: { file: <binary> }
    - Rich text description
    - Price & CTA
 
-#### Admin Panel (`/admin`)
+#### Admin Panel (Separate App at `http://localhost:5174`)
+**Note**: Admin panel is now a separate React application in `admin/` folder.
+
+**Features:**
 - Dashboard (Statistics)
 - Gemstones Management
 - Jewelry Management
@@ -336,6 +350,8 @@ Body: { file: <binary> }
 - Blog Management
 - Collections Management
 - Settings (Logo, Cloudinary, Section Config)
+
+**Access**: Run separately from client (see Deployment section)
 
 ### Components
 
@@ -358,12 +374,12 @@ Body: { file: <binary> }
 - `CollectionDetail` - Collection detail page
 - `PortfolioDetail` - Product detail (gemstone/jewelry)
 
-#### Admin Components
-- `Admin` - Main admin panel with all management features
-
-#### Utility Components
-- `SingleImageUpload` - Single image upload with Cloudinary
-- `ImageUpload` - Multi-image gallery upload with sorting
+#### Admin Components (admin/src/)
+- `AdminApp` - Main admin panel with all management features (1,100+ lines)
+- Integrated utility components:
+  - `SingleImageUpload` - Single image upload with Cloudinary
+  - `ImageUpload` - Multi-image gallery upload with sorting
+  - `SectionConfigDialog` - Section configuration dialog
 
 ---
 
@@ -496,16 +512,21 @@ DB_PORT=3306
 PORT=3000
 ```
 
-#### Frontend (.env)
+#### Public Frontend (.env)
 ```env
-VITE_API_URL=http://localhost:3000
+VITE_API_URL=http://localhost:5000
+```
+
+#### Admin Frontend (.env)
+```env
+VITE_API_URL=http://localhost:5000
 ```
 
 **Note**: For production, update `VITE_API_URL` to your production API URL (e.g., `https://api.adofine.com`)
 
 ### Build Commands
 
-#### Frontend
+#### Public Frontend (Client)
 ```bash
 cd client
 npm install
@@ -513,12 +534,20 @@ npm run build    # Output: client/dist/
 npm run dev      # Development: http://localhost:5173
 ```
 
+#### Admin Panel (admin)
+```bash
+cd admin
+npm install
+npm run build    # Output: admin/dist/
+npm run dev      # Development: http://localhost:5174
+```
+
 #### Backend
 ```bash
 cd server
 npm install
 node index.js    # Production
-nodemon index.js # Development
+nodemon index.js # Development: http://localhost:5000
 ```
 
 ### Database Setup
@@ -538,22 +567,42 @@ node migrate_collections.js
 ### Production Deployment
 
 #### Option 1: Traditional Hosting
-1. **Frontend**: Deploy `client/dist/` to static hosting (Netlify, Vercel, S3)
-2. **Backend**: Deploy to VPS (DigitalOcean, AWS EC2)
-3. **Database**: MySQL on same VPS or managed service (AWS RDS)
+1. **Public Frontend**: Deploy `client/dist/` to static hosting (Netlify, Vercel, S3)
+2. **Admin Panel**: Deploy `admin/dist/` to static hosting (can be same or separate domain)
+3. **Backend**: Deploy to VPS (DigitalOcean, AWS EC2)
+4. **Database**: MySQL on same VPS or managed service (AWS RDS)
+
+**Deployment Structure Options:**
+- **Same Domain**: 
+  - `https://adofine.com` → Public site
+  - `https://adofine.com/admin` → Admin panel
+- **Subdomain**: 
+  - `https://adofine.com` → Public site
+  - `https://admin.adofine.com` → Admin panel (recommended for security)
 
 #### Option 2: Docker
 ```dockerfile
-# Frontend
-FROM node:18 AS build
+# Public Frontend
+FROM node:18 AS build-client
 WORKDIR /app
 COPY client/package*.json ./
 RUN npm install
 COPY client/ ./
 RUN npm run build
 
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
+FROM nginx:alpine AS client
+COPY --from=build-client /app/dist /usr/share/nginx/html
+
+# Admin Frontend
+FROM node:18 AS build-admin
+WORKDIR /app
+COPY admin/package*.json ./
+RUN npm install
+COPY admin/ ./
+RUN npm run build
+
+FROM nginx:alpine AS admin
+COPY --from=build-admin /app/dist /usr/share/nginx/html
 
 # Backend
 FROM node:18
@@ -570,11 +619,12 @@ CMD ["node", "index.js"]
 
 ### Known Limitations
 1. No user authentication system
-2. Admin panel not password-protected
+2. Admin panel not password-protected (physically separated but still accessible to anyone with URL)
 3. No shopping cart functionality
 4. No payment integration
 5. No email notifications
 6. No search functionality
+7. Admin and public client run as separate apps (requires running 2 dev servers)
 
 ### Future Enhancements
 1. Add user authentication (JWT)
@@ -594,8 +644,9 @@ CMD ["node", "index.js"]
 
 For technical support or questions:
 - **Project**: ADO Fine Jewelry
-- **Version**: 1.0.0
-- **Last Updated**: January 24, 2026
+- **Version**: 1.1.0
+- **Last Updated**: January 26, 2026
+- **Major Changes**: Separated admin panel into independent React application (`admin/`)
 
 ---
 

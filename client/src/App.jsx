@@ -13,7 +13,6 @@ import BlogDetail from './components/BlogDetail';
 import CollectionsSection from './components/CollectionsSection';
 import CollectionDetail from './components/CollectionDetail';
 import PortfolioDetail from './components/PortfolioDetail';
-import Admin from './components/Admin';
 
 function MainLayout() {
   return (
@@ -71,7 +70,6 @@ function App() {
               <Footer />
             </>
           } />
-          <Route path="/admin" element={<Admin />} />
         </Routes>
       </div>
     </Router>
