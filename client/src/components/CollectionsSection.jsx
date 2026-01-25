@@ -9,7 +9,7 @@ const CollectionsSection = () => {
     useEffect(() => {
         const fetchCollections = async () => {
             try {
-                const res = await fetch('${API_URL}/api/collections');
+                const res = await fetch(`${API_URL}/api/collections`);
                 if (res.ok) {
                     const data = await res.json();
                     setCollections(data.filter(c => c.is_visible));

@@ -33,7 +33,7 @@ class CustomUploadAdapter {
                 const formData = new FormData();
                 formData.append('file', file);
 
-                fetch('${API_URL}/api/upload', {
+                fetch(`${API_URL}/api/upload`, {
                     method: 'POST',
                     body: formData
                 })
@@ -78,7 +78,7 @@ const SingleImageUpload = ({ value, onChange, label }) => {
             const formData = new FormData();
             formData.append('file', file);
 
-            const res = await fetch('${API_URL}/api/upload', {
+            const res = await fetch(`${API_URL}/api/upload`, {
                 method: 'POST',
                 body: formData
             });
@@ -150,7 +150,7 @@ const ImageUpload = ({ gallery, setGallery }) => {
                 const formData = new FormData();
                 formData.append('file', file);
 
-                const res = await fetch('${API_URL}/api/upload', {
+                const res = await fetch(`${API_URL}/api/upload`, {
                     method: 'POST',
                     body: formData
                 });
@@ -250,8 +250,8 @@ const Admin = () => {
     const fetchDropdowns = async () => {
         try {
             const [gemCats, jewCats] = await Promise.all([
-                fetch('${API_URL}/api/gemstone-categories').then(res => res.json()),
-                fetch('${API_URL}/api/jewelry-categories').then(res => res.json())
+                fetch(`${API_URL}/api/gemstone-categories`).then(res => res.json()),
+                fetch(`${API_URL}/api/jewelry-categories`).then(res => res.json())
             ]);
             setGemstoneCategories(gemCats);
             setJewelryCategories(jewCats);
@@ -292,7 +292,7 @@ const Admin = () => {
 
     const loadSettings = async () => {
         try {
-            const res = await fetch('${API_URL}/api/settings');
+            const res = await fetch(`${API_URL}/api/settings`);
             const data = await res.json();
             setSettings(prev => ({ ...prev, ...data }));
         } catch (error) {
@@ -323,7 +323,7 @@ const Admin = () => {
 
     const saveSettings = async () => {
         try {
-            const res = await fetch('${API_URL}/api/settings', {
+            const res = await fetch(`${API_URL}/api/settings`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(settings)
@@ -353,8 +353,8 @@ const Admin = () => {
         if (activeTab === 'collections') {
             try {
                 const [gems, jews] = await Promise.all([
-                    fetch('${API_URL}/api/gemstones').then(r => r.json()),
-                    fetch('${API_URL}/api/jewelry-items').then(r => r.json())
+                    fetch(`${API_URL}/api/gemstones`).then(r => r.json()),
+                    fetch(`${API_URL}/api/jewelry-items`).then(r => r.json())
                 ]);
                 setAllGemstones(gems);
                 setAllJewelry(jews);
