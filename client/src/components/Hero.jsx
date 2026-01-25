@@ -1,0 +1,264 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+
+const HeroSkeleton = () => (
+  <div className="hero-skeleton">
+    <div className="skeleton-content">
+      <div className="skeleton-line subtitle"></div>
+      <div className="skeleton-line title"></div>
+      <div className="skeleton-line title-2"></div>
+      <div className="skeleton-line button"></div>
+    </div>
+    <style jsx>{`
+            .hero-skeleton {
+                height: 100vh;
+                background: #111;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+            }
+            .skeleton-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+                width: 100%;
+            }
+            .skeleton-line {
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 4px;
+                animation: pulse 1.5s infinite;
+            }
+            .subtitle { width: 300px; height: 20px; }
+            .title { width: 500px; height: 80px; }
+            .title-2 { width: 400px; height: 80px; }
+            .button { width: 200px; height: 50px; margin-top: 30px; }
+
+            @keyframes pulse {
+                0% { opacity: 0.3; }
+                50% { opacity: 0.6; }
+                100% { opacity: 0.3; }
+            }
+        `}</style>
+  </div>
+);
+
+const Hero = () => {
+  const [slides, setSlides] = useState([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSlides = async () => {
+      try {
+        const res = await fetch('http://localhost:3000/api/hero-slides');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.length > 0) {
+            setSlides(data);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching hero slides:', error);
+      } finally {
+        // Determine preloading time: real fetch time + slight delay for smoothness if super fast
+        // But for now, just set false.
+        setIsLoading(false);
+      }
+    };
+    fetchSlides();
+  }, []);
+
+  // Auto-slide effect
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const interval = setInterval(() => {
+      nextSlide();
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [slides.length, currentSlide]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  // Default Fallback content if no slides
+  const defaultSlide = {
+    image_url: 'https://placehold.co/1920x1080/222/FFF?text=Hero+Image',
+    title: 'Tinh hoa & SANG TRỌNG',
+    subtitle: 'CHÀO MỪNG BẠN ĐẾN VỚI THẾ GIỚI ĐÁ QUÝ',
+    link: ''
+  };
+
+  const activeSlide = slides.length > 0 ? slides[currentSlide] : defaultSlide;
+
+  // Helper to render title with Split style
+  const renderTitle = (title) => {
+    if (!title) return null;
+    if (title.includes('&')) {
+      const parts = title.split('&');
+      return (
+        <>
+          <span className="outline">{parts[0].trim()}</span> & <br />
+          <span className="filled">{parts[1].trim()}</span>
+        </>
+      );
+    }
+    return <span className="filled">{title}</span>;
+  };
+
+  if (isLoading) return <HeroSkeleton />;
+
+  return (
+    <div className="hero" id="home">
+      <div className="hero-content">
+        <p className="hero-intro fade-in-up">
+          {activeSlide.subtitle}
+        </p>
+
+        <h1 className="hero-title fade-in-up" key={currentSlide}>
+          {renderTitle(activeSlide.title)}
+        </h1>
+
+        {activeSlide.link && (
+          <div style={{ marginTop: 30 }} className="fade-in-up">
+            <Link to={activeSlide.link} className="btn-hero">KHÁM PHÁ NGAY</Link>
+          </div>
+        )}
+      </div>
+
+      {slides.length > 1 && (
+        <>
+          <button className="nav-arrow left" onClick={prevSlide}>&lt;</button>
+          <button className="nav-arrow right" onClick={nextSlide}>&gt;</button>
+
+          <div className="hero-dots">
+            {slides.map((_, idx) => (
+              <span
+                key={idx}
+                className={`dot ${idx === currentSlide ? 'active' : ''}`}
+                onClick={() => setCurrentSlide(idx)}
+              ></span>
+            ))}
+          </div>
+        </>
+      )}
+
+      <style jsx>{`
+        .hero {
+          height: 100vh;
+          background: url('${activeSlide.image_url}') center/cover no-repeat;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          color: #fff;
+          text-align: center;
+          transition: background-image 1s ease-in-out;
+        }
+        .hero::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: rgba(0,0,0,0.4);
+        }
+        .hero-content {
+          position: relative;
+          z-index: 1;
+        }
+        .hero-intro {
+          color: #888;
+          font-size: 1rem;
+          letter-spacing: 2px;
+          margin-bottom: 20px;
+          text-transform: uppercase;
+        }
+        .text-white { color: #fff; }
+        .hero-title {
+          font-size: 5rem;
+          line-height: 1.1;
+          font-weight: 100;
+        }
+        .hero-title .outline {
+          color: transparent;
+          -webkit-text-stroke: 1px rgba(255,255,255,0.5);
+        }
+        .hero-title .filled {
+          font-weight: bold;
+          text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+          color: #fff;
+        }
+
+        .btn-hero {
+            display: inline-block;
+            padding: 12px 30px;
+            border: 1px solid #fff;
+            color: #fff;
+            text-decoration: none;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+        .btn-hero:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .nav-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          background: rgba(255,255,255,0.1);
+          border: none;
+          color: #fff;
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 1.2rem;
+          z-index: 2;
+          transition: background 0.3s;
+        }
+        .nav-arrow:hover { background: #d31e44; }
+        .nav-arrow.left { left: 30px; }
+        .nav-arrow.right { right: 30px; }
+
+        .hero-dots {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 2;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+        }
+        .dot.active {
+            background: #fff;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default Hero;
