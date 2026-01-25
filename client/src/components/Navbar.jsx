@@ -60,12 +60,13 @@ const Navbar = () => {
         </div>
         <ul className="nav-links d-flex">
           <li><Link to="/" className="active">TRANG CHỦ</Link></li>
-          <li><a href="#pages">TRANG</a></li>
-          <li><a href="/#collections">BỘ SƯU TẬP</a></li>
-          <li><a href="#gallery">CÁC LOẠI ĐÁ</a></li>
+          {/* <li><a href="#pages">TRANG</a></li> */}
+          <li><a href="/collections">BỘ SƯU TẬP</a></li>
+          {/* <li><a href="#gallery">CÁC LOẠI ĐÁ</a></li> */}
           <li><Link to="/news">TIN TỨC</Link></li>
-          <li><a href="#contact">LIÊN HỆ</a></li>
-          <li><a href="#shop">CỬA HÀNG</a></li>
+          {/* <li><a href="#contact">LIÊN HỆ</a></li> */}
+          {/* <li><a href="#shop">CỬA HÀNG</a></li> */}
+          <li><Link to="/admin" style={{ color: '#d31e44' }}>ADMIN</Link></li>
         </ul>
       </div>
       <style jsx>{`
