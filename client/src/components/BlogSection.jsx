@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 
 const BlogSection = () => {
+    const { t } = useTranslation();
     const [posts, setPosts] = useState([]);
 
     useEffect(() => {
@@ -25,8 +27,8 @@ const BlogSection = () => {
     return (
         <section className="blog-section" id="news">
             <div className="container">
-                <h2 className="section-title">TIN TỨC</h2>
-                <p className="section-subtitle">Cập nhật xu hướng và kiến thức về đá quý</p>
+                <h2 className="section-title">{t('blog.title').toUpperCase()}</h2>
+                <p className="section-subtitle">{t('blog.title')}</p>
 
                 <div className="blog-grid">
                     {posts.map(post => (
@@ -38,7 +40,7 @@ const BlogSection = () => {
                                 <div className="blog-content">
                                     <h3 className="blog-title">{post.title}</h3>
                                     <p className="blog-excerpt">{post.excerpt}</p>
-                                    <span className="read-more">ĐỌC THÊM &rarr;</span>
+                                    <span className="read-more">{t('blog.readMore').toUpperCase()} &rarr;</span>
                                 </div>
                             </div>
                         </Link>
@@ -46,7 +48,7 @@ const BlogSection = () => {
                 </div>
 
                 <div style={{ marginTop: '50px' }}>
-                    <Link to="/news" className="btn btn-primary-outline">LƯU TRỮ TIN TỨC</Link>
+                    <Link to="/news" className="btn btn-primary-outline">{t('blog.title').toUpperCase()}</Link>
                 </div>
             </div>
             <style jsx>{`

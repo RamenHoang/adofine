@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const About = () => {
+    const { t } = useTranslation();
     return (
         <section className="about-section" id="about">
             <div className="container d-flex align-center">
@@ -8,15 +10,15 @@ const About = () => {
                     <img src="https://placehold.co/400x500/222/FFF?text=Artist+John" alt="Artist" />
                 </div>
                 <div className="about-content">
-                    <h2 className="section-title" style={{ textAlign: 'left' }}>VỀ CHÚNG TÔI</h2>
-                    <p className="section-subtitle" style={{ textAlign: 'left' }}>Nghệ nhân Kim hoàn & Thiết kế Đá quý</p>
+                    <h2 className="section-title" style={{ textAlign: 'left' }}>{t('about.title').toUpperCase()}</h2>
+                    <p className="section-subtitle" style={{ textAlign: 'left' }}>{t('about.description')}</p>
                     <p className="about-text">
-                        Chúng tôi chuyên cung cấp các loại đá quý tự nhiên và trang sức cao cấp. Mỗi tác phẩm là sự kết hợp tinh tế giữa vẻ đẹp thiên nhiên và bàn tay tài hoa của nghệ nhân.
+                        {t('about.visionText')}
                     </p>
                     <p className="about-text">
-                        Cam kết chất lượng chuẩn quốc tế, kiểm định uy tín. Mang đến cho khách hàng sự an tâm và hài lòng tuyệt đối.
+                        {t('about.missionText')}
                     </p>
-                    <button className="btn btn-primary">XEM THÊM</button>
+                    <button className="btn btn-primary">{t('common.learnMore').toUpperCase()}</button>
                 </div>
             </div>
             <style jsx>{`

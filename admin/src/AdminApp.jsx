@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
+import { useAuth } from './contexts/AuthContext';
+import Login from './components/Login';
 import {
     AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemIcon, ListItemText,
     CssBaseline, Box, IconButton, Card, CardContent, Grid, Button,
@@ -35,6 +38,7 @@ class CustomUploadAdapter {
 
                 fetch(`${API_URL}/api/upload`, {
                     method: 'POST',
+                    credentials: 'include',
                     body: formData
                 })
                     .then(response => {
@@ -80,19 +84,20 @@ const SingleImageUpload = ({ value, onChange, label }) => {
 
             const res = await fetch(`${API_URL}/api/upload`, {
                 method: 'POST',
+                credentials: 'include',
                 body: formData
             });
 
             if (!res.ok) {
                 const err = await res.json();
-                alert('Upload failed: ' + (err.error || 'Unknown error'));
+                toast.error('Upload failed: ' + (err.error || 'Unknown error'));
             } else {
                 const data = await res.json();
                 onChange(data.url); // Pass back the URL
             }
         } catch (error) {
             console.error('Upload error', error);
-            alert('Upload Error');
+            toast.error('Upload Error');
         } finally {
             setUploading(false);
             e.target.value = null;
@@ -152,12 +157,13 @@ const ImageUpload = ({ gallery, setGallery }) => {
 
                 const res = await fetch(`${API_URL}/api/upload`, {
                     method: 'POST',
+                    credentials: 'include',
                     body: formData
                 });
 
                 if (!res.ok) {
                     const err = await res.json();
-                    alert('Upload failed: ' + (err.error || 'Unknown error'));
+                    toast.error('Upload failed: ' + (err.error || 'Unknown error'));
                     continue;
                 }
 
@@ -167,7 +173,7 @@ const ImageUpload = ({ gallery, setGallery }) => {
             setGallery(prev => [...prev, ...newImages]);
         } catch (error) {
             console.error('Upload error', error);
-            alert('Upload Error');
+            toast.error('Upload Error');
         } finally {
             setUploading(false);
             e.target.value = null; // Reset input
@@ -218,6 +224,28 @@ const ImageUpload = ({ gallery, setGallery }) => {
 
 
 const AdminApp = () => {
+    const { user, loading, logout } = useAuth();
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState('dashboard');
+
+    // Show loading state
+    if (loading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <LinearProgress sx={{ width: '50%' }} />
+            </Box>
+        );
+    }
+
+    // Show login if not authenticated
+    if (!user) {
+        return <Login />;
+    }
+
+    return <AuthenticatedAdminApp user={user} logout={logout} />;
+};
+
+const AuthenticatedAdminApp = ({ user, logout }) => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('dashboard');
 
@@ -242,6 +270,11 @@ const AdminApp = () => {
     // Settings State
     const [settings, setSettings] = useState({ CLOUD_NAME: '', API_KEY: '', API_SECRET: '', UPLOAD_PRESET: '' });
 
+    const handleLogout = async () => {
+        await logout();
+        toast.info('Đã đăng xuất');
+    };
+
     useEffect(() => {
         loadDataForTab();
         fetchDropdowns();
@@ -250,8 +283,8 @@ const AdminApp = () => {
     const fetchDropdowns = async () => {
         try {
             const [gemCats, jewCats] = await Promise.all([
-                fetch(`${API_URL}/api/gemstone-categories`).then(res => res.json()),
-                fetch(`${API_URL}/api/jewelry-categories`).then(res => res.json())
+                fetch(`${API_URL}/api/gemstone-categories`, { credentials: 'include' }).then(res => res.json()),
+                fetch(`${API_URL}/api/jewelry-categories`, { credentials: 'include' }).then(res => res.json())
             ]);
             setGemstoneCategories(gemCats);
             setJewelryCategories(jewCats);
@@ -279,7 +312,7 @@ const AdminApp = () => {
         }
 
         try {
-            const res = await fetch(`${API_URL}${endpoint}`);
+            const res = await fetch(`${API_URL}${endpoint}`, { credentials: 'include' });
             const data = await res.json();
             setItems(data);
             if (activeTab === 'products' || activeTab === 'jewelry') {
@@ -292,7 +325,7 @@ const AdminApp = () => {
 
     const loadSettings = async () => {
         try {
-            const res = await fetch(`${API_URL}/api/settings`);
+            const res = await fetch(`${API_URL}/api/settings`, { credentials: 'include' });
             const data = await res.json();
             setSettings(prev => ({ ...prev, ...data }));
         } catch (error) {
@@ -325,11 +358,12 @@ const AdminApp = () => {
         try {
             const res = await fetch(`${API_URL}/api/settings`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(settings)
             });
-            if (res.ok) alert('Đã lưu cấu hình!');
-            else alert('Lỗi khi lưu cấu hình');
+            if (res.ok) toast.success('Đã lưu cấu hình!');
+            else toast.error('Lỗi khi lưu cấu hình');
         } catch (error) {
             console.error('Error saving settings:', error);
         }
@@ -344,7 +378,7 @@ const AdminApp = () => {
                 const endpoint = activeTab === 'products' ? `/api/gemstones/${item.id}` :
                     activeTab === 'jewelry' ? `/api/jewelry-items/${item.id}` :
                         `/api/collections/${item.id}`;
-                const res = await fetch(`${API_URL}${endpoint}`);
+                const res = await fetch(`${API_URL}${endpoint}`, { credentials: 'include' });
                 if (res.ok) fullItem = await res.json();
             } catch (err) { console.error(err); }
         }
@@ -353,8 +387,8 @@ const AdminApp = () => {
         if (activeTab === 'collections') {
             try {
                 const [gems, jews] = await Promise.all([
-                    fetch(`${API_URL}/api/gemstones`).then(r => r.json()),
-                    fetch(`${API_URL}/api/jewelry-items`).then(r => r.json())
+                    fetch(`${API_URL}/api/gemstones`, { credentials: 'include' }).then(r => r.json()),
+                    fetch(`${API_URL}/api/jewelry-items`, { credentials: 'include' }).then(r => r.json())
                 ]);
                 setAllGemstones(gems);
                 setAllJewelry(jews);
@@ -439,6 +473,7 @@ const AdminApp = () => {
         try {
             const res = await fetch(url, {
                 method,
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
@@ -446,9 +481,9 @@ const AdminApp = () => {
             if (res.ok) {
                 loadDataForTab();
                 handleCloseDialog();
-                alert(editingId ? 'Cập nhật thành công!' : 'Thêm mới thành công!');
+                toast.success(editingId ? 'Cập nhật thành công!' : 'Thêm mới thành công!');
             } else {
-                alert('Có lỗi xảy ra!');
+                toast.error('Có lỗi xảy ra!');
             }
         } catch (error) {
             console.error('Error saving:', error);
@@ -466,7 +501,7 @@ const AdminApp = () => {
         else if (activeTab === 'hero-slides') endpoint = '/api/hero-slides';
 
         try {
-            await fetch(`${API_URL}${endpoint}/${id}`, { method: 'DELETE' });
+            await fetch(`${API_URL}${endpoint}/${id}`, { method: 'DELETE', credentials: 'include' });
             loadDataForTab();
         } catch (error) {
             console.error('Error deleting:', error);
@@ -552,7 +587,7 @@ const AdminApp = () => {
                                                 activeTab === 'collections' ? 'Quản lý Bộ sưu tập' :
                                                     activeTab === 'gem-categories' ? 'Danh mục Đá Quý' : 'Danh mục Trang Sức'}
                     </Typography>
-                    <Button color="inherit">Đăng xuất</Button>
+                    <Button color="inherit" onClick={handleLogout}>Đăng xuất</Button>
                 </Toolbar>
             </AppBar>
 

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 
 const BlogDetail = () => {
+    const { t } = useTranslation();
     const { id } = useParams();
     const [post, setPost] = useState(null);
 
@@ -22,7 +24,7 @@ const BlogDetail = () => {
         fetchPost();
     }, [id]);
 
-    if (!post) return <div className="loading">Loading...</div>;
+    if (!post) return <div className="loading">{t('common.loading')}</div>;
 
     return (
         <div className="blog-detail-page">
@@ -43,7 +45,7 @@ const BlogDetail = () => {
                 </div>
 
                 <div className="post-footer text-center">
-                    <Link to="/news" className="btn-back">&larr; QUAY LẠI TIN TỨC</Link>
+                    <Link to="/news" className="btn-back">&larr; {t('blog.backToList').toUpperCase()}</Link>
                 </div>
             </div>
 

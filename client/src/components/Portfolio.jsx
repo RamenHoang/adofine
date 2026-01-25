@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 import { Link } from 'react-router-dom';
 
 const Portfolio = () => {
+    const { t } = useTranslation();
     const [filter, setFilter] = useState('TẤT CẢ');
     const [items, setItems] = useState([]);
     const [config, setConfig] = useState({});
@@ -66,7 +68,7 @@ const Portfolio = () => {
                                         <a href="#" className="icon-btn">🔍</a>
                                     </div>
                                     <div className="details">
-                                        <h3>TUYỆT TÁC</h3>
+                                        <h3>{t('gemstones.title').toUpperCase()}</h3>
                                         <div className="meta">
                                             <span>{item.title}, {item.price}</span>
                                         </div>
