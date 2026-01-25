@@ -17,7 +17,7 @@ import {
 } from '@mui/icons-material';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import { API_URL } from '../config';
+import { API_URL } from './config';
 
 const drawerWidth = 260;
 
@@ -217,7 +217,7 @@ const ImageUpload = ({ gallery, setGallery }) => {
 };
 
 
-const Admin = () => {
+const AdminApp = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('dashboard');
 
@@ -1096,4 +1096,4 @@ const SectionConfigDialog = ({ open, onClose, settings, onSave, onChange }) => {
     );
 };
 
-export default Admin;
+export default AdminApp;
