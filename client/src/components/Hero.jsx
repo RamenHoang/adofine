@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../config';
 import { Link } from 'react-router-dom';
 
 const HeroSkeleton = () => (
@@ -52,7 +53,7 @@ const Hero = () => {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/hero-slides');
+        const res = await fetch('${API_URL}/api/hero-slides');
         if (res.ok) {
           const data = await res.json();
           if (data.length > 0) {

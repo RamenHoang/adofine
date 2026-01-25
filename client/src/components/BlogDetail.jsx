@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { API_URL } from '../config';
 
 const BlogDetail = () => {
     const { id } = useParams();
@@ -9,7 +10,7 @@ const BlogDetail = () => {
         window.scrollTo(0, 0);
         const fetchPost = async () => {
             try {
-                const res = await fetch(`http://localhost:3000/api/posts/${id}`);
+                const res = await fetch(`${API_URL}/api/posts/${id}`);
                 if (res.ok) {
                     const data = await res.json();
                     setPost(data);

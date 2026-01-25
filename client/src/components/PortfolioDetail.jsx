@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { API_URL } from '../config';
 
 const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
     const { id } = useParams();
@@ -12,7 +13,7 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
         const fetchDetail = async () => {
             try {
                 const endpoint = type === 'jewelry' ? `/api/jewelry-items/${id}` : `/api/gemstones/${id}`;
-                const response = await fetch(`http://localhost:3000${endpoint}`);
+                const response = await fetch(`${API_URL}${endpoint}`);
                 if (response.ok) {
                     const data = await response.json();
                     setItem(data);

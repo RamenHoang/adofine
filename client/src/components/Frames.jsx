@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../config';
 import { Link } from 'react-router-dom';
 
 const Frames = () => {
@@ -8,7 +9,7 @@ const Frames = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/jewelry');
+        const response = await fetch('${API_URL}/api/jewelry');
         const data = await response.json();
         setFrames(data);
       } catch (error) {

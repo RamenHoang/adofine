@@ -496,9 +496,12 @@ DB_PORT=3306
 PORT=3000
 ```
 
-#### Frontend
-- No environment variables needed
-- API URL hardcoded to `http://localhost:3000`
+#### Frontend (.env)
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+**Note**: For production, update `VITE_API_URL` to your production API URL (e.g., `https://api.adofine.com`)
 
 ### Build Commands
 

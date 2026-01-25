@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import './CollectionDetail.css';
+import { API_URL } from '../config';
 
 const CollectionDetail = () => {
     const { id } = useParams();
@@ -10,7 +11,7 @@ const CollectionDetail = () => {
         window.scrollTo(0, 0);
         const fetchCollection = async () => {
             try {
-                const res = await fetch(`http://localhost:3000/api/collections/${id}`);
+                const res = await fetch(`${API_URL}/api/collections/${id}`);
                 if (res.ok) {
                     const data = await res.json();
                     setCollection(data);
