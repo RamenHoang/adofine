@@ -9,7 +9,7 @@ const Frames = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('${API_URL}/api/jewelry');
+        const response = await fetch(`${API_URL}/api/jewelry`);
         const data = await response.json();
         setFrames(data);
       } catch (error) {

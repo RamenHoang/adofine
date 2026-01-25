@@ -11,12 +11,12 @@ const Portfolio = () => {
         const fetchData = async () => {
             try {
                 // Fetch Items
-                const response = await fetch('${API_URL}/api/gemstones');
+                const response = await fetch(`${API_URL}/api/gemstones`);
                 const data = await response.json();
                 setItems(data);
 
                 // Fetch Config
-                const settingsRes = await fetch('${API_URL}/api/settings');
+                const settingsRes = await fetch(`${API_URL}/api/settings`);
                 const settingsData = await settingsRes.json();
                 setConfig(settingsData);
             } catch (error) {

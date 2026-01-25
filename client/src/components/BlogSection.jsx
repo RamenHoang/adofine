@@ -8,7 +8,7 @@ const BlogSection = () => {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const res = await fetch('${API_URL}/api/posts');
+                const res = await fetch(`${API_URL}/api/posts`);
                 if (res.ok) {
                     const data = await res.json();
                     setPosts(data.slice(0, 3)); // Limit to 3 latest
