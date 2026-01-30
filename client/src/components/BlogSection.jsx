@@ -31,19 +31,17 @@ const BlogSection = () => {
                 <p className="section-subtitle">{t('blog.title')}</p>
 
                 <div className="blog-grid">
-                    {posts.map(post => (
-                        <Link to={`/news/${post.id}`} key={post.id} className="blog-card-link" style={{ textDecoration: 'none', color: 'inherit' }}>
-                            <div className="blog-card">
-                                <div className="blog-image">
-                                    <img src={post.image_url || 'https://placehold.co/600x400/222/FFF?text=News'} alt={post.title} />
-                                </div>
-                                <div className="blog-content">
-                                    <h3 className="blog-title">{post.title}</h3>
-                                    <p className="blog-excerpt">{post.excerpt}</p>
-                                    <span className="read-more">{t('blog.readMore').toUpperCase()} &rarr;</span>
-                                </div>
+                    {posts.map((post, index) => (
+                        <div key={post.id} className={`blog-card ${index % 2 === 1 ? 'reverse' : ''}`}>
+                            <div className="blog-image">
+                                <img src={post.image_url || 'https://placehold.co/600x400/222/FFF?text=News'} alt={post.title} />
                             </div>
-                        </Link>
+                            <div className="blog-content">
+                                <h3 className="blog-title">{post.title}</h3>
+                                <p className="blog-excerpt">{post.excerpt}</p>
+                                <Link to={`/news/${post.id}`} className="btn-read-more">{t('blog.readMore').toUpperCase()}</Link>
+                            </div>
+                        </div>
                     ))}
                 </div>
 
@@ -59,38 +57,62 @@ const BlogSection = () => {
                     text-align: center;
                 }
                 .blog-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                    gap: 30px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0;
                     margin-top: 40px;
-                    padding: 0 20px;
+                    padding: 0;
+                    max-width: 1200px;
+                    margin-left: auto;
+                    margin-right: auto;
                 }
                 .blog-card {
-                    background: #1a1a1a;
-                    border: 1px solid #333;
+                    display: flex;
                     text-align: left;
-                    transition: transform 0.3s;
-                    cursor: pointer;
+                    overflow: hidden;
                 }
-                .blog-card:hover {
-                    transform: translateY(-5px);
-                    border-color: #d31e44;
+                .blog-card.reverse {
+                    flex-direction: row-reverse;
                 }
                 .blog-image {
-                    height: 200px;
+                    flex: 0 0 50%;
+                    height: 300px;
                     overflow: hidden;
+                    position: relative;
+                }
+                .blog-image::before {
+                    content: '';
+                    position: absolute;
+                    top: 20px;
+                    left: 20px;
+                    right: 20px;
+                    bottom: 20px;
+                    border: 2px solid #fff;
+                    pointer-events: none;
+                    z-index: 1;
                 }
                 .blog-image img {
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
-                    transition: transform 0.5s;
                 }
-                .blog-card:hover .blog-image img {
-                    transform: scale(1.1);
+                @media (max-width: 768px) {
+                    .blog-card, .blog-card.reverse {
+                        flex-direction: column;
+                    }
+                    .blog-image {
+                        flex: 0 0 auto;
+                        height: 200px;
+                    }
                 }
                 .blog-content {
+                    flex: 1;
                     padding: 20px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    text-align: center;
                 }
                 .blog-title {
                     font-size: 1.2rem;
@@ -107,12 +129,20 @@ const BlogSection = () => {
                     -webkit-box-orient: vertical;
                     overflow: hidden;
                 }
-                .read-more {
-                    font-size: 0.8rem;
-                    font-weight: bold;
+                .btn-read-more {
+                    display: inline-block;
+                    padding: 12px 30px;
+                    border: 1px solid #d31e44;
                     color: #d31e44;
+                    text-decoration: none;
                     text-transform: uppercase;
                     letter-spacing: 1px;
+                    font-weight: bold;
+                    transition: all 0.3s;
+                }
+                .btn-read-more:hover {
+                    background: #d31e44;
+                    color: #fff;
                 }
                 .btn-primary-outline {
                     display: inline-block;
