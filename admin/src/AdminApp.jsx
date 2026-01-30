@@ -268,7 +268,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
     const [formData, setFormData] = useState({});
 
     // Settings State
-    const [settings, setSettings] = useState({ CLOUD_NAME: '', API_KEY: '', API_SECRET: '', UPLOAD_PRESET: '' });
+    const [settings, setSettings] = useState({ CLOUD_NAME: '', API_KEY: '', API_SECRET: '', UPLOAD_PRESET: '', GEM_GRID_COLUMNS: '4' });
 
     const handleLogout = async () => {
         await logout();
@@ -647,11 +647,25 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                         </Stack>
 
                         <Typography variant="h6" gutterBottom>Cấu hình Cloudinary (Upload Ảnh)</Typography>
-                        <Stack spacing={3}>
+                        <Stack spacing={3} sx={{ mb: 4 }}>
                             <TextField label="Cloud Name" name="CLOUD_NAME" value={settings.CLOUD_NAME} onChange={handleSettingsChange} fullWidth />
                             <TextField label="API Key" name="API_KEY" value={settings.API_KEY} onChange={handleSettingsChange} fullWidth />
                             <TextField label="API Secret" name="API_SECRET" value={settings.API_SECRET} onChange={handleSettingsChange} fullWidth type="password" />
                             <TextField label="Upload Preset" name="UPLOAD_PRESET" value={settings.UPLOAD_PRESET} onChange={handleSettingsChange} fullWidth helperText="Tạo preset 'unsigned' trong Cloudinary Settings > Upload" />
+                        </Stack>
+
+                        <Typography variant="h6" gutterBottom>Cấu hình Hiển thị Đá Quý</Typography>
+                        <Stack spacing={3}>
+                            <TextField 
+                                label="Số cột hiển thị" 
+                                name="GEM_GRID_COLUMNS" 
+                                value={settings.GEM_GRID_COLUMNS || '4'} 
+                                onChange={handleSettingsChange} 
+                                fullWidth 
+                                type="number"
+                                inputProps={{ min: 1, max: 6, step: 1 }}
+                                helperText="Số cột hiển thị đá quý trên website (1-6, mặc định: 4)"
+                            />
 
                             <Button variant="contained" onClick={saveSettings} size="large">Lưu Cấu hình</Button>
                         </Stack>
