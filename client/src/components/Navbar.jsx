@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 
 const Navbar = () => {
   const { t } = useTranslation();
+  const location = useLocation();
   const [logoSettings, setLogoSettings] = useState({
     LOGO_IMAGE: '',
     LOGO_TEXT_PREFIX: 'red',
@@ -61,14 +62,14 @@ const Navbar = () => {
           </Link>
         </div>
         <ul className="nav-links d-flex">
-          <li><Link to="/" className="active">{t('nav.home').toUpperCase()}</Link></li>
+          <li><Link to="/" className={location.pathname === '/' ? 'active' : ''}>{t('nav.home').toUpperCase()}</Link></li>
           {/* <li><a href="#pages">TRANG</a></li> */}
-          <li><a href="/collections">{t('nav.collections').toUpperCase()}</a></li>
+          <li><Link to="/collections" className={location.pathname.startsWith('/collections') ? 'active' : ''}>{t('nav.collections').toUpperCase()}</Link></li>
           {/* <li><a href="#gallery">CÁC LOẠI ĐÁ</a></li> */}
-          <li><Link to="/news">{t('nav.news').toUpperCase()}</Link></li>
+          <li><Link to="/news" className={location.pathname.startsWith('/news') ? 'active' : ''}>{t('nav.news').toUpperCase()}</Link></li>
           {/* <li><a href="#contact">LIÊN HỆ</a></li> */}
           {/* <li><a href="#shop">CỬA HÀNG</a></li> */}
-          <li><Link to="/admin" style={{ color: '#d31e44' }}>ADMIN</Link></li>
+          <li><Link to="/admin" className={location.pathname.startsWith('/admin') ? 'active' : ''} style={{ color: location.pathname.startsWith('/admin') ? '#d31e44' : 'inherit' }}>ADMIN</Link></li>
         </ul>
       </div>
       <style jsx>{`
@@ -78,8 +79,8 @@ const Navbar = () => {
           top: 0;
           width: 100%;
           z-index: 1000;
-          background: rgba(0,0,0,0.8);
-          backdrop-filter: blur(5px);
+          // background: rgba(0,0,0,0.8);
+          // backdrop-filter: blur(5px);
         }
         .logo {
           font-size: 1.5rem;
