@@ -22,7 +22,7 @@ export default {
     missionText: "To provide customers with authentic gemstone and jewelry products with the best service."
   },
   gemstones: {
-    title: "Gemstone Collection",
+    title: "Gemstones",
     viewDetails: "View Details",
     price: "Price",
     category: "Category",
@@ -38,7 +38,7 @@ export default {
     backToList: "Back to List"
   },
   jewelry: {
-    title: "Jewelry Collection",
+    title: "Jewelry",
     viewDetails: "View Details",
     price: "Price",
     category: "Category",

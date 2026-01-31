@@ -1,3 +1,5 @@
+/* ... existing styles ... */
+
 .collection-detail-page {
     background: #000;
     min-height: 100vh;
@@ -8,6 +10,7 @@
     background-size: cover;
     background-position: center;
     position: relative;
+    background-repeat: no-repeat;
 }
 .coll-overlay {
     width: 100%;
@@ -23,64 +26,144 @@
     letter-spacing: 4px;
     margin-bottom: 20px;
     color: #fff;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 .coll-desc-hero {
     font-size: 1.2rem;
     color: #ddd;
     max-width: 600px;
     margin: 0 auto;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
-.items-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+
+/* Gemstones Section (Mansonryish) */
+.gem-grid {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+}
+.gem-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     gap: 30px;
 }
-.item-card {
-    background: #111;
-    border: 1px solid #333;
-    transition: transform 0.3s;
-}
-.item-card:hover {
-    transform: translateY(-5px);
-    border-color: #d31e44;
-}
-.item-link {
-    text-decoration: none;
-    color: inherit;
-    display: block;
-}
-.item-image {
-    height: 280px;
+.gem-frame {
+    padding: 10px;
+    background: #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    position: relative;
     overflow: hidden;
 }
-.item-image img {
+.gem-frame img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s;
+    height: auto;
+    display: block;
 }
-.item-card:hover .item-image img {
+.gem-frame:hover .gem-overlay {
+    opacity: 1;
+}
+.gem-overlay {
+    position: absolute;
+    top: 10px; left: 10px; right: 10px; bottom: 10px;
+    background: rgba(211, 30, 68, 0.85);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+}
+.gem-icons {
+    display: flex;
+    gap: 15px;
+}
+.gem-icon-btn {
+    width: 40px; height: 40px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    display: flex; 
+    align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: transform 0.2s;
+}
+.gem-icon-btn:hover {
+    background: #fff;
+    color: #d31e44;
     transform: scale(1.1);
 }
-.item-info {
-    padding: 20px;
-    text-align: center;
-}
-.item-title {
-    font-size: 1.1rem;
-    margin-bottom: 5px;
+.gem-details {
+    text-align: right;
+    border-right: 2px solid #fff;
+    padding-right: 15px;
     color: #fff;
 }
-.item-price {
-    color: #d31e44;
-    font-weight: bold;
-    margin-bottom: 10px;
+.gem-details h3 {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+    font-weight: 300;
+    letter-spacing: 1px;
 }
-.item-type {
-    font-size: 0.8rem;
+.gem-meta {
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+
+
+/* Jewelry Section */
+.jewelry-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+.jewelry-frame {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    transition: transform 0.3s;
+    background-color: #fff;
+    padding: 5px;
+    border-style: solid;
+    border-color: #d31e44;
+    border-width: 10px;
+}
+.jewelry-frame:hover {
+    transform: scale(1.02);
+    z-index: 10;
+}
+.jewelry-frame img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+.jewelry-info {
+    text-align: center;
+    color: #000;
+    padding: 5px 0;
+    font-weight: bold;
+}
+.jewelry-price {
+    font-size: 0.8em;
     color: #666;
-    text-transform: uppercase;
-    border: 1px solid #333;
-    padding: 2px 8px;
-    border-radius: 4px;
+}
+
+
+
+@media (max-width: 1024px) {
+    .gem-grid {
+        gap: 20px;
+    }
+    .gem-column {
+        max-width: 50%;
+    }
+}
+@media (max-width: 768px) {
+    .gem-column {
+        max-width: 100%;
+    }
+    .gem-grid {
+        flex-direction: column;
+    }
 }
