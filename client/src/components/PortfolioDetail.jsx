@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
+import PageHeader from './PageHeader';
 
 const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
     const { t } = useTranslation();
@@ -63,7 +64,14 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
 
     return (
         <div className="portfolio-detail">
-            <div className="detail-hero">
+            <PageHeader
+                title={type === 'gemstone' ? 'GEMSTONES' : 'JEWELRY'} // Or localized
+                breadcrumbs={[
+                    { label: type === 'gemstone' ? 'GEMSTONES' : 'JEWELRY' }, // Link to where?
+                    { label: item.title }
+                ]}
+            />
+            <div className="detail-hero" style={{ marginTop: 0 }}>
                 <img src={item.image} alt={item.title} />
             </div>
 

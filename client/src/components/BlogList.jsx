@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
+import PageHeader from './PageHeader';
 
 const BlogList = () => {
     const { t } = useTranslation();
@@ -24,10 +25,11 @@ const BlogList = () => {
 
     return (
         <div className="blog-page">
-            <div className="container">
-                <h1 className="page-title text-center">{t('blog.title').toUpperCase()}</h1>
-                <p className="page-subtitle text-center">{t('blog.title')}</p>
-
+            <PageHeader
+                title={t('blog.title').toUpperCase()}
+                breadcrumbs={[{ label: t('blog.title').toUpperCase() }]}
+            />
+            <div className="container" style={{ paddingTop: '50px' }}>
                 <div className="blog-grid">
                     {posts.map(post => (
                         <Link to={`/news/${post.id}`} key={post.id} className="blog-card-link">
@@ -47,20 +49,10 @@ const BlogList = () => {
             </div>
             <style jsx>{`
                 .blog-page {
-                    padding: 120px 0 80px;
                     background: #000;
                     min-height: 100vh;
                     color: #fff;
-                }
-                .page-title {
-                    font-size: 2.5rem;
-                    margin-bottom: 10px;
-                    text-transform: uppercase;
-                    letter-spacing: 2px;
-                }
-                .page-subtitle {
-                    color: #888;
-                    margin-bottom: 60px;
+                    padding-bottom: 80px;
                 }
                 .blog-grid {
                     display: grid;
@@ -121,7 +113,7 @@ const BlogList = () => {
                     letter-spacing: 1px;
                 }
             `}</style>
-        </div>
+        </div >
     );
 };
 
