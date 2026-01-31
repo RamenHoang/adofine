@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 import { Link } from 'react-router-dom';
+import { useLoading } from '../context/LoadingContext';
 
 const HeroSkeleton = () => (
   <div className="hero-skeleton">
@@ -48,14 +49,19 @@ const HeroSkeleton = () => (
 
 const Hero = () => {
   const { t } = useTranslation();
+  const { showLoading, hideLoading } = useLoading();
   const [slides, setSlides] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchSlides = async () => {
+      showLoading();
       try {
-        const res = await fetch(`${API_URL}/api/hero-slides`);
+        const [res] = await Promise.all([
+          fetch(`${API_URL}/api/hero-slides`),
+          new Promise(resolve => setTimeout(resolve, 800))
+        ]);
+
         if (res.ok) {
           const data = await res.json();
           if (data.length > 0) {
@@ -65,9 +71,7 @@ const Hero = () => {
       } catch (error) {
         console.error('Error fetching hero slides:', error);
       } finally {
-        // Determine preloading time: real fetch time + slight delay for smoothness if super fast
-        // But for now, just set false.
-        setIsLoading(false);
+        hideLoading();
       }
     };
     fetchSlides();
@@ -115,7 +119,7 @@ const Hero = () => {
     return <span className="filled">{title}</span>;
   };
 
-  if (isLoading) return <HeroSkeleton />;
+
 
   return (
     <div className="hero" id="home">
