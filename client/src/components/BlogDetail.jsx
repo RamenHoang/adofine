@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
+import PageHeader from './PageHeader';
 
 const BlogDetail = () => {
     const { t } = useTranslation();
@@ -28,7 +29,14 @@ const BlogDetail = () => {
 
     return (
         <div className="blog-detail-page">
-            <div className="blog-hero" style={{ backgroundImage: `url(${post.image_url})` }}>
+            <PageHeader
+                title={t('blog.title').toUpperCase()}
+                breadcrumbs={[
+                    { label: t('blog.title').toUpperCase(), link: '/news' },
+                    { label: post.title }
+                ]}
+            />
+            <div className="blog-hero" style={{ backgroundImage: `url(${post.image_url})`, height: '50vh', marginTop: '0' }}>
                 <div className="hero-overlay">
                     <div className="container" style={{ position: 'relative', zIndex: 2 }}>
                         <h1 className="post-title">{post.title}</h1>

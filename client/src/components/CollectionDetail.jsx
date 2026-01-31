@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './CollectionDetail.css';
 import { API_URL } from '../config';
+import PageHeader from './PageHeader';
 
 const CollectionDetail = () => {
     const { t } = useTranslation();
@@ -41,8 +42,15 @@ const CollectionDetail = () => {
 
     return (
         <div className="collection-detail-page">
+            <PageHeader
+                title={t('nav.collections').toUpperCase()}
+                breadcrumbs={[
+                    { label: t('nav.collections').toUpperCase(), link: '/collections' },
+                    { label: collection.title }
+                ]}
+            />
             {/* Hero */}
-            <div className="coll-hero" style={{ backgroundImage: `url(${collection.image})` }}>
+            <div className="coll-hero" style={{ backgroundImage: `url(${collection.image})`, marginTop: 0 }}>
                 <div className="coll-overlay">
                     <div className="container text-center">
                         <h1 className="coll-title">{collection.title}</h1>

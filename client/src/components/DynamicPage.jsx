@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { API_URL } from '../config';
+import PageHeader from './PageHeader';
 
 const DynamicPage = () => {
     const { slug } = useParams();
@@ -49,28 +50,12 @@ const DynamicPage = () => {
     }
 
     return (
-        <div className="section" style={{ paddingTop: '120px', minHeight: '80vh' }}>
-            <div className="container">
-                <h1 style={{
-                    marginBottom: '20px',
-                    textAlign: 'center',
-                    textTransform: 'uppercase',
-                    fontSize: '2.5rem',
-                    fontWeight: '800',
-                    color: '#ffffff',
-                    letterSpacing: '1px'
-                }}>
-                    {page.title}
-                </h1>
-
-                <div style={{
-                    width: '80px',
-                    height: '4px',
-                    backgroundColor: '#d31e44',
-                    margin: '0 auto 40px auto',
-                    borderRadius: '2px'
-                }}></div>
-
+        <div className="section" style={{ minHeight: '80vh' }}>
+            <PageHeader
+                title={page.title}
+                breadcrumbs={[{ label: 'PAGES', link: '#' }, { label: page.title }]}
+            />
+            <div className="container" style={{ paddingTop: '50px' }}>
                 <div
                     className="page-content"
                     dangerouslySetInnerHTML={{ __html: page.content }}
