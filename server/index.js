@@ -12,6 +12,7 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const { body, validationResult } = require('express-validator');
+const { sendContactRequestEmail } = require('./email');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -866,6 +867,197 @@ app.delete('/api/pages/:id', authenticateToken, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// Helper function to safely parse JSON fields (handles both string and object)
+const parseJsonField = (field) => {
+    if (!field) return [];
+    if (typeof field === 'string') {
+        try {
+            return JSON.parse(field);
+        } catch (e) {
+            console.error('Error parsing JSON field:', e);
+            return [];
+        }
+    }
+    // Already an object (MySQL 8.0+ returns JSON as objects)
+    return field;
+};
+
+// Rate limiter for contact requests
+const contactLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 5, // 5 requests per hour per IP
+    message: 'Too many contact requests, please try again later',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// POST /api/contact-requests - Submit contact request (public)
+app.post('/api/contact-requests', contactLimiter, [
+    body('phone').trim().notEmpty().withMessage('Phone is required'),
+    body('email').trim().isEmail().withMessage('Valid email is required'),
+    body('subject').trim().notEmpty().withMessage('Subject is required'),
+    body('message').trim().notEmpty().withMessage('Message is required'),
+    body('salutation').optional().trim(),
+    body('selected_gemstones').optional().isArray(),
+    body('selected_jewelry').optional().isArray(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const {
+        salutation,
+        phone,
+        email,
+        subject,
+        message,
+        selected_gemstones,
+        selected_jewelry
+    } = req.body;
+
+    try {
+        // Insert into database
+        const [result] = await db.query(
+            `INSERT INTO contact_requests 
+            (salutation, phone, email, subject, message, selected_gemstones, selected_jewelry, status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'new')`,
+            [
+                salutation || null,
+                phone,
+                email,
+                subject,
+                message,
+                JSON.stringify(selected_gemstones || []),
+                JSON.stringify(selected_jewelry || [])
+            ]
+        );
+
+        const contactId = result.insertId;
+
+        // Fetch the created contact with timestamp
+        const [contacts] = await db.query(
+            'SELECT * FROM contact_requests WHERE id = ?',
+            [contactId]
+        );
+        const contactData = contacts[0];
+
+        // Parse JSON fields back
+        contactData.selected_gemstones = parseJsonField(contactData.selected_gemstones);
+        contactData.selected_jewelry = parseJsonField(contactData.selected_jewelry);
+
+        // Send email to admin (don't block the response if email fails)
+        sendContactRequestEmail(contactData).catch(error => {
+            console.error('Failed to send email notification:', error);
+        });
+
+        res.status(201).json({
+            message: 'Contact request submitted successfully',
+            id: contactId
+        });
+    } catch (error) {
+        console.error('Error creating contact request:', error);
+        res.status(500).json({ error: 'Failed to submit contact request' });
+    }
+});
+
+// GET /api/contact-requests - Get all contact requests (admin only)
+app.get('/api/contact-requests', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            'SELECT * FROM contact_requests ORDER BY created_at DESC'
+        );
+        
+        // Parse JSON fields
+        const contacts = rows.map(contact => ({
+            ...contact,
+            selected_gemstones: parseJsonField(contact.selected_gemstones),
+            selected_jewelry: parseJsonField(contact.selected_jewelry)
+        }));
+
+        res.json(contacts);
+    } catch (error) {
+        console.error('Error fetching contact requests:', error);
+        res.status(500).json({ error: 'Failed to fetch contact requests' });
+    }
+});
+
+// GET /api/contact-requests/:id - Get single contact request (admin only)
+app.get('/api/contact-requests/:id', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            'SELECT * FROM contact_requests WHERE id = ?',
+            [req.params.id]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Contact request not found' });
+        }
+
+        const contact = rows[0];
+        contact.selected_gemstones = parseJsonField(contact.selected_gemstones);
+        contact.selected_jewelry = parseJsonField(contact.selected_jewelry);
+
+        res.json(contact);
+    } catch (error) {
+        console.error('Error fetching contact request:', error);
+        res.status(500).json({ error: 'Failed to fetch contact request' });
+    }
+});
+
+// PUT /api/contact-requests/:id - Update contact request status/notes (admin only)
+app.put('/api/contact-requests/:id', authenticateToken, [
+    body('status').optional().isIn(['new', 'contacted', 'completed']),
+    body('admin_notes').optional().trim(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { status, admin_notes } = req.body;
+    const updateFields = [];
+    const values = [];
+
+    if (status) {
+        updateFields.push('status = ?');
+        values.push(status);
+    }
+    if (admin_notes !== undefined) {
+        updateFields.push('admin_notes = ?');
+        values.push(admin_notes);
+    }
+
+    if (updateFields.length === 0) {
+        return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    values.push(req.params.id);
+
+    try {
+        await db.query(
+            `UPDATE contact_requests SET ${updateFields.join(', ')} WHERE id = ?`,
+            values
+        );
+
+        res.json({ message: 'Contact request updated successfully' });
+    } catch (error) {
+        console.error('Error updating contact request:', error);
+        res.status(500).json({ error: 'Failed to update contact request' });
+    }
+});
+
+// DELETE /api/contact-requests/:id - Delete contact request (admin only)
+app.delete('/api/contact-requests/:id', authenticateToken, async (req, res) => {
+    try {
+        await db.query('DELETE FROM contact_requests WHERE id = ?', [req.params.id]);
+        res.json({ message: 'Contact request deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting contact request:', error);
+        res.status(500).json({ error: 'Failed to delete contact request' });
     }
 });
 

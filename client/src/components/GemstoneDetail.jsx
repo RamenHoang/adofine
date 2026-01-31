@@ -104,9 +104,9 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
                     </ul>
 
                     <div style={{ marginTop: '30px' }}>
-                        <a href="tel:0912345678" className="btn btn-primary" style={{ width: '100%', textAlign: 'center', display: 'block' }}>
+                        <Link to="/contact" className="btn btn-primary" style={{ width: '100%', textAlign: 'center', display: 'block' }}>
                             {t('common.contactUs').toUpperCase()}
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>

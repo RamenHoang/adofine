@@ -95,7 +95,13 @@ const CollectionDetail = () => {
                                                     <div className="gem-details">
                                                         <h3>{item.title}</h3>
                                                         <div className="gem-meta">
-                                                            <span>{item.price ? `${Number(item.price).toLocaleString()} USD` : t('common.contactUs')}</span>
+                                                            {item.price ? (
+                                                                <span>{Number(item.price).toLocaleString()} USD</span>
+                                                            ) : (
+                                                                <Link to="/contact" style={{ color: '#c9a961', textDecoration: 'underline' }}>
+                                                                    {t('common.contactUs')}
+                                                                </Link>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -124,7 +130,13 @@ const CollectionDetail = () => {
                                         <img src={item.image || 'https://placehold.co/400x400/333/FFF?text=Product'} alt={item.title} />
                                         <div className="jewelry-info">
                                             {item.title} <br />
-                                            <span className="jewelry-price">{item.price ? `${Number(item.price).toLocaleString()} USD` : t('common.contactUs')}</span>
+                                            {item.price ? (
+                                                <span className="jewelry-price">{Number(item.price).toLocaleString()} USD</span>
+                                            ) : (
+                                                <Link to="/contact" className="jewelry-price" style={{ color: '#c9a961', textDecoration: 'underline' }}>
+                                                    {t('common.contactUs')}
+                                                </Link>
+                                            )}
                                         </div>
                                     </Link>
                                 </div>

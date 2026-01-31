@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 
@@ -55,7 +56,7 @@ const Footer = () => {
                         <p>{settings.FOOTER_ABOUT_TEXT || t('footer.aboutText')}</p>
                         <div className="newsletter-form">
                             <input type="email" placeholder="Email" />
-                            <button className="btn btn-primary">{t('common.contactUs').toUpperCase()}</button>
+                            <Link to="/contact" className="btn btn-primary">{t('common.contactUs').toUpperCase()}</Link>
                         </div>
                     </div>
                 </div>

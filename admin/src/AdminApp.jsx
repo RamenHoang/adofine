@@ -16,7 +16,8 @@ import {
     Category as CategoryIcon, Diamond as GemIcon, Watch as JewelryIcon,
     Settings as SettingsIcon, CloudUpload as UploadIcon,
     ArrowBack as ArrowBackIcon, ArrowForward as ArrowForwardIcon, Close as CloseIcon,
-    ViewCarousel as CarouselIcon, Book as BookIcon, Collections as CollectionIcon, Article as PageIcon
+    ViewCarousel as CarouselIcon, Book as BookIcon, Collections as CollectionIcon, Article as PageIcon,
+    ContactMail as ContactIcon
 } from '@mui/icons-material';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
@@ -309,6 +310,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
             case 'blogs': endpoint = '/api/posts'; break;
             case 'pages': endpoint = '/api/pages'; break;
             case 'collections': endpoint = '/api/collections'; break;
+            case 'contacts': endpoint = '/api/contact-requests'; break;
             default: return;
         }
 
@@ -452,6 +454,33 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
             } : {
                 title: '', slug: '', content: '', is_visible: true
             });
+        } else if (activeTab === 'contacts') {
+            // For contacts, we only edit (no add new), so item should always exist
+            setFormData(fullItem ? {
+                id: fullItem.id,
+                salutation: fullItem.salutation || '',
+                phone: fullItem.phone || '',
+                email: fullItem.email || '',
+                subject: fullItem.subject || '',
+                message: fullItem.message || '',
+                selected_gemstones: fullItem.selected_gemstones || [],
+                selected_jewelry: fullItem.selected_jewelry || [],
+                status: fullItem.status || 'new',
+                admin_notes: fullItem.admin_notes || '',
+                created_at: fullItem.created_at
+            } : {
+                id: null,
+                salutation: '',
+                phone: '',
+                email: '',
+                subject: '',
+                message: '',
+                selected_gemstones: [],
+                selected_jewelry: [],
+                status: 'new',
+                admin_notes: '',
+                created_at: null
+            });
         }
 
         setOpenDialog(true);
@@ -471,11 +500,41 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
         else if (activeTab === 'blogs') endpoint = '/api/posts';
         else if (activeTab === 'collections') endpoint = '/api/collections';
         else if (activeTab === 'pages') endpoint = '/api/pages';
+        else if (activeTab === 'contacts') endpoint = '/api/contact-requests';
 
         const url = editingId ? `${API_URL}${endpoint}/${editingId}` : `${API_URL}${endpoint}`;
         const method = editingId ? 'PUT' : 'POST';
 
         const payload = { ...formData };
+        
+        // For contacts, only send status and admin_notes (read-only form)
+        if (activeTab === 'contacts') {
+            const contactPayload = {
+                status: formData.status,
+                admin_notes: formData.admin_notes
+            };
+            
+            try {
+                const res = await fetch(url, {
+                    method,
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(contactPayload)
+                });
+
+                if (res.ok) {
+                    loadDataForTab();
+                    handleCloseDialog();
+                    toast.success('Cập nhật thành công!');
+                } else {
+                    toast.error('Có lỗi xảy ra!');
+                }
+            } catch (error) {
+                console.error('Error saving:', error);
+            }
+            return;
+        }
+        
         if ((activeTab === 'products' || activeTab === 'jewelry') && !payload.image && payload.gallery && payload.gallery.length > 0) {
             // Optional: still fallback to gallery[0] if no main image
         }
@@ -510,12 +569,15 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
         else if (activeTab === 'jewelry-categories') endpoint = '/api/jewelry-categories';
         else if (activeTab === 'hero-slides') endpoint = '/api/hero-slides';
         else if (activeTab === 'pages') endpoint = '/api/pages';
+        else if (activeTab === 'contacts') endpoint = '/api/contact-requests';
 
         try {
             await fetch(`${API_URL}${endpoint}/${id}`, { method: 'DELETE', credentials: 'include' });
             loadDataForTab();
+            toast.success('Xóa thành công!');
         } catch (error) {
             console.error('Error deleting:', error);
+            toast.error('Có lỗi xảy ra!');
         }
     };
 
@@ -574,6 +636,10 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                     <ListItemIcon><PageIcon /></ListItemIcon>
                     <ListItemText primary="Quản lý Trang tĩnh" />
                 </ListItem>
+                <ListItem button selected={activeTab === 'contacts'} onClick={() => setActiveTab('contacts')}>
+                    <ListItemIcon><ContactIcon /></ListItemIcon>
+                    <ListItemText primary="Liên hệ thiết kế" />
+                </ListItem>
 
                 <Typography variant="overline" sx={{ px: 2, mt: 2, color: '#888', display: 'block' }}>Hệ thống</Typography>
                 <ListItem button selected={activeTab === 'settings'} onClick={() => setActiveTab('settings')}>
@@ -601,7 +667,8 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                             activeTab === 'blogs' ? 'Quản lý Tin tức' :
                                                 activeTab === 'pages' ? 'Quản lý Trang tĩnh' :
                                                     activeTab === 'collections' ? 'Quản lý Bộ sưu tập' :
-                                                        activeTab === 'gem-categories' ? 'Danh mục Đá Quý' : 'Danh mục Trang Sức'}
+                                                        activeTab === 'contacts' ? 'Quản lý Liên hệ thiết kế' :
+                                                            activeTab === 'gem-categories' ? 'Danh mục Đá Quý' : 'Danh mục Trang Sức'}
                     </Typography>
                     <Button color="inherit" onClick={handleLogout}>Đăng xuất</Button>
                 </Toolbar>
@@ -670,6 +737,54 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                             <TextField label="Upload Preset" name="UPLOAD_PRESET" value={settings.UPLOAD_PRESET} onChange={handleSettingsChange} fullWidth helperText="Tạo preset 'unsigned' trong Cloudinary Settings > Upload" />
                         </Stack>
 
+                        <Typography variant="h6" gutterBottom>Cấu hình Email (SMTP)</Typography>
+                        <Stack spacing={3} sx={{ mb: 4 }}>
+                            <TextField 
+                                label="SMTP Host" 
+                                name="SMTP_HOST" 
+                                value={settings.SMTP_HOST || 'smtp.gmail.com'} 
+                                onChange={handleSettingsChange} 
+                                fullWidth 
+                                helperText="Ví dụ: smtp.gmail.com, smtp.sendgrid.net"
+                            />
+                            <TextField 
+                                label="SMTP Port" 
+                                name="SMTP_PORT" 
+                                value={settings.SMTP_PORT || '587'} 
+                                onChange={handleSettingsChange} 
+                                fullWidth 
+                                type="number"
+                                helperText="587 (TLS) hoặc 465 (SSL)"
+                            />
+                            <TextField 
+                                label="Email gửi (SMTP User)" 
+                                name="SMTP_USER" 
+                                value={settings.SMTP_USER || ''} 
+                                onChange={handleSettingsChange} 
+                                fullWidth 
+                                type="email"
+                                helperText="Email dùng để gửi thông báo"
+                            />
+                            <TextField 
+                                label="Mật khẩu Email (SMTP Pass)" 
+                                name="SMTP_PASS" 
+                                value={settings.SMTP_PASS || ''} 
+                                onChange={handleSettingsChange} 
+                                fullWidth 
+                                type="password"
+                                helperText="Gmail: dùng App Password (không phải mật khẩu thường)"
+                            />
+                            <TextField 
+                                label="Email nhận liên hệ" 
+                                name="CONTACT_EMAIL" 
+                                value={settings.CONTACT_EMAIL || ''} 
+                                onChange={handleSettingsChange} 
+                                fullWidth 
+                                type="email"
+                                helperText="Email admin nhận thông báo liên hệ (để trống = dùng SMTP_USER)"
+                            />
+                        </Stack>
+
                         <Typography variant="h6" gutterBottom>Cấu hình Footer (Liên hệ)</Typography>
                         <Stack spacing={3} sx={{ mb: 4 }}>
                             <TextField label="Tiêu đề Cột 1 (Liên hệ)" name="FOOTER_CONTACT_TITLE" value={settings.FOOTER_CONTACT_TITLE || 'LIÊN HỆ'} onChange={handleSettingsChange} fullWidth />
@@ -710,7 +825,69 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                     </Paper>
                 )}
 
-                {activeTab !== 'dashboard' && activeTab !== 'settings' && (
+                {activeTab === 'contacts' && (
+                    <Box>
+                        <TableContainer component={Paper}>
+                            <Table>
+                                <TableHead>
+                                    <TableRow sx={{ bgcolor: '#eee' }}>
+                                        <TableCell>ID</TableCell>
+                                        <TableCell>Danh xưng</TableCell>
+                                        <TableCell>Số điện thoại</TableCell>
+                                        <TableCell>Email</TableCell>
+                                        <TableCell>Tiêu đề</TableCell>
+                                        <TableCell>Trạng thái</TableCell>
+                                        <TableCell>Ngày gửi</TableCell>
+                                        <TableCell align="right">Hành động</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {items.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={8} align="center" sx={{ py: 4, color: '#999' }}>
+                                                Chưa có yêu cầu liên hệ nào
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : items.map((contact) => (
+                                        <TableRow key={contact.id}>
+                                            <TableCell>#{contact.id}</TableCell>
+                                            <TableCell>{contact.salutation || '-'}</TableCell>
+                                            <TableCell>{contact.phone}</TableCell>
+                                            <TableCell>{contact.email}</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold' }}>{contact.subject}</TableCell>
+                                            <TableCell>
+                                                <Chip
+                                                    label={
+                                                        contact.status === 'new' ? 'Mới' :
+                                                        contact.status === 'contacted' ? 'Đã liên hệ' :
+                                                        'Hoàn thành'
+                                                    }
+                                                    color={
+                                                        contact.status === 'new' ? 'error' :
+                                                        contact.status === 'contacted' ? 'warning' :
+                                                        'success'
+                                                    }
+                                                    size="small"
+                                                />
+                                            </TableCell>
+                                            <TableCell>{new Date(contact.created_at).toLocaleDateString('vi-VN')}</TableCell>
+                                            <TableCell align="right">
+                                                <IconButton size="small" color="primary" onClick={() => handleOpenDialog(contact)}>
+                                                    <EditIcon />
+                                                </IconButton>
+                                                <IconButton size="small" color="error" onClick={() => handleDelete(contact.id)}>
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Box>
+                )}
+
+                {activeTab !== 'dashboard' && activeTab !== 'settings' && activeTab !== 'contacts' && (
                     <Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                             {activeTab === 'products' ? (
@@ -804,7 +981,13 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
             <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="md">
                 <DialogTitle>
                     {editingId ? 'Chỉnh sửa' : 'Thêm mới'}
-                    {activeTab === 'products' ? ' Đá Quý' : activeTab === 'jewelry' ? ' Trang Sức' : activeTab === 'hero-slides' ? ' Hero Slide' : activeTab === 'blogs' ? ' Tin tức' : activeTab === 'pages' ? ' Trang' : activeTab === 'collections' ? ' Bộ sưu tập' : ' Danh mục'}
+                    {activeTab === 'products' ? ' Đá Quý' : 
+                     activeTab === 'jewelry' ? ' Trang Sức' : 
+                     activeTab === 'hero-slides' ? ' Hero Slide' : 
+                     activeTab === 'blogs' ? ' Tin tức' : 
+                     activeTab === 'pages' ? ' Trang' : 
+                     activeTab === 'collections' ? ' Bộ sưu tập' :
+                     activeTab === 'contacts' ? 'Chi tiết liên hệ' : ' Danh mục'}
                 </DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -1040,6 +1223,106 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                             </>
                         )}
 
+                        {/* --- CONTACT REQUESTS FORM (View/Edit Only) --- */}
+                        {activeTab === 'contacts' && (
+                            <>
+                                <Grid item xs={12}>
+                                    <Card sx={{ mb: 2, bgcolor: '#f5f5f5' }}>
+                                        <CardContent>
+                                            <Typography variant="h6" gutterBottom>Thông tin khách hàng</Typography>
+                                            <Grid container spacing={2}>
+                                                <Grid item xs={12} sm={4}>
+                                                    <Typography variant="caption" color="text.secondary">Danh xưng:</Typography>
+                                                    <Typography>{formData.salutation || '-'}</Typography>
+                                                </Grid>
+                                                <Grid item xs={12} sm={4}>
+                                                    <Typography variant="caption" color="text.secondary">Số điện thoại:</Typography>
+                                                    <Typography>{formData.phone}</Typography>
+                                                </Grid>
+                                                <Grid item xs={12} sm={4}>
+                                                    <Typography variant="caption" color="text.secondary">Email:</Typography>
+                                                    <Typography>{formData.email}</Typography>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <Typography variant="caption" color="text.secondary">Tiêu đề:</Typography>
+                                                    <Typography variant="h6">{formData.subject}</Typography>
+                                                </Grid>
+                                                <Grid item xs={12}>
+                                                    <Typography variant="caption" color="text.secondary">Nội dung:</Typography>
+                                                    <Typography style={{ whiteSpace: 'pre-wrap' }}>{formData.message}</Typography>
+                                                </Grid>
+                                            </Grid>
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+
+                                {formData.selected_gemstones && formData.selected_gemstones.length > 0 && (
+                                    <Grid item xs={12}>
+                                        <Card sx={{ mb: 2 }}>
+                                            <CardContent>
+                                                <Typography variant="subtitle1" gutterBottom>Đá quý tham khảo:</Typography>
+                                                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                                                    {formData.selected_gemstones.map((gem, idx) => (
+                                                        <Chip key={idx} label={`${gem.title} - ${gem.price || 'N/A'}`} />
+                                                    ))}
+                                                </Stack>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                )}
+
+                                {formData.selected_jewelry && formData.selected_jewelry.length > 0 && (
+                                    <Grid item xs={12}>
+                                        <Card sx={{ mb: 2 }}>
+                                            <CardContent>
+                                                <Typography variant="subtitle1" gutterBottom>Trang sức tham khảo:</Typography>
+                                                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                                                    {formData.selected_jewelry.map((jewel, idx) => (
+                                                        <Chip key={idx} label={`${jewel.title} - ${jewel.price || 'N/A'}`} />
+                                                    ))}
+                                                </Stack>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                )}
+
+                                <Grid item xs={12}>
+                                    <FormControl fullWidth>
+                                        <InputLabel>Trạng thái</InputLabel>
+                                        <Select
+                                            name="status"
+                                            value={formData.status || 'new'}
+                                            onChange={handleInputChange}
+                                            label="Trạng thái"
+                                        >
+                                            <MenuItem value="new">Mới</MenuItem>
+                                            <MenuItem value="contacted">Đã liên hệ</MenuItem>
+                                            <MenuItem value="completed">Hoàn thành</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+
+                                <Grid item xs={12}>
+                                    <TextField
+                                        fullWidth
+                                        multiline
+                                        rows={4}
+                                        label="Ghi chú của Admin"
+                                        name="admin_notes"
+                                        value={formData.admin_notes || ''}
+                                        onChange={handleInputChange}
+                                        placeholder="Thêm ghi chú nội bộ về yêu cầu này..."
+                                    />
+                                </Grid>
+
+                                <Grid item xs={12}>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Ngày gửi: {formData.created_at ? new Date(formData.created_at).toLocaleString('vi-VN') : '-'}
+                                    </Typography>
+                                </Grid>
+                            </>
+                        )}
+
                         {/* --- GEMSTONE FORM --- */}
                         {activeTab === 'products' && (
                             <>
@@ -1184,8 +1467,19 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                     </Grid>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseDialog} color="inherit">Hủy</Button>
-                    <Button onClick={handleSubmit} variant="contained" color="primary">{editingId ? 'Cập nhật' : 'Lưu'}</Button>
+                    <Button onClick={handleCloseDialog} color="inherit">
+                        {activeTab === 'contacts' ? 'Đóng' : 'Hủy'}
+                    </Button>
+                    {activeTab !== 'contacts' && (
+                        <Button onClick={handleSubmit} variant="contained" color="primary">
+                            {editingId ? 'Cập nhật' : 'Lưu'}
+                        </Button>
+                    )}
+                    {activeTab === 'contacts' && editingId && (
+                        <Button onClick={handleSubmit} variant="contained" color="primary">
+                            Cập nhật trạng thái
+                        </Button>
+                    )}
                 </DialogActions>
             </Dialog>
         </Box>
