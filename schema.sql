@@ -155,7 +155,12 @@ INSERT IGNORE INTO app_settings (setting_key, setting_value) VALUES
 ('CLOUD_NAME', ''),
 ('API_KEY', ''),
 ('API_SECRET', ''),
-('UPLOAD_PRESET', '');
+('UPLOAD_PRESET', ''),
+('SMTP_HOST', 'smtp.gmail.com'),
+('SMTP_PORT', '587'),
+('SMTP_USER', ''),
+('SMTP_PASS', ''),
+('CONTACT_EMAIL', '');
 
 -- NEW: HERO SLIDES (Carousel) --
 CREATE TABLE IF NOT EXISTS hero_slides (
@@ -203,6 +208,22 @@ CREATE TABLE IF NOT EXISTS pages (
     slug VARCHAR(255) UNIQUE NOT NULL,
     content LONGTEXT,
     is_visible BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- CONTACT REQUESTS (Custom Jewelry Design Inquiries) --
+CREATE TABLE IF NOT EXISTS contact_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    salutation VARCHAR(50),
+    phone VARCHAR(20) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    selected_gemstones JSON,
+    selected_jewelry JSON,
+    status ENUM('new', 'contacted', 'completed') DEFAULT 'new',
+    admin_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

@@ -61,6 +61,30 @@ npm run build:dev
 - `VITE_APP_ENV` - Môi trường (development/production)
 - `VITE_DEBUG` - Chế độ debug (true/false)
 
+### Server Environment Variables
+- `PORT` - Port của server (default: 5000)
+- `DB_HOST` - MySQL host (default: localhost)
+- `DB_USER` - MySQL username
+- `DB_PASSWORD` - MySQL password
+- `DB_NAME` - MySQL database name (default: red_art_db)
+- `JWT_SECRET` - Secret key cho JWT token
+- `CLOUDINARY_CLOUD_NAME` - Cloudinary cloud name
+- `CLOUDINARY_API_KEY` - Cloudinary API key
+- `CLOUDINARY_API_SECRET` - Cloudinary API secret
+- `SMTP_HOST` - (Optional) SMTP server host - Có thể cấu hình trong Admin Panel
+- `SMTP_PORT` - (Optional) SMTP server port - Có thể cấu hình trong Admin Panel
+- `SMTP_USER` - (Optional) Email address for sending emails - Có thể cấu hình trong Admin Panel
+- `SMTP_PASS` - (Optional) Email password or app-specific password - Có thể cấu hình trong Admin Panel
+- `CONTACT_EMAIL` - (Optional) Email address to receive contact requests - Có thể cấu hình trong Admin Panel
+
+**Note on Email Configuration:**
+- Email settings can be configured in **Admin Panel > Cấu hình (Settings) > Cấu hình Email (SMTP)**
+- Settings are stored in database (`app_settings` table)
+- For Gmail, enable "2-Step Verification" and create an "App Password"
+- Use the App Password as `SMTP_PASS` (not your regular Gmail password)
+- Or use other SMTP services like SendGrid, AWS SES, etc.
+- Environment variables are used as fallback if database settings are empty
+
 ## Sử dụng trong code
 
 ```javascript

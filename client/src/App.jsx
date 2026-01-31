@@ -15,6 +15,7 @@ import CollectionsSection from './components/CollectionsSection';
 import CollectionDetail from './components/CollectionDetail';
 import PortfolioDetail from './components/GemstoneDetail';
 import DynamicPage from './components/DynamicPage';
+import ContactPage from './components/ContactPage';
 import { LoadingProvider } from './context/LoadingContext';
 import LoadingOverlay from './components/LoadingOverlay';
 
@@ -79,6 +80,13 @@ function App() {
               <>
                 <Navbar />
                 <PortfolioDetail type="jewelry" />
+                <Footer />
+              </>
+            } />
+            <Route path="/contact" element={
+              <>
+                <Navbar />
+                <ContactPage />
                 <Footer />
               </>
             } />

@@ -76,5 +76,39 @@ export default {
     noData: "No data available",
     contactUs: "Contact Us",
     learnMore: "Learn More"
+  },
+  contact: {
+    title: "Contact Us",
+    subtitle: "Let us create the perfect custom jewelry piece for you",
+    basicInfo: "Basic Information",
+    salutation: "Salutation",
+    salutationPlaceholder: "Mr., Mrs., Ms., etc.",
+    phone: "Phone Number",
+    phonePlaceholder: "Enter your phone number",
+    email: "Email",
+    emailPlaceholder: "Enter your email address",
+    subject: "Subject",
+    subjectPlaceholder: "Brief description of your request",
+    message: "Message",
+    messagePlaceholder: "Tell us about your custom jewelry design ideas...",
+    selectGemstones: "Select Reference Gemstones (Optional)",
+    selectGemstonesDesc: "Choose gemstones that inspire your custom design",
+    selectedGemstones: "Selected Gemstones",
+    noGemstones: "No gemstones available",
+    selectJewelry: "Select Reference Jewelry (Optional)",
+    selectJewelryDesc: "Choose jewelry pieces that match your style preferences",
+    selectedJewelry: "Selected Jewelry",
+    noJewelry: "No jewelry items available",
+    submit: "Submit Request",
+    submitting: "Submitting...",
+    successMessage: "Thank you! Your request has been submitted successfully. We will contact you soon.",
+    errorMessage: "Sorry, something went wrong. Please try again later.",
+    errors: {
+      phoneRequired: "Phone number is required",
+      emailRequired: "Email is required",
+      emailInvalid: "Please enter a valid email address",
+      subjectRequired: "Subject is required",
+      messageRequired: "Message is required"
+    }
   }
 };
