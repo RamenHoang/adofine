@@ -4,18 +4,25 @@ import { useParams } from 'react-router-dom';
 import { API_URL } from '../config';
 import PageHeader from './PageHeader';
 
+import { useLoading } from '../context/LoadingContext';
+
 const DynamicPage = () => {
     const { slug } = useParams();
+    const { showLoading, hideLoading } = useLoading();
     const [page, setPage] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchPage = async () => {
-            setLoading(true);
+            showLoading();
             setError(null);
             try {
-                const res = await fetch(`${API_URL}/api/pages/slug/${slug}`);
+                // Minimum loading time for premium feel
+                const [res] = await Promise.all([
+                    fetch(`${API_URL}/api/pages/slug/${slug}`),
+                    new Promise(resolve => setTimeout(resolve, 800))
+                ]);
+
                 if (!res.ok) {
                     throw new Error('Page not found');
                 }
@@ -25,20 +32,14 @@ const DynamicPage = () => {
                 console.error(err);
                 setError(err.message);
             } finally {
-                setLoading(false);
+                hideLoading();
             }
         };
 
         if (slug) fetchPage();
     }, [slug]);
 
-    if (loading) {
-        return (
-            <div className="section" style={{ minHeight: '60vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                Loading...
-            </div>
-        );
-    }
+    if (!page && !error) return null; // Loading is handled by overlay
 
     if (error || !page) {
         return (

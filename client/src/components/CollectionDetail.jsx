@@ -5,9 +5,12 @@ import './CollectionDetail.css';
 import { API_URL } from '../config';
 import PageHeader from './PageHeader';
 
+import { useLoading } from '../context/LoadingContext';
+
 const CollectionDetail = () => {
     const { t } = useTranslation();
     const { id } = useParams();
+    const { showLoading, hideLoading } = useLoading();
     const [collection, setCollection] = useState(null);
 
     // Helper for masonry layout (Gemstones)
@@ -23,14 +26,21 @@ const CollectionDetail = () => {
     useEffect(() => {
         window.scrollTo(0, 0);
         const fetchCollection = async () => {
+            showLoading();
             try {
-                const res = await fetch(`${API_URL}/api/collections/${id}`);
+                const [res] = await Promise.all([
+                    fetch(`${API_URL}/api/collections/${id}`),
+                    new Promise(resolve => setTimeout(resolve, 800))
+                ]);
+
                 if (res.ok) {
                     const data = await res.json();
                     setCollection(data);
                 }
             } catch (error) {
                 console.error('Error fetching collection:', error);
+            } finally {
+                hideLoading();
             }
         };
         fetchCollection();
@@ -38,7 +48,7 @@ const CollectionDetail = () => {
 
 
 
-    if (!collection) return <div className="loading">{t('common.loading')}</div>;
+    if (!collection) return null;
 
     return (
         <div className="collection-detail-page">

@@ -670,6 +670,28 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                             <TextField label="Upload Preset" name="UPLOAD_PRESET" value={settings.UPLOAD_PRESET} onChange={handleSettingsChange} fullWidth helperText="Tạo preset 'unsigned' trong Cloudinary Settings > Upload" />
                         </Stack>
 
+                        <Typography variant="h6" gutterBottom>Cấu hình Footer (Liên hệ)</Typography>
+                        <Stack spacing={3} sx={{ mb: 4 }}>
+                            <TextField label="Tiêu đề Cột 1 (Liên hệ)" name="FOOTER_CONTACT_TITLE" value={settings.FOOTER_CONTACT_TITLE || 'LIÊN HỆ'} onChange={handleSettingsChange} fullWidth />
+                            <TextField label="Địa chỉ" name="FOOTER_ADDRESS" value={settings.FOOTER_ADDRESS || ''} onChange={handleSettingsChange} fullWidth multiline />
+                            <TextField label="Số điện thoại" name="FOOTER_PHONE" value={settings.FOOTER_PHONE || ''} onChange={handleSettingsChange} fullWidth />
+                            <TextField label="Email" name="FOOTER_EMAIL" value={settings.FOOTER_EMAIL || ''} onChange={handleSettingsChange} fullWidth />
+                        </Stack>
+
+                        <Typography variant="h6" gutterBottom>Cấu hình Footer (Giới thiệu & Social)</Typography>
+                        <Stack spacing={3} sx={{ mb: 4 }}>
+                            <TextField label="Tiêu đề Cột 3 (About Us)" name="FOOTER_ABOUT_TITLE" value={settings.FOOTER_ABOUT_TITLE || 'FOLLOW US'} onChange={handleSettingsChange} fullWidth />
+                            <TextField label="Nội dung giới thiệu ngắn" name="FOOTER_ABOUT_TEXT" value={settings.FOOTER_ABOUT_TEXT || ''} onChange={handleSettingsChange} fullWidth multiline rows={3} />
+
+                            <Grid container spacing={2}>
+                                <Grid item xs={4}><TextField label="Link Facebook" name="SOCIAL_FB" value={settings.SOCIAL_FB || ''} onChange={handleSettingsChange} fullWidth /></Grid>
+                                <Grid item xs={4}><TextField label="Link Twitter/X" name="SOCIAL_TW" value={settings.SOCIAL_TW || ''} onChange={handleSettingsChange} fullWidth /></Grid>
+                                <Grid item xs={4}><TextField label="Link Instagram" name="SOCIAL_IG" value={settings.SOCIAL_IG || ''} onChange={handleSettingsChange} fullWidth /></Grid>
+                            </Grid>
+
+                            <TextField label="Copyright Text" name="FOOTER_COPYRIGHT" value={settings.FOOTER_COPYRIGHT || '© 2026 RED ART. All rights reserved.'} onChange={handleSettingsChange} fullWidth />
+                        </Stack>
+
                         <Typography variant="h6" gutterBottom>Cấu hình Hiển thị Đá Quý</Typography>
                         <Stack spacing={3}>
                             <TextField

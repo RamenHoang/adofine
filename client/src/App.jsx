@@ -15,6 +15,8 @@ import CollectionsSection from './components/CollectionsSection';
 import CollectionDetail from './components/CollectionDetail';
 import PortfolioDetail from './components/PortfolioDetail';
 import DynamicPage from './components/DynamicPage';
+import { LoadingProvider } from './context/LoadingContext';
+import LoadingOverlay from './components/LoadingOverlay';
 
 function MainLayout() {
   return (
@@ -32,66 +34,69 @@ function MainLayout() {
 
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<MainLayout />} />
-          <Route path="/news" element={
-            <>
-              <Navbar />
-              <BlogList />
-              <Footer />
-            </>
-          } />
-          <Route path="/pages/:slug" element={
-            <>
-              <Navbar />
-              <DynamicPage />
-              <Footer />
-            </>
-          } />
-          <Route path="/news/:id" element={
-            <>
-              <Navbar />
-              <BlogDetail />
-              <Footer />
-            </>
-          } />
-          <Route path="/collections/:id" element={
-            <>
-              <Navbar />
-              <CollectionDetail />
-              <Footer />
-            </>
-          } />
-          <Route path="/portfolio/:id" element={
-            <>
-              <Navbar />
-              <PortfolioDetail type="gemstone" />
-              <Footer />
-            </>
-          } />
-          <Route path="/jewelry/:id" element={
-            <>
-              <Navbar />
-              <PortfolioDetail type="jewelry" />
-              <Footer />
-            </>
-          } />
-        </Routes>
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
-      </div>
-    </Router>
+    <LoadingProvider>
+      <Router>
+        <div className="App">
+          <LoadingOverlay />
+          <Routes>
+            <Route path="/" element={<MainLayout />} />
+            <Route path="/news" element={
+              <>
+                <Navbar />
+                <BlogList />
+                <Footer />
+              </>
+            } />
+            <Route path="/pages/:slug" element={
+              <>
+                <Navbar />
+                <DynamicPage />
+                <Footer />
+              </>
+            } />
+            <Route path="/news/:id" element={
+              <>
+                <Navbar />
+                <BlogDetail />
+                <Footer />
+              </>
+            } />
+            <Route path="/collections/:id" element={
+              <>
+                <Navbar />
+                <CollectionDetail />
+                <Footer />
+              </>
+            } />
+            <Route path="/portfolio/:id" element={
+              <>
+                <Navbar />
+                <PortfolioDetail type="gemstone" />
+                <Footer />
+              </>
+            } />
+            <Route path="/jewelry/:id" element={
+              <>
+                <Navbar />
+                <PortfolioDetail type="jewelry" />
+                <Footer />
+              </>
+            } />
+          </Routes>
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
+        </div>
+      </Router>
+    </LoadingProvider>
   );
 }
 
