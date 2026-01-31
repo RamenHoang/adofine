@@ -14,17 +14,17 @@ import BlogDetail from './components/BlogDetail';
 import CollectionsSection from './components/CollectionsSection';
 import CollectionDetail from './components/CollectionDetail';
 import PortfolioDetail from './components/PortfolioDetail';
+import DynamicPage from './components/DynamicPage';
 
 function MainLayout() {
   return (
     <>
       <Navbar />
       <Hero />
-      <About />
-      <CollectionsSection />
-      <BlogSection />
       <Portfolio />
+      <BlogSection />
       <Frames />
+      <About />
       <Footer />
     </>
   );
@@ -40,6 +40,13 @@ function App() {
             <>
               <Navbar />
               <BlogList />
+              <Footer />
+            </>
+          } />
+          <Route path="/pages/:slug" element={
+            <>
+              <Navbar />
+              <DynamicPage />
               <Footer />
             </>
           } />
@@ -72,7 +79,7 @@ function App() {
             </>
           } />
         </Routes>
-        <ToastContainer 
+        <ToastContainer
           position="top-right"
           autoClose={3000}
           hideProgressBar={false}

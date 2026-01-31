@@ -16,7 +16,7 @@ import {
     Category as CategoryIcon, Diamond as GemIcon, Watch as JewelryIcon,
     Settings as SettingsIcon, CloudUpload as UploadIcon,
     ArrowBack as ArrowBackIcon, ArrowForward as ArrowForwardIcon, Close as CloseIcon,
-    ViewCarousel as CarouselIcon, Book as BookIcon, Collections as CollectionIcon
+    ViewCarousel as CarouselIcon, Book as BookIcon, Collections as CollectionIcon, Article as PageIcon
 } from '@mui/icons-material';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
@@ -307,6 +307,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
             case 'jewelry-categories': endpoint = '/api/jewelry-categories'; break;
             case 'hero-slides': endpoint = '/api/hero-slides'; break; // Hero Slides
             case 'blogs': endpoint = '/api/posts'; break;
+            case 'pages': endpoint = '/api/pages'; break;
             case 'collections': endpoint = '/api/collections'; break;
             default: return;
         }
@@ -373,11 +374,12 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
         setEditingId(item ? item.id : null);
 
         let fullItem = item;
-        if (item && (activeTab === 'products' || activeTab === 'jewelry' || activeTab === 'collections')) {
+        if (item && (activeTab === 'products' || activeTab === 'jewelry' || activeTab === 'collections' || activeTab === 'pages')) {
             try {
                 const endpoint = activeTab === 'products' ? `/api/gemstones/${item.id}` :
                     activeTab === 'jewelry' ? `/api/jewelry-items/${item.id}` :
-                        `/api/collections/${item.id}`;
+                        activeTab === 'pages' ? `/api/pages/${item.id}` :
+                            `/api/collections/${item.id}`;
                 const res = await fetch(`${API_URL}${endpoint}`, { credentials: 'include' });
                 if (res.ok) fullItem = await res.json();
             } catch (err) { console.error(err); }
@@ -443,6 +445,13 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
             } : {
                 title: '', description: '', image: '', is_visible: true, items: []
             });
+        } else if (activeTab === 'pages') {
+            setFormData(fullItem ? {
+                title: fullItem.title, slug: fullItem.slug, content: fullItem.content,
+                is_visible: fullItem.is_visible !== 0
+            } : {
+                title: '', slug: '', content: '', is_visible: true
+            });
         }
 
         setOpenDialog(true);
@@ -461,6 +470,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
         else if (activeTab === 'hero-slides') endpoint = '/api/hero-slides';
         else if (activeTab === 'blogs') endpoint = '/api/posts';
         else if (activeTab === 'collections') endpoint = '/api/collections';
+        else if (activeTab === 'pages') endpoint = '/api/pages';
 
         const url = editingId ? `${API_URL}${endpoint}/${editingId}` : `${API_URL}${endpoint}`;
         const method = editingId ? 'PUT' : 'POST';
@@ -499,6 +509,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
         else if (activeTab === 'gem-categories') endpoint = '/api/gemstone-categories';
         else if (activeTab === 'jewelry-categories') endpoint = '/api/jewelry-categories';
         else if (activeTab === 'hero-slides') endpoint = '/api/hero-slides';
+        else if (activeTab === 'pages') endpoint = '/api/pages';
 
         try {
             await fetch(`${API_URL}${endpoint}/${id}`, { method: 'DELETE', credentials: 'include' });
@@ -559,6 +570,10 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                     <ListItemIcon><BookIcon /></ListItemIcon>
                     <ListItemText primary="Quản lý Tin tức" />
                 </ListItem>
+                <ListItem button selected={activeTab === 'pages'} onClick={() => setActiveTab('pages')}>
+                    <ListItemIcon><PageIcon /></ListItemIcon>
+                    <ListItemText primary="Quản lý Trang tĩnh" />
+                </ListItem>
 
                 <Typography variant="overline" sx={{ px: 2, mt: 2, color: '#888', display: 'block' }}>Hệ thống</Typography>
                 <ListItem button selected={activeTab === 'settings'} onClick={() => setActiveTab('settings')}>
@@ -584,8 +599,9 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                     activeTab === 'jewelry' ? 'Quản lý Trang Sức' :
                                         activeTab === 'hero-slides' ? 'Quản lý Hero Slide' :
                                             activeTab === 'blogs' ? 'Quản lý Tin tức' :
-                                                activeTab === 'collections' ? 'Quản lý Bộ sưu tập' :
-                                                    activeTab === 'gem-categories' ? 'Danh mục Đá Quý' : 'Danh mục Trang Sức'}
+                                                activeTab === 'pages' ? 'Quản lý Trang tĩnh' :
+                                                    activeTab === 'collections' ? 'Quản lý Bộ sưu tập' :
+                                                        activeTab === 'gem-categories' ? 'Danh mục Đá Quý' : 'Danh mục Trang Sức'}
                     </Typography>
                     <Button color="inherit" onClick={handleLogout}>Đăng xuất</Button>
                 </Toolbar>
@@ -656,12 +672,12 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
 
                         <Typography variant="h6" gutterBottom>Cấu hình Hiển thị Đá Quý</Typography>
                         <Stack spacing={3}>
-                            <TextField 
-                                label="Số cột hiển thị" 
-                                name="GEM_GRID_COLUMNS" 
-                                value={settings.GEM_GRID_COLUMNS || '4'} 
-                                onChange={handleSettingsChange} 
-                                fullWidth 
+                            <TextField
+                                label="Số cột hiển thị"
+                                name="GEM_GRID_COLUMNS"
+                                value={settings.GEM_GRID_COLUMNS || '4'}
+                                onChange={handleSettingsChange}
+                                fullWidth
                                 type="number"
                                 inputProps={{ min: 1, max: 6, step: 1 }}
                                 helperText="Số cột hiển thị đá quý trên website (1-6, mặc định: 4)"
@@ -691,6 +707,8 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                         <TableCell>ID</TableCell>
                                         {(activeTab === 'products' || activeTab === 'jewelry' || activeTab === 'hero-slides' || activeTab === 'blogs' || activeTab === 'collections') && <TableCell>Ảnh</TableCell>}
                                         <TableCell>Tên / Tiêu đề</TableCell>
+                                        {activeTab === 'pages' && <TableCell>Slug</TableCell>}
+                                        {activeTab === 'pages' && <TableCell>Hiển thị</TableCell>}
                                         {(activeTab === 'products' || activeTab === 'jewelry') && <TableCell>Danh mục</TableCell>}
                                         {activeTab === 'jewelry' && <TableCell>Thành phần Đá</TableCell>}
                                         {(activeTab === 'products' || activeTab === 'jewelry') && <TableCell>Giá</TableCell>}
@@ -710,6 +728,11 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                                 </TableCell>
                                             )}
                                             <TableCell sx={{ fontWeight: 'bold' }}>{item.title || item.name}</TableCell>
+
+                                            {activeTab === 'pages' && <TableCell>{item.slug}</TableCell>}
+                                            {activeTab === 'pages' && <TableCell>
+                                                <Chip label={item.is_visible ? 'Hiện' : 'Ẩn'} color={item.is_visible ? 'success' : 'default'} size="small" />
+                                            </TableCell>}
 
                                             {(activeTab === 'products') && <TableCell>{item.category_name || item.category}</TableCell>}
                                             {(activeTab === 'jewelry') && <TableCell>{item.category_name}</TableCell>}
@@ -759,7 +782,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
             <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="md">
                 <DialogTitle>
                     {editingId ? 'Chỉnh sửa' : 'Thêm mới'}
-                    {activeTab === 'products' ? ' Đá Quý' : activeTab === 'jewelry' ? ' Trang Sức' : activeTab === 'hero-slides' ? ' Hero Slide' : activeTab === 'blogs' ? ' Tin tức' : activeTab === 'collections' ? ' Bộ sưu tập' : ' Danh mục'}
+                    {activeTab === 'products' ? ' Đá Quý' : activeTab === 'jewelry' ? ' Trang Sức' : activeTab === 'hero-slides' ? ' Hero Slide' : activeTab === 'blogs' ? ' Tin tức' : activeTab === 'pages' ? ' Trang' : activeTab === 'collections' ? ' Bộ sưu tập' : ' Danh mục'}
                 </DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -942,6 +965,45 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                 </Grid>
                                 <Grid item xs={12}>
                                     <InputLabel shrink>Nội dung bài viết (Rich Text)</InputLabel>
+                                    <div style={{ border: '1px solid #ccc', marginTop: '8px' }}>
+                                        <CKEditor
+                                            editor={ClassicEditor}
+                                            data={formData.content || ''}
+                                            config={{
+                                                extraPlugins: [MyCustomUploadAdapterPlugin]
+                                            }}
+                                            onChange={handleEditorChange('content')}
+                                        />
+                                    </div>
+                                </Grid>
+                            </>
+                        )}
+
+                        {/* --- PAGES FORM --- */}
+                        {activeTab === 'pages' && (
+                            <>
+                                <Grid item xs={12} sm={8}>
+                                    <TextField fullWidth label="Tiêu đề trang" name="title" value={formData.title || ''} onChange={handleInputChange} required />
+                                </Grid>
+                                <Grid item xs={12} sm={4}>
+                                    <FormControl fullWidth>
+                                        <InputLabel>Hiển thị</InputLabel>
+                                        <Select
+                                            name="is_visible"
+                                            value={formData.is_visible ? 1 : 0}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, is_visible: e.target.value === 1 }))}
+                                            label="Hiển thị"
+                                        >
+                                            <MenuItem value={1}>Hiện (Trên Menu)</MenuItem>
+                                            <MenuItem value={0}>Ẩn</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <TextField fullWidth label="Slug (URL Path) - Để trống để tự tạo" name="slug" value={formData.slug || ''} onChange={handleInputChange} placeholder="vi-du-ve-trang" helperText="Đường dẫn: /pages/slug-nay" />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <InputLabel shrink>Nội dung trang (Rich Text)</InputLabel>
                                     <div style={{ border: '1px solid #ccc', marginTop: '8px' }}>
                                         <CKEditor
                                             editor={ClassicEditor}

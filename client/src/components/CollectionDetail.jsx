@@ -9,6 +9,16 @@ const CollectionDetail = () => {
     const { id } = useParams();
     const [collection, setCollection] = useState(null);
 
+    // Helper for masonry layout (Gemstones)
+    const distributeIntoColumns = (items, numColumns = 4) => {
+        const columns = Array.from({ length: numColumns }, () => []);
+        items.forEach((item, index) => {
+            const columnIndex = index % numColumns;
+            columns[columnIndex].push(item);
+        });
+        return columns;
+    };
+
     useEffect(() => {
         window.scrollTo(0, 0);
         const fetchCollection = async () => {
@@ -24,6 +34,8 @@ const CollectionDetail = () => {
         };
         fetchCollection();
     }, [id]);
+
+
 
     if (!collection) return <div className="loading">{t('common.loading')}</div>;
 
@@ -47,18 +59,31 @@ const CollectionDetail = () => {
                         <h2 className="section-title" style={{ marginBottom: '40px', fontSize: '2rem', textAlign: 'left' }}>
                             {t('gemstones.title').toUpperCase()}
                         </h2>
-                        <div className="items-grid">
-                            {collection.items.filter(item => item.type === 'gemstone').map(item => (
-                                <div key={`${item.type}-${item.id}`} className="item-card">
-                                    <Link to={`/portfolio/${item.id}`} className="item-link">
-                                        <div className="item-image">
-                                            <img src={item.image || 'https://placehold.co/400x400/333/FFF?text=Product'} alt={item.title} />
+
+
+
+                        <div className="gem-grid">
+                            {distributeIntoColumns(collection.items.filter(item => item.type === 'gemstone'), 4).map((column, colIndex) => (
+                                <div key={colIndex} className="gem-column">
+                                    {column.map(item => (
+                                        <div key={item.id} className="grid-item">
+                                            <div className="gem-frame">
+                                                <img src={item.image || 'https://placehold.co/400x400/333/FFF?text=Product'} alt={item.title} />
+                                                <div className="gem-overlay">
+                                                    <div className="gem-icons">
+                                                        <Link to={`/portfolio/${item.id}`} className="gem-icon-btn">🔗</Link>
+                                                        <a href="#" className="gem-icon-btn">🔍</a>
+                                                    </div>
+                                                    <div className="gem-details">
+                                                        <h3>{item.title}</h3>
+                                                        <div className="gem-meta">
+                                                            <span>{item.price ? `${Number(item.price).toLocaleString()} USD` : t('common.contactUs')}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="item-info">
-                                            <h3 className="item-title">{item.title}</h3>
-                                            <p className="item-price">{item.price ? `${Number(item.price).toLocaleString()} USD` : t('common.contactUs')}</p>
-                                        </div>
-                                    </Link>
+                                    ))}
                                 </div>
                             ))}
                         </div>
@@ -71,16 +96,17 @@ const CollectionDetail = () => {
                         <h2 className="section-title" style={{ marginBottom: '40px', fontSize: '2rem', textAlign: 'left' }}>
                             {t('jewelry.title').toUpperCase()}
                         </h2>
-                        <div className="items-grid">
+
+
+
+                        <div className="jewelry-gallery">
                             {collection.items.filter(item => item.type === 'jewelry').map(item => (
-                                <div key={`${item.type}-${item.id}`} className="item-card">
-                                    <Link to={`/jewelry/${item.id}`} className="item-link">
-                                        <div className="item-image">
-                                            <img src={item.image || 'https://placehold.co/400x400/333/FFF?text=Product'} alt={item.title} />
-                                        </div>
-                                        <div className="item-info">
-                                            <h3 className="item-title">{item.title}</h3>
-                                            <p className="item-price">{item.price ? `${Number(item.price).toLocaleString()} USD` : t('common.contactUs')}</p>
+                                <div key={`${item.type}-${item.id}`} className="jewelry-frame">
+                                    <Link to={`/jewelry/${item.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                        <img src={item.image || 'https://placehold.co/400x400/333/FFF?text=Product'} alt={item.title} />
+                                        <div className="jewelry-info">
+                                            {item.title} <br />
+                                            <span className="jewelry-price">{item.price ? `${Number(item.price).toLocaleString()} USD` : t('common.contactUs')}</span>
                                         </div>
                                     </Link>
                                 </div>

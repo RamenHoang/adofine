@@ -780,6 +780,95 @@ app.delete('/api/collections/:id', authenticateToken, async (req, res) => {
     }
 });
 
+
+// --- PAGES CRUD ---
+app.get('/api/pages/public', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT id, title, slug, is_visible FROM pages WHERE is_visible = TRUE ORDER BY title ASC');
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.get('/api/pages/slug/:slug', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM pages WHERE slug = ?', [req.params.slug]);
+        if (rows.length === 0) return res.status(404).json({ error: 'Not found' });
+        res.json(rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.get('/api/pages', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM pages ORDER BY created_at DESC');
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.get('/api/pages/:id', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM pages WHERE id = ?', [req.params.id]);
+        if (rows.length === 0) return res.status(404).json({ error: 'Not found' });
+        res.json(rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.post('/api/pages', authenticateToken, async (req, res) => {
+    try {
+        const { title, slug, content, is_visible } = req.body;
+        let validSlug = slug;
+        if (!validSlug) {
+            validSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
+        }
+
+        const [result] = await db.query(
+            'INSERT INTO pages (title, slug, content, is_visible) VALUES (?, ?, ?, ?)',
+            [title, validSlug, content, is_visible]
+        );
+        res.status(201).json({ id: result.insertId, slug: validSlug, ...req.body });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.put('/api/pages/:id', authenticateToken, async (req, res) => {
+    try {
+        const { title, slug, content, is_visible } = req.body;
+        const [result] = await db.query(
+            'UPDATE pages SET title=?, slug=?, content=?, is_visible=? WHERE id=?',
+            [title, slug, content, is_visible, req.params.id]
+        );
+        if (result.affectedRows === 0) return res.status(404).json({ error: 'Not found' });
+        res.json({ id: req.params.id, ...req.body });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.delete('/api/pages/:id', authenticateToken, async (req, res) => {
+    try {
+        const [result] = await db.query('DELETE FROM pages WHERE id = ?', [req.params.id]);
+        if (result.affectedRows === 0) return res.status(404).json({ error: 'Not found' });
+        res.json({ message: 'Deleted successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
 app.get('/test-db', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT 1 + 1 AS solution');

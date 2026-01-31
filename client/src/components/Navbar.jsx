@@ -12,6 +12,23 @@ const Navbar = () => {
     LOGO_TEXT_SUFFIX: 'ART',
     LOGO_SUBTITLE: 'TRANG SỨC ĐÁ QUÝ'
   });
+  const [collections, setCollections] = useState([]);
+  const [pages, setPages] = useState([]);
+
+  useEffect(() => {
+    const fetchPages = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/pages/public`);
+        if (res.ok) {
+          const data = await res.json();
+          setPages(data);
+        }
+      } catch (error) {
+        console.error('Error fetching pages:', error);
+      }
+    };
+    fetchPages();
+  }, []);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -30,6 +47,21 @@ const Navbar = () => {
       }
     };
     fetchSettings();
+  }, []);
+
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/collections`);
+        if (res.ok) {
+          const data = await res.json();
+          setCollections(data.filter(c => c.is_visible));
+        }
+      } catch (error) {
+        console.error('Error fetching collections:', error);
+      }
+    };
+    fetchCollections();
   }, []);
 
   return (
@@ -64,7 +96,30 @@ const Navbar = () => {
         <ul className="nav-links d-flex">
           <li><Link to="/" className={location.pathname === '/' ? 'active' : ''}>{t('nav.home').toUpperCase()}</Link></li>
           {/* <li><a href="#pages">TRANG</a></li> */}
-          <li><Link to="/collections" className={location.pathname.startsWith('/collections') ? 'active' : ''}>{t('nav.collections').toUpperCase()}</Link></li>
+          <li className="dropdown">
+            <Link to="#" className={location.pathname.startsWith('/pages') ? 'active' : ''}>PAGES</Link>
+            {pages.length > 0 && (
+              <ul className="dropdown-menu">
+                {pages.map(page => (
+                  <li key={page.id}>
+                    <Link to={`/pages/${page.slug}`}>{page.title}</Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+          <li className="dropdown">
+            <Link to="/collections" className={location.pathname.startsWith('/collections') ? 'active' : ''}>{t('nav.collections').toUpperCase()}</Link>
+            {collections.length > 0 && (
+              <ul className="dropdown-menu">
+                {collections.map(collection => (
+                  <li key={collection.id}>
+                    <Link to={`/collections/${collection.id}`}>{collection.title}</Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
           {/* <li><a href="#gallery">CÁC LOẠI ĐÁ</a></li> */}
           <li><Link to="/news" className={location.pathname.startsWith('/news') ? 'active' : ''}>{t('nav.news').toUpperCase()}</Link></li>
           {/* <li><a href="#contact">LIÊN HỆ</a></li> */}
@@ -74,7 +129,7 @@ const Navbar = () => {
       </div>
       <style jsx>{`
         .navbar {
-          padding: 20px 0;
+          padding: 30px 0;
           position: fixed;
           top: 0;
           width: 100%;
@@ -99,8 +154,50 @@ const Navbar = () => {
           font-size: 0.8rem;
           font-weight: bold;
         }
+        .nav-links > li > a {
+          padding: 10px 0;
+          display: inline-block;
+        }
         .nav-links a.active {
           color: var(--primary-color);
+        }
+        .dropdown {
+          position: relative;
+        }
+        .dropdown-menu {
+          display: none;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          background: #fff;
+          min-width: 200px;
+          padding: 15px 0;
+          margin-top: 0;
+          border-radius: 0;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          list-style: none;
+          z-index: 1001;
+        }
+        .dropdown:hover .dropdown-menu {
+          display: block;
+        }
+        .dropdown-menu li {
+          padding: 0;
+        }
+        .dropdown-menu a {
+          display: block;
+          padding: 10px 20px;
+          color: #333;
+          text-decoration: none;
+          // font-size: 0.75rem;
+          // font-weight: 500;
+          transition: all 0.3s ease;
+          text-transform: none;
+        }
+        .dropdown-menu a:hover {
+          // background: rgba(211, 30, 68, 0.1);
+          color: var(--primary-color);
+          // padding-left: 25px;
         }
       `}</style>
     </nav>
