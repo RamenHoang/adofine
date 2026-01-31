@@ -11,7 +11,7 @@ const LoadingOverlay = () => {
         <div className="loading-overlay">
             <div className="loading-content">
                 <div className="spinner"></div>
-                <div className="loading-text">RED ART</div>
+                <div className="loading-text">ADOFINE JEWELRY</div>
             </div>
             <style jsx>{`
                 .loading-overlay {
