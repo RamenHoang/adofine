@@ -1,17 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { API_URL } from '../config';
 
 const Footer = () => {
     const { t } = useTranslation();
+    const [settings, setSettings] = useState({
+        FOOTER_CONTACT_TITLE: '',
+        FOOTER_ADDRESS: '',
+        FOOTER_PHONE: '',
+        FOOTER_EMAIL: '',
+        FOOTER_ABOUT_TITLE: '',
+        FOOTER_ABOUT_TEXT: '',
+        SOCIAL_FB: '',
+        SOCIAL_TW: '',
+        SOCIAL_IG: '',
+        FOOTER_COPYRIGHT: ''
+    });
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const res = await fetch(`${API_URL}/api/settings`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setSettings(prev => ({ ...prev, ...data }));
+                }
+            } catch (error) {
+                console.error('Error fetching settings:', error);
+            }
+        };
+        fetchSettings();
+    }, []);
+
     return (
         <footer className="footer" id="contact">
             <div className="container">
                 <div className="footer-grid">
                     <div className="footer-col">
-                        <h3 className="footer-title">{t('footer.contact').toUpperCase()}</h3>
-                        <p>{t('footer.address')}</p>
-                        <p>{t('footer.phone')}</p>
-                        <p>{t('footer.email')}</p>
+                        <h3 className="footer-title">{settings.FOOTER_CONTACT_TITLE || t('footer.contact').toUpperCase()}</h3>
+                        <p>{settings.FOOTER_ADDRESS || t('footer.address')}</p>
+                        <p>{settings.FOOTER_PHONE || t('footer.phone')}</p>
+                        <p>{settings.FOOTER_EMAIL || t('footer.email')}</p>
                     </div>
                     <div className="footer-col">
                         <h3 className="footer-title">{t('blog.title').toUpperCase()}</h3>
@@ -22,8 +51,8 @@ const Footer = () => {
                         </ul>
                     </div>
                     <div className="footer-col">
-                        <h3 className="footer-title">{t('footer.followUs').toUpperCase()}</h3>
-                        <p>{t('footer.aboutText')}</p>
+                        <h3 className="footer-title">{settings.FOOTER_ABOUT_TITLE || t('footer.followUs').toUpperCase()}</h3>
+                        <p>{settings.FOOTER_ABOUT_TEXT || t('footer.aboutText')}</p>
                         <div className="newsletter-form">
                             <input type="email" placeholder="Email" />
                             <button className="btn btn-primary">{t('common.contactUs').toUpperCase()}</button>
@@ -31,11 +60,18 @@ const Footer = () => {
                     </div>
                 </div>
                 <div className="footer-bottom">
-                    <p>{t('footer.copyright')}</p>
+                    <p>{settings.FOOTER_COPYRIGHT || t('footer.copyright')}</p>
                     <div className="social-links">
-                        <a href="#">FB</a>
-                        <a href="#">TW</a>
-                        <a href="#">IG</a>
+                        {settings.SOCIAL_FB && <a href={settings.SOCIAL_FB} target="_blank" rel="noopener noreferrer">FB</a>}
+                        {settings.SOCIAL_TW && <a href={settings.SOCIAL_TW} target="_blank" rel="noopener noreferrer">TW</a>}
+                        {settings.SOCIAL_IG && <a href={settings.SOCIAL_IG} target="_blank" rel="noopener noreferrer">IG</a>}
+                        {!settings.SOCIAL_FB && !settings.SOCIAL_TW && !settings.SOCIAL_IG && (
+                            <>
+                                <a href="#">FB</a>
+                                <a href="#">TW</a>
+                                <a href="#">IG</a>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
@@ -86,6 +122,13 @@ const Footer = () => {
         .social-links {
             display: flex;
             gap: 20px;
+        }
+        .social-links a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .social-links a:hover {
+            color: #d31e44;
         }
       `}</style>
         </footer>

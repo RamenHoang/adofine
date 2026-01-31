@@ -4,20 +4,31 @@ import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 import PageHeader from './PageHeader';
 
+import { useLoading } from '../context/LoadingContext';
+
 const BlogList = () => {
     const { t } = useTranslation();
+    const { showLoading, hideLoading } = useLoading();
     const [posts, setPosts] = useState([]);
 
     useEffect(() => {
         const fetchPosts = async () => {
+            showLoading();
             try {
-                const res = await fetch(`${API_URL}/api/posts`);
+                // Minimum loading time for premium feel
+                const [res] = await Promise.all([
+                    fetch(`${API_URL}/api/posts`),
+                    new Promise(resolve => setTimeout(resolve, 800))
+                ]);
+
                 if (res.ok) {
                     const data = await res.json();
                     setPosts(data);
                 }
             } catch (error) {
                 console.error('Error fetching posts:', error);
+            } finally {
+                hideLoading();
             }
         };
         fetchPosts();

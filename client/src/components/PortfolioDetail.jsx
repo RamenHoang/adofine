@@ -4,9 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 import PageHeader from './PageHeader';
 
+import { useLoading } from '../context/LoadingContext';
+
 const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
     const { t } = useTranslation();
     const { id } = useParams();
+    const { showLoading, hideLoading } = useLoading();
     const [item, setItem] = useState(null);
 
     // Scroll to top
@@ -14,9 +17,15 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
 
     useEffect(() => {
         const fetchDetail = async () => {
+            showLoading();
             try {
                 const endpoint = type === 'jewelry' ? `/api/jewelry-items/${id}` : `/api/gemstones/${id}`;
-                const response = await fetch(`${API_URL}${endpoint}`);
+                // Minimum loading time for premium feel
+                const [response] = await Promise.all([
+                    fetch(`${API_URL}${endpoint}`),
+                    new Promise(resolve => setTimeout(resolve, 800))
+                ]);
+
                 if (response.ok) {
                     const data = await response.json();
                     setItem(data);
@@ -25,12 +34,14 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
                 }
             } catch (error) {
                 console.error('Error fetching detail:', error);
+            } finally {
+                hideLoading();
             }
         };
         fetchDetail();
     }, [id, type]);
 
-    if (!item) return <div className="text-white text-center py-5">{t('common.loading')}</div>;
+    if (!item) return null; // Loading handled by global overlay
 
     // Handle different fields between Gemstone/Jewelry if needed
     // Gemstone: detail_client, detail_author...
