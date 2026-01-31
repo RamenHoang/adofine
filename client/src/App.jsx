@@ -5,7 +5,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import BlogSection from './components/BlogSection';
 import Section from './components/Section';
-import Portfolio from './components/Portfolio';
+import Gemstones from './components/Gemstones';
 import About from './components/About';
 import Frames from './components/Frames';
 import Footer from './components/Footer';
@@ -13,7 +13,7 @@ import BlogList from './components/BlogList';
 import BlogDetail from './components/BlogDetail';
 import CollectionsSection from './components/CollectionsSection';
 import CollectionDetail from './components/CollectionDetail';
-import PortfolioDetail from './components/PortfolioDetail';
+import PortfolioDetail from './components/GemstoneDetail';
 import DynamicPage from './components/DynamicPage';
 import { LoadingProvider } from './context/LoadingContext';
 import LoadingOverlay from './components/LoadingOverlay';
@@ -23,7 +23,7 @@ function MainLayout() {
     <>
       <Navbar />
       <Hero />
-      <Portfolio />
+      <Gemstones />
       <BlogSection />
       <Frames />
       <About />
