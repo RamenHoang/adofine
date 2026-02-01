@@ -13,7 +13,7 @@ const LoadingOverlay = () => {
                 <div className="spinner"></div>
                 <div className="loading-text">ADOFINE JEWELRY</div>
             </div>
-            <style jsx>{`
+            <style>{`
                 .loading-overlay {
                     position: fixed;
                     top: 0;

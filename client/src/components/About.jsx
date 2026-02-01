@@ -21,7 +21,7 @@ const About = () => {
                     <button className="btn btn-primary">{t('common.learnMore').toUpperCase()}</button>
                 </div>
             </div>
-            <style jsx>{`
+            <style>{`
         .about-section {
             padding: 100px 0;
             background: #111;

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './CollectionsSection.css';
 import { API_URL } from '../config';
+import Button from './Button';
 
 const CollectionsSection = () => {
     const { t } = useTranslation();
@@ -38,7 +38,14 @@ const CollectionsSection = () => {
                         <div className="col-content">
                             <h3 className="col-title">{col.title}</h3>
                             <p className="col-desc">{col.description}</p>
-                            <Link to={`/collections/${col.id}`} className="btn-explore">{t('collections.viewCollection').toUpperCase()}</Link>
+                            <Button
+                                as="link"
+                                to={`/collections/${col.id}`}
+                                variant="outline"
+                                size="medium"
+                            >
+                                {t('collections.viewCollection').toUpperCase()}
+                            </Button>
                         </div>
                     </div>
                 ))}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 import { useLoading } from '../context/LoadingContext';
+import Button from './Button';
 import './ContactPage.css';
 
 const ContactPage = () => {
@@ -350,13 +351,14 @@ const ContactPage = () => {
                   {formData.selected_gemstones.map(g => (
                     <span key={g.id} className="tag">
                       {g.title}
-                      <button
-                        type="button"
+                      <Button
+                        variant="ghost"
+                        size="small"
                         onClick={() => handleGemstoneToggle(g)}
                         className="tag-remove"
                       >
                         ×
-                      </button>
+                      </Button>
                     </span>
                   ))}
                 </div>
@@ -411,13 +413,14 @@ const ContactPage = () => {
                   {formData.selected_jewelry.map(j => (
                     <span key={j.id} className="tag">
                       {j.title}
-                      <button
-                        type="button"
+                      <Button
+                        variant="ghost"
+                        size="small"
                         onClick={() => handleJewelryToggle(j)}
                         className="tag-remove"
                       >
                         ×
-                      </button>
+                      </Button>
                     </span>
                   ))}
                 </div>
@@ -427,13 +430,15 @@ const ContactPage = () => {
 
           {/* Submit Button */}
           <div className="form-actions">
-            <button
+            <Button
               type="submit"
-              className="submit-button"
+              variant="gradient"
+              size="large"
               disabled={isSubmitting}
+              loading={isSubmitting}
             >
               {isSubmitting ? t('contact.submitting') : t('contact.submit')}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

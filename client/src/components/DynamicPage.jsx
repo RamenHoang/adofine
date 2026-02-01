@@ -63,7 +63,7 @@ const DynamicPage = () => {
                     style={{ lineHeight: '1.8', fontSize: '1.1rem' }}
                 />
             </div>
-            <style jsx>{`
+            <style>{`
                 .page-content img {
                     max-width: 100%;
                     height: auto;

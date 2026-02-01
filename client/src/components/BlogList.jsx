@@ -58,7 +58,7 @@ const BlogList = () => {
                     ))}
                 </div>
             </div>
-            <style jsx>{`
+            <style>{`
                 .blog-page {
                     background: #000;
                     min-height: 100vh;

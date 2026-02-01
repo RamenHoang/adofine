@@ -24,7 +24,7 @@ const PageHeader = ({ title, breadcrumbs = [] }) => {
                 </h1>
 
                 {/* Right: Breadcrumb */}
-                <div className="breadcrumb" style={{
+                {/* <div className="breadcrumb" style={{
                     fontSize: '0.9rem',
                     color: '#888',
                     textTransform: 'uppercase'
@@ -40,7 +40,7 @@ const PageHeader = ({ title, breadcrumbs = [] }) => {
                             )}
                         </React.Fragment>
                     ))}
-                </div>
+                </div> */}
             </div>
         </div>
     );

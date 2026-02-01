@@ -127,7 +127,7 @@ const Navbar = () => {
           {/* <li><Link to="/admin" className={location.pathname.startsWith('/admin') ? 'active' : ''} style={{ color: location.pathname.startsWith('/admin') ? '#d31e44' : 'inherit' }}>ADMIN</Link></li> */}
         </ul>
       </div>
-      <style jsx>{`
+      <style>{`
         .navbar {
           padding: 30px 0;
           position: fixed;

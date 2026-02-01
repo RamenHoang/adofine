@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 import PageHeader from './PageHeader';
+import Button from './Button';
 
 import { useLoading } from '../context/LoadingContext';
 
@@ -104,9 +105,15 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
                     </ul>
 
                     <div style={{ marginTop: '30px' }}>
-                        <Link to="/contact" className="btn btn-primary" style={{ width: '100%', textAlign: 'center', display: 'block' }}>
+                        <Button
+                            as="link"
+                            to="/contact"
+                            variant="default"
+                            size="large"
+                            fullWidth
+                        >
                             {t('common.contactUs').toUpperCase()}
-                        </Link>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -126,10 +133,18 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
             )}
 
             <div className="container" style={{ marginBottom: '50px' }}>
-                <Link to="/" className="btn btn-primary">&larr; {t('gemstones.backToList').toUpperCase()}</Link>
+                <Button
+                    as="link"
+                    to="/"
+                    variant="default"
+                    icon={<span>&larr;</span>}
+                    iconPosition="left"
+                >
+                    {t('gemstones.backToList').toUpperCase()}
+                </Button>
             </div>
 
-            <style jsx>{`
+            <style>{`
         .portfolio-detail { background: #000; color: #888; min-height: 100vh; }
         .detail-hero { width: 100%; height: 50vh; overflow: hidden; margin-bottom: 60px; }
         .detail-hero img { width: 100%; height: 100%; object-fit: cover; }

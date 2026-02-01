@@ -15,7 +15,7 @@ const Section = ({ title, subtitle, description, buttonText, image, reverse, dar
                     {image ? <img src={image} alt={title} /> : <div className="img-placeholder"></div>}
                 </div>
             </div>
-            <style jsx>{`
+            <style>{`
         .section {
           padding: 80px 0;
           background: #000;

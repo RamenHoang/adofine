@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
-import { Link } from 'react-router-dom';
 import { useLoading } from '../context/LoadingContext';
+import Button from './Button';
 
 const HeroSkeleton = () => (
   <div className="hero-skeleton">
@@ -12,7 +12,7 @@ const HeroSkeleton = () => (
       <div className="skeleton-line title-2"></div>
       <div className="skeleton-line button"></div>
     </div>
-    <style jsx>{`
+    <style>{`
             .hero-skeleton {
                 height: 100vh;
                 background: #111;
@@ -134,15 +134,22 @@ const Hero = () => {
 
         {activeSlide.link && (
           <div style={{ marginTop: 30 }} className="fade-in-up">
-            <Link to={activeSlide.link} className="btn-hero">KHÁM PHÁ NGAY</Link>
+            <Button
+              as="link"
+              to={activeSlide.link}
+              variant="default"
+              size="large"
+            >
+              KHÁM PHÁ NGAY
+            </Button>
           </div>
         )}
       </div>
 
       {slides.length > 1 && (
         <>
-          <button className="nav-arrow left" onClick={prevSlide}>&lt;</button>
-          <button className="nav-arrow right" onClick={nextSlide}>&gt;</button>
+          <Button variant="ghost" className="nav-arrow left" onClick={prevSlide}>&lt;</Button>
+          <Button variant="ghost" className="nav-arrow right" onClick={nextSlide}>&gt;</Button>
 
           <div className="hero-dots">
             {slides.map((_, idx) => (
@@ -156,7 +163,7 @@ const Hero = () => {
         </>
       )}
 
-      <style jsx>{`
+      <style>{`
         .hero {
           height: 100vh;
           background: url('${activeSlide.image_url}') center/cover no-repeat;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
+import Button from './Button';
 
 const BlogSection = () => {
     const { t } = useTranslation();
@@ -39,7 +39,14 @@ const BlogSection = () => {
                             <div className="blog-content">
                                 <h3 className="blog-title">{post.title}</h3>
                                 <p className="blog-excerpt">{post.excerpt}</p>
-                                <Link to={`/news/${post.id}`} className="btn-read-more">{t('blog.readMore').toUpperCase()}</Link>
+                                <Button
+                                    as="link"
+                                    to={`/news/${post.id}`}
+                                    variant="outline"
+                                    size="small"
+                                >
+                                    {t('blog.readMore').toUpperCase()}
+                                </Button>
                             </div>
                         </div>
                     ))}
@@ -49,7 +56,7 @@ const BlogSection = () => {
                     <Link to="/news" className="btn btn-primary-outline">{t('blog.title').toUpperCase()}</Link>
                 </div> */}
             </div>
-            <style jsx>{`
+            <style>{`
                 .blog-section {
                     padding: 80px 0;
                     background: #111;

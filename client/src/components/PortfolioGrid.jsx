@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Button from './Button';
 
 const PortfolioGrid = ({
   items = [],
@@ -38,13 +39,15 @@ const PortfolioGrid = ({
         {/* Filters */}
         <div className="filters">
           {filters.map(filter => (
-            <button
+            <Button
               key={filter}
-              className={`btn ${activeFilter === filter ? 'active' : ''}`}
+              variant="default"
+              size="small"
+              active={activeFilter === filter}
               onClick={() => onFilterChange(filter)}
             >
               {filter}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -76,7 +79,7 @@ const PortfolioGrid = ({
         </div>
 
       </div>
-      <style jsx>{`
+      <style>{`
         .portfolio-section {
           padding: 80px 0;
           background-image: url('${sectionBg}');

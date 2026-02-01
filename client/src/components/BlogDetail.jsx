@@ -67,7 +67,7 @@ const BlogDetail = () => {
                 </div>
             </div>
 
-            <style jsx>{`
+            <style>{`
     .blog - detail - page {
     background: #111;
     min - height: 100vh;

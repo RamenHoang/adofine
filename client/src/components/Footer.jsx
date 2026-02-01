@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
+import Button from './Button';
 
 const Footer = () => {
     const { t } = useTranslation();
@@ -71,7 +72,15 @@ const Footer = () => {
                         <p>{settings.FOOTER_ABOUT_TEXT || t('footer.aboutText')}</p>
                         <div className="newsletter-form">
                             {/* <input type="email" placeholder="Email" /> */}
-                            <Link to="/contact" className="btn btn-primary">{t('common.contactUs').toUpperCase()}</Link>
+                            {/* <Link to="/contact" className="btn btn-primary">{t('common.contactUs').toUpperCase()}</Link> */}
+                            <Button
+                                as="link"
+                                to={`/contact`}
+                                variant="outline"
+                                size="small"
+                            >
+                                {t('common.contactUs').toUpperCase()}
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -91,7 +100,7 @@ const Footer = () => {
                     </div>
                 </div>
             </div>
-            <style jsx>{`
+            <style>{`
         .footer {
             background: #080808;
             color: #888;
