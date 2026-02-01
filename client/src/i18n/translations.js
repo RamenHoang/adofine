@@ -54,7 +54,7 @@ export default {
     backToList: "Back to Collections"
   },
   blog: {
-    title: "News & Articles",
+    title: "News",
     readMore: "Read More",
     publishedOn: "Published on",
     backToList: "Back to News"

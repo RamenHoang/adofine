@@ -7,7 +7,7 @@ import BlogSection from './components/BlogSection';
 import Section from './components/Section';
 import Gemstones from './components/Gemstones';
 import About from './components/About';
-import Frames from './components/Frames';
+import Jewelries from './components/Jewelries';
 import Footer from './components/Footer';
 import BlogList from './components/BlogList';
 import BlogDetail from './components/BlogDetail';
@@ -26,8 +26,8 @@ function MainLayout() {
       <Hero />
       <Gemstones />
       <BlogSection />
-      <Frames />
-      <About />
+      <Jewelries />
+      {/* <About /> */}
       <Footer />
     </>
   );
