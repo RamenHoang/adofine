@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 import PageHeader from './PageHeader';
 import BlogRows from './BlogRows';
+import Button from './Button';
 
 import { useLoading } from '../context/LoadingContext';
 
@@ -12,7 +13,7 @@ const BlogList = () => {
     const [posts, setPosts] = useState([]);
     const [total, setTotal] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
-    const postsPerPage = 6;
+    const postsPerPage = 5;
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -59,31 +60,35 @@ const BlogList = () => {
                 {/* Pagination */}
                 {totalPages > 1 && (
                     <div className="pagination">
-                        <button 
-                            onClick={() => handlePageChange(currentPage - 1)} 
+                        <Button
+                            variant="ghost"
+                            size="small"
+                            onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
-                            className="page-btn"
                         >
                             &lt; PREV
-                        </button>
+                        </Button>
                         
                         {[...Array(totalPages)].map((_, i) => (
-                            <button
+                            <Button
                                 key={i + 1}
+                                variant="ghost"
+                                size="small"
+                                active={currentPage === i + 1}
                                 onClick={() => handlePageChange(i + 1)}
-                                className={`page-btn ${currentPage === i + 1 ? 'active' : ''}`}
                             >
                                 {i + 1}
-                            </button>
+                            </Button>
                         ))}
                         
-                        <button 
-                            onClick={() => handlePageChange(currentPage + 1)} 
+                        <Button
+                            variant="ghost"
+                            size="small"
+                            onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === totalPages}
-                            className="page-btn"
                         >
                             NEXT &gt;
-                        </button>
+                        </Button>
                     </div>
                 )}
             </div>
@@ -101,29 +106,6 @@ const BlogList = () => {
                     gap: 10px;
                     margin-top: 60px;
                     flex-wrap: wrap;
-                }
-                .page-btn {
-                    padding: 10px 18px;
-                    background: transparent;
-                    border: 1px solid #333;
-                    color: #fff;
-                    cursor: pointer;
-                    transition: all 0.3s;
-                    font-size: 0.9rem;
-                    letter-spacing: 1px;
-                }
-                .page-btn:hover:not(:disabled) {
-                    border-color: #d31e44;
-                    color: #d31e44;
-                }
-                .page-btn.active {
-                    background: #d31e44;
-                    border-color: #d31e44;
-                    color: #fff;
-                }
-                .page-btn:disabled {
-                    opacity: 0.3;
-                    cursor: not-allowed;
                 }
             `}</style>
         </div >

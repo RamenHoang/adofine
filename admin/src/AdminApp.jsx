@@ -320,7 +320,14 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
         try {
             const res = await fetch(`${API_URL}${endpoint}`, { credentials: 'include' });
             const data = await res.json();
-            setItems(data);
+            
+            // Handle new blog API response format
+            if (activeTab === 'blogs' && data.posts) {
+                setItems(data.posts);
+            } else {
+                setItems(data);
+            }
+            
             if (activeTab === 'products' || activeTab === 'jewelry') {
                 setStats(prev => ({ ...prev, products: data.length }));
             }
