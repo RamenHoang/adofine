@@ -3,7 +3,8 @@
   --bg-color: #000000;
   --text-color: #ffffff;
   --text-muted: #888888;
-  --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-main: 'PT Sans Narrow', 'Arial Narrow', Arial, sans-serif;
+  --toastify-font-family: 'PT Sans Narrow', 'Arial Narrow', Arial, sans-serif;
 }
 
 body {

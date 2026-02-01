@@ -42,7 +42,7 @@ const LoadingOverlay = () => {
                 }
                 .loading-text {
                     color: #fff;
-                    font-family: sans-serif;
+                    font-family: 'PT Sans Narrow', 'Arial Narrow', Arial, sans-serif;
                     letter-spacing: 3px;
                     font-size: 0.9rem;
                     opacity: 0.8;

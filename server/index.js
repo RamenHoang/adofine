@@ -156,7 +156,7 @@ app.post('/api/auth/logout', (req, res) => {
 // --- SETTINGS API (Cloudinary Config) ---
 app.get('/api/settings', async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM app_settings');
+        const [rows] = await db.query('SELECT * FROM app_settings WHERE is_private = 0');
         const settings = {};
         rows.forEach(row => settings[row.setting_key] = row.setting_value);
         res.json(settings);

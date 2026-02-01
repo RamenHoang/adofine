@@ -124,7 +124,7 @@ const Navbar = () => {
           <li><Link to="/news" className={location.pathname.startsWith('/news') ? 'active' : ''}>{t('nav.news').toUpperCase()}</Link></li>
           {/* <li><a href="#contact">LIÊN HỆ</a></li> */}
           {/* <li><a href="#shop">CỬA HÀNG</a></li> */}
-          <li><Link to="/admin" className={location.pathname.startsWith('/admin') ? 'active' : ''} style={{ color: location.pathname.startsWith('/admin') ? '#d31e44' : 'inherit' }}>ADMIN</Link></li>
+          {/* <li><Link to="/admin" className={location.pathname.startsWith('/admin') ? 'active' : ''} style={{ color: location.pathname.startsWith('/admin') ? '#d31e44' : 'inherit' }}>ADMIN</Link></li> */}
         </ul>
       </div>
       <style jsx>{`
@@ -151,7 +151,6 @@ const Navbar = () => {
         .nav-links {
           list-style: none;
           gap: 30px;
-          font-size: 0.8rem;
           font-weight: bold;
         }
         .nav-links > li > a {

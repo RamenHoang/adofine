@@ -17,6 +17,7 @@ const Footer = () => {
         SOCIAL_IG: '',
         FOOTER_COPYRIGHT: ''
     });
+    const [posts, setPosts] = useState([]);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -31,6 +32,18 @@ const Footer = () => {
             }
         };
         fetchSettings();
+        const fetchPosts = async () => {
+            try {
+                const res = await fetch(`${API_URL}/api/posts`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setPosts(data.slice(0, 3)); // Limit to 3 latest
+                }
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+            }
+        };
+        fetchPosts();
     }, []);
 
     return (
@@ -46,16 +59,18 @@ const Footer = () => {
                     <div className="footer-col">
                         <h3 className="footer-title">{t('blog.title').toUpperCase()}</h3>
                         <ul className="footer-links">
-                            <li><a href="#">{t('blog.title')}</a></li>
-                            <li><a href="#">{t('blog.title')}</a></li>
-                            <li><a href="#">{t('blog.title')}</a></li>
+                            {posts.map(post => (
+                                <li key={post.id}>
+                                    <Link to={`/posts/${post.slug}`}>{post.title}</Link>
+                                </li>
+                            ))}
                         </ul>
                     </div>
                     <div className="footer-col">
                         <h3 className="footer-title">{settings.FOOTER_ABOUT_TITLE || t('footer.followUs').toUpperCase()}</h3>
                         <p>{settings.FOOTER_ABOUT_TEXT || t('footer.aboutText')}</p>
                         <div className="newsletter-form">
-                            <input type="email" placeholder="Email" />
+                            {/* <input type="email" placeholder="Email" /> */}
                             <Link to="/contact" className="btn btn-primary">{t('common.contactUs').toUpperCase()}</Link>
                         </div>
                     </div>
@@ -84,10 +99,11 @@ const Footer = () => {
             font-size: 0.9rem;
         }
         .footer-grid {
-            display: grid;
+            display: flex;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 40px;
             margin-bottom: 60px;
+            justify-content: space-between;
         }
         .footer-title {
             color: #fff;

@@ -28,7 +28,7 @@ const BlogSection = () => {
         <section className="blog-section" id="news">
             <div className="container">
                 <h2 className="section-title">{t('blog.title').toUpperCase()}</h2>
-                <p className="section-subtitle">{t('blog.title')}</p>
+                {/* <p className="section-subtitle">{t('blog.title')}</p> */}
 
                 <div className="blog-grid">
                     {posts.map((post, index) => (
@@ -44,10 +44,10 @@ const BlogSection = () => {
                         </div>
                     ))}
                 </div>
-
+{/* 
                 <div style={{ marginTop: '50px' }}>
                     <Link to="/news" className="btn btn-primary-outline">{t('blog.title').toUpperCase()}</Link>
-                </div>
+                </div> */}
             </div>
             <style jsx>{`
                 .blog-section {
@@ -133,7 +133,8 @@ const BlogSection = () => {
                     display: inline-block;
                     padding: 12px 30px;
                     border: 1px solid #d31e44;
-                    color: #d31e44;
+                    border-radius: 4px;
+                    color: #fff;
                     text-decoration: none;
                     text-transform: uppercase;
                     letter-spacing: 1px;
