@@ -148,8 +148,8 @@ const Hero = () => {
 
       {slides.length > 1 && (
         <>
-          <Button variant="ghost" className="nav-arrow left" onClick={prevSlide}>&lt;</Button>
-          <Button variant="ghost" className="nav-arrow right" onClick={nextSlide}>&gt;</Button>
+          <button className="nav-arrow left" onClick={prevSlide}>&lt;</button>
+          <button className="nav-arrow right" onClick={nextSlide}>&gt;</button>
 
           <div className="hero-dots">
             {slides.map((_, idx) => (

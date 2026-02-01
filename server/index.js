@@ -170,7 +170,9 @@ app.post('/api/settings', authenticateToken, async (req, res) => {
     try {
         const settings = req.body; // { CLOUD_NAME: '...', API_KEY: '...', ... }
         for (const [key, value] of Object.entries(settings)) {
-            await db.query('INSERT INTO app_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value=?', [key, value, value]);
+            if (value) {
+                await db.query('INSERT INTO app_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value=?', [key, value, value]);
+            }
         }
         res.json({ message: 'Settings saved' });
     } catch (err) {
@@ -599,8 +601,26 @@ app.delete('/api/hero-slides/:id', authenticateToken, async (req, res) => {
 // --- BLOG CRUD ---
 app.get('/api/posts', async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM posts ORDER BY created_at DESC');
-        res.json(rows);
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = parseInt(req.query.offset) || 0;
+        
+        // Get total count
+        const [countResult] = await db.query('SELECT COUNT(*) as total FROM posts');
+        const total = countResult[0].total;
+        
+        // Get posts with pagination
+        const [rows] = await db.query(
+            'SELECT * FROM posts ORDER BY created_at DESC LIMIT ? OFFSET ?',
+            [limit, offset]
+        );
+        
+        res.json({
+            posts: rows,
+            total,
+            limit,
+            offset,
+            hasMore: offset + rows.length < total
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Database error' });
@@ -678,25 +698,46 @@ app.get('/api/collections/:id', async (req, res) => {
         if (rows.length === 0) return res.status(404).json({ error: 'Not found' });
         const collection = rows[0];
 
-        // Fetch Items (Gemstones & Jewelry)
+        // Fetch Items (Gemstones & Jewelry) with category info
         const [items] = await db.query(`
             SELECT ci.*, 
-                   g.title as gem_title, g.image as gem_image, g.price as gem_price,
-                   j.title as jew_title, j.image as jew_image, j.price as jew_price
+                   g.title as gem_title, g.image as gem_image, g.price as gem_price, g.gemstone_category_id,
+                   gc.name as gem_category_name,
+                   j.title as jew_title, j.image as jew_image, j.price as jew_price, j.jewelry_category_id,
+                   jc.name as jew_category_name
             FROM collection_items ci
             LEFT JOIN gemstones g ON ci.gemstone_id = g.id
+            LEFT JOIN gemstone_categories gc ON g.gemstone_category_id = gc.id
             LEFT JOIN jewelry_items j ON ci.jewelry_id = j.id
+            LEFT JOIN jewelry_categories jc ON j.jewelry_category_id = jc.id
             WHERE ci.collection_id = ?
         `, [collection.id]);
 
         // Normalize items structure
         collection.items = items.map(item => ({
-            id: item.gemstone_id || item.jewelry_id, // Use product_id as id for frontend
+            id: item.gemstone_id || item.jewelry_id,
             type: item.gemstone_id ? 'gemstone' : 'jewelry',
             title: item.gem_title || item.jew_title,
             image: item.gem_image || item.jew_image,
-            price: item.gem_price || item.jew_price
+            price: item.gem_price || item.jew_price,
+            category_name: item.gem_category_name || item.jew_category_name
         }));
+
+        // Extract unique categories for filters
+        const gemstoneCategories = [...new Set(
+            collection.items
+                .filter(item => item.type === 'gemstone' && item.category_name)
+                .map(item => item.category_name)
+        )];
+        
+        const jewelryCategories = [...new Set(
+            collection.items
+                .filter(item => item.type === 'jewelry' && item.category_name)
+                .map(item => item.category_name)
+        )];
+
+        collection.gemstone_categories = gemstoneCategories;
+        collection.jewelry_categories = jewelryCategories;
 
         res.json(collection);
     } catch (err) {

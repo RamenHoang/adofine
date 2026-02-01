@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 import PageHeader from './PageHeader';
+import BlogRows from './BlogRows';
 
 import { useLoading } from '../context/LoadingContext';
 
@@ -10,20 +10,25 @@ const BlogList = () => {
     const { t } = useTranslation();
     const { showLoading, hideLoading } = useLoading();
     const [posts, setPosts] = useState([]);
+    const [total, setTotal] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const postsPerPage = 6;
 
     useEffect(() => {
         const fetchPosts = async () => {
             showLoading();
             try {
+                const offset = (currentPage - 1) * postsPerPage;
                 // Minimum loading time for premium feel
                 const [res] = await Promise.all([
-                    fetch(`${API_URL}/api/posts`),
+                    fetch(`${API_URL}/api/posts?limit=${postsPerPage}&offset=${offset}`),
                     new Promise(resolve => setTimeout(resolve, 800))
                 ]);
 
                 if (res.ok) {
                     const data = await res.json();
-                    setPosts(data);
+                    setPosts(data.posts);
+                    setTotal(data.total);
                 }
             } catch (error) {
                 console.error('Error fetching posts:', error);
@@ -32,7 +37,15 @@ const BlogList = () => {
             }
         };
         fetchPosts();
-    }, []);
+        window.scrollTo(0, 0);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentPage]);
+
+    const totalPages = Math.ceil(total / postsPerPage);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
 
     return (
         <div className="blog-page">
@@ -40,88 +53,77 @@ const BlogList = () => {
                 title={t('blog.title').toUpperCase()}
                 breadcrumbs={[{ label: t('blog.title').toUpperCase() }]}
             />
-            <div className="container" style={{ paddingTop: '50px' }}>
-                <div className="blog-grid">
-                    {posts.map(post => (
-                        <Link to={`/news/${post.id}`} key={post.id} className="blog-card-link">
-                            <div className="blog-card">
-                                <div className="blog-image">
-                                    <img src={post.image_url || 'https://placehold.co/600x400/222/FFF?text=News'} alt={post.title} />
-                                </div>
-                                <div className="blog-content">
-                                    <h3 className="blog-title">{post.title}</h3>
-                                    <p className="blog-excerpt">{post.excerpt}</p>
-                                    <span className="read-more">{t('blog.readMore').toUpperCase()} &rarr;</span>
-                                </div>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
+            <div className="container" style={{ paddingTop: '80px', paddingBottom: '80px' }}>
+                <BlogRows posts={posts} showButton={false} />
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="pagination">
+                        <button 
+                            onClick={() => handlePageChange(currentPage - 1)} 
+                            disabled={currentPage === 1}
+                            className="page-btn"
+                        >
+                            &lt; PREV
+                        </button>
+                        
+                        {[...Array(totalPages)].map((_, i) => (
+                            <button
+                                key={i + 1}
+                                onClick={() => handlePageChange(i + 1)}
+                                className={`page-btn ${currentPage === i + 1 ? 'active' : ''}`}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
+                        
+                        <button 
+                            onClick={() => handlePageChange(currentPage + 1)} 
+                            disabled={currentPage === totalPages}
+                            className="page-btn"
+                        >
+                            NEXT &gt;
+                        </button>
+                    </div>
+                )}
             </div>
             <style>{`
                 .blog-page {
                     background: #000;
                     min-height: 100vh;
                     color: #fff;
-                    padding-bottom: 80px;
                 }
-                .blog-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-                    gap: 40px;
+                
+                /* Pagination */
+                .pagination {
+                    display: flex;
+                    justify-content: center;
+                    gap: 10px;
+                    margin-top: 60px;
+                    flex-wrap: wrap;
                 }
-                .blog-card-link {
-                    text-decoration: none;
-                    color: inherit;
-                }
-                .blog-card {
-                    background: #1a1a1a;
+                .page-btn {
+                    padding: 10px 18px;
+                    background: transparent;
                     border: 1px solid #333;
-                    transition: transform 0.3s, border-color 0.3s;
-                    height: 100%;
+                    color: #fff;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                    font-size: 0.9rem;
+                    letter-spacing: 1px;
                 }
-                .blog-card:hover {
-                    transform: translateY(-5px);
+                .page-btn:hover:not(:disabled) {
                     border-color: #d31e44;
+                    color: #d31e44;
                 }
-                .blog-image {
-                    height: 240px;
-                    overflow: hidden;
-                }
-                .blog-image img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                    transition: transform 0.5s;
-                }
-                .blog-card:hover .blog-image img {
-                    transform: scale(1.1);
-                }
-                .blog-content {
-                    padding: 25px;
-                }
-                .blog-title {
-                    font-size: 1.4rem;
-                    margin-bottom: 15px;
-                    line-height: 1.4;
+                .page-btn.active {
+                    background: #d31e44;
+                    border-color: #d31e44;
                     color: #fff;
                 }
-                .blog-excerpt {
-                    font-size: 0.95rem;
-                    color: #aaa;
-                    margin-bottom: 20px;
-                    display: -webkit-box;
-                    -webkit-line-clamp: 3;
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                    line-height: 1.6;
-                }
-                .read-more {
-                    font-size: 0.85rem;
-                    font-weight: bold;
-                    color: #d31e44;
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
+                .page-btn:disabled {
+                    opacity: 0.3;
+                    cursor: not-allowed;
                 }
             `}</style>
         </div >

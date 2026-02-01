@@ -1,56 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import './CollectionsSection.css';
 import { API_URL } from '../config';
-import Button from './Button';
+import PortfolioGrid from './PortfolioGrid';
 
 const CollectionsSection = () => {
-    const { t } = useTranslation();
     const [collections, setCollections] = useState([]);
+    const [config, setConfig] = useState({});
 
     useEffect(() => {
-        const fetchCollections = async () => {
+        const fetchData = async () => {
             try {
+                // Fetch collections
                 const res = await fetch(`${API_URL}/api/collections`);
                 if (res.ok) {
                     const data = await res.json();
                     setCollections(data.filter(c => c.is_visible));
                 }
+
+                // Fetch section configuration
+                const settingsRes = await fetch(`${API_URL}/api/settings`);
+                const settingsData = await settingsRes.json();
+                setConfig(settingsData);
             } catch (error) {
                 console.error('Error fetching collections:', error);
             }
         };
-        fetchCollections();
+        fetchData();
     }, []);
 
     if (collections.length === 0) return null;
 
-    return (
-        <section className="collections-section" id="collections">
-            <div className="container">
-                <h2 className="section-title text-center" style={{ marginBottom: '60px' }}>{t('collections.title').toUpperCase()}</h2>
+    // Use configuration with fallback defaults
+    const sectionTitle = config.COLLECTION_SECTION_TITLE || 'BỘ SƯU TẬP';
+    const sectionDesc = config.COLLECTION_SECTION_DESC || 'Những bộ sưu tập độc đáo và ấn tượng';
+    const sectionBg = config.COLLECTION_SECTION_BG || 'https://placehold.co/1920x1080/111/FFF?text=Collections+BG';
+    const numColumns = parseInt(config.COLLECTION_GRID_COLUMNS) || 4;
 
-                {collections.map((col, index) => (
-                    <div key={col.id} className={`collection-row ${index % 2 !== 0 ? 'reverse' : ''}`}>
-                        <div className="col-image">
-                            <img src={col.image || 'https://placehold.co/800x600/111/FFF?text=Collection'} alt={col.title} />
-                        </div>
-                        <div className="col-content">
-                            <h3 className="col-title">{col.title}</h3>
-                            <p className="col-desc">{col.description}</p>
-                            <Button
-                                as="link"
-                                to={`/collections/${col.id}`}
-                                variant="outline"
-                                size="medium"
-                            >
-                                {t('collections.viewCollection').toUpperCase()}
-                            </Button>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </section>
+    return (
+        <PortfolioGrid
+            items={collections}
+            filters={['ALL']}
+            activeFilter="ALL"
+            onFilterChange={() => {}}
+            sectionTitle={sectionTitle}
+            sectionSubtitle={sectionDesc}
+            sectionBg={sectionBg}
+            categoryLabel="BỘ SƯU TẬP"
+            linkBasePath="/collections"
+            numColumns={numColumns}
+        />
     );
 };
 

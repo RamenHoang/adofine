@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './CollectionDetail.css';
 import { API_URL } from '../config';
 import PageHeader from './PageHeader';
-
+import PortfolioGrid from './PortfolioGrid';
 import { useLoading } from '../context/LoadingContext';
 
 const CollectionDetail = () => {
@@ -12,30 +12,29 @@ const CollectionDetail = () => {
     const { id } = useParams();
     const { showLoading, hideLoading } = useLoading();
     const [collection, setCollection] = useState(null);
-
-    // Helper for masonry layout (Gemstones)
-    const distributeIntoColumns = (items, numColumns = 4) => {
-        const columns = Array.from({ length: numColumns }, () => []);
-        items.forEach((item, index) => {
-            const columnIndex = index % numColumns;
-            columns[columnIndex].push(item);
-        });
-        return columns;
-    };
+    const [config, setConfig] = useState({});
+    const [gemstoneFilter, setGemstoneFilter] = useState('ALL');
+    const [jewelryFilter, setJewelryFilter] = useState('ALL');
 
     useEffect(() => {
         window.scrollTo(0, 0);
         const fetchCollection = async () => {
             showLoading();
             try {
-                const [res] = await Promise.all([
+                const [res, settingsRes] = await Promise.all([
                     fetch(`${API_URL}/api/collections/${id}`),
+                    fetch(`${API_URL}/api/settings`),
                     new Promise(resolve => setTimeout(resolve, 800))
                 ]);
 
                 if (res.ok) {
                     const data = await res.json();
                     setCollection(data);
+                }
+                
+                if (settingsRes.ok) {
+                    const settingsData = await settingsRes.json();
+                    setConfig(settingsData);
                 }
             } catch (error) {
                 console.error('Error fetching collection:', error);
@@ -44,11 +43,34 @@ const CollectionDetail = () => {
             }
         };
         fetchCollection();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
-
-
     if (!collection) return null;
+
+    // Get number of columns from config with fallback
+    const numColumns = parseInt(config.COLLECTION_GRID_COLUMNS) || 4;
+    
+    // Filter items by type
+    const allGemstones = collection.items ? collection.items.filter(item => item.type === 'gemstone') : [];
+    const allJewelry = collection.items ? collection.items.filter(item => item.type === 'jewelry') : [];
+
+    // Apply category filter
+    const gemstones = gemstoneFilter === 'ALL' 
+        ? allGemstones 
+        : allGemstones.filter(item => item.category_name && item.category_name.toUpperCase() === gemstoneFilter);
+    
+    const jewelry = jewelryFilter === 'ALL' 
+        ? allJewelry 
+        : allJewelry.filter(item => item.category_name && item.category_name.toUpperCase() === jewelryFilter);
+
+    // Use categories from API response
+    const gemstoneCategories = collection.gemstone_categories || [];
+    const jewelryCategories = collection.jewelry_categories || [];
+    
+    // Create filters arrays
+    const gemstoneFilters = gemstoneCategories.length > 0 ? ['ALL', ...gemstoneCategories.map(cat => cat.toUpperCase())] : ['ALL'];
+    const jewelryFilters = jewelryCategories.length > 0 ? ['ALL', ...jewelryCategories.map(cat => cat.toUpperCase())] : ['ALL'];
 
     return (
         <div className="collection-detail-page">
@@ -69,87 +91,48 @@ const CollectionDetail = () => {
                 </div>
             </div>
 
-            {/* Items Grid */}
-            <div className="container" style={{ padding: '80px 0' }}>
-                {/* Gemstones Section */}
-                {collection.items && collection.items.filter(item => item.type === 'gemstone').length > 0 && (
-                    <div style={{ marginBottom: '80px' }}>
-                        <h2 className="section-title" style={{ marginBottom: '40px', fontSize: '2rem', textAlign: 'left' }}>
-                            {t('gemstones.title').toUpperCase()}
-                        </h2>
+            {/* Gemstones Section */}
+            {allGemstones.length > 0 && (
+                <div style={{ marginTop: '80px' }}>
+                    <PortfolioGrid
+                        items={gemstones}
+                        filters={gemstoneFilters}
+                        activeFilter={gemstoneFilter}
+                        onFilterChange={setGemstoneFilter}
+                        sectionTitle={t('gemstones.title').toUpperCase()}
+                        sectionSubtitle=""
+                        sectionBg=""
+                        categoryLabel={t('gemstones.title').toUpperCase()}
+                        linkBasePath="/portfolio"
+                        numColumns={numColumns}
+                    />
+                </div>
+            )}
 
+            {/* Jewelry Section */}
+            {allJewelry.length > 0 && (
+                <div style={{ marginTop: allGemstones.length > 0 ? '80px' : '80px' }}>
+                    <PortfolioGrid
+                        items={jewelry}
+                        filters={jewelryFilters}
+                        activeFilter={jewelryFilter}
+                        onFilterChange={setJewelryFilter}
+                        sectionTitle={t('jewelry.title').toUpperCase()}
+                        sectionSubtitle=""
+                        sectionBg=""
+                        categoryLabel={t('jewelry.title').toUpperCase()}
+                        linkBasePath="/jewelry"
+                        numColumns={numColumns}
+                    />
+                </div>
+            )}
 
-
-                        <div className="gem-grid">
-                            {distributeIntoColumns(collection.items.filter(item => item.type === 'gemstone'), 4).map((column, colIndex) => (
-                                <div key={colIndex} className="gem-column">
-                                    {column.map(item => (
-                                        <div key={item.id} className="grid-item">
-                                            <div className="gem-frame">
-                                                <img src={item.image || 'https://placehold.co/400x400/333/FFF?text=Product'} alt={item.title} />
-                                                <div className="gem-overlay">
-                                                    <div className="gem-icons">
-                                                        <Link to={`/portfolio/${item.id}`} className="gem-icon-btn">🔗</Link>
-                                                        <a href="#" className="gem-icon-btn">🔍</a>
-                                                    </div>
-                                                    <div className="gem-details">
-                                                        <h3>{item.title}</h3>
-                                                        <div className="gem-meta">
-                                                            {item.price ? (
-                                                                <span>{Number(item.price).toLocaleString()} USD</span>
-                                                            ) : (
-                                                                <Link to="/contact" style={{ color: '#c9a961', textDecoration: 'underline' }}>
-                                                                    {t('common.contactUs')}
-                                                                </Link>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Jewelry Section */}
-                {collection.items && collection.items.filter(item => item.type === 'jewelry').length > 0 && (
-                    <div style={{ marginBottom: '80px' }}>
-                        <h2 className="section-title" style={{ marginBottom: '40px', fontSize: '2rem', textAlign: 'left' }}>
-                            {t('jewelry.title').toUpperCase()}
-                        </h2>
-
-
-
-                        <div className="jewelry-gallery">
-                            {collection.items.filter(item => item.type === 'jewelry').map(item => (
-                                <div key={`${item.type}-${item.id}`} className="jewelry-frame">
-                                    <Link to={`/jewelry/${item.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                        <img src={item.image || 'https://placehold.co/400x400/333/FFF?text=Product'} alt={item.title} />
-                                        <div className="jewelry-info">
-                                            {item.title} <br />
-                                            {item.price ? (
-                                                <span className="jewelry-price">{Number(item.price).toLocaleString()} USD</span>
-                                            ) : (
-                                                <Link to="/contact" className="jewelry-price" style={{ color: '#c9a961', textDecoration: 'underline' }}>
-                                                    {t('common.contactUs')}
-                                                </Link>
-                                            )}
-                                        </div>
-                                    </Link>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {(!collection.items || collection.items.length === 0) && (
-                    <p className="text-center" style={{ color: '#888' }}>{t('common.noData')}</p>
-                )}
-            </div>
-
+            {/* No Items */}
+            {(!collection.items || collection.items.length === 0) && (
+                <div className="container" style={{ padding: '80px 0', textAlign: 'center' }}>
+                    <p style={{ color: '#888' }}>{t('common.noData')}</p>
+                </div>
+            )}
         </div>
     );
 };

@@ -109,7 +109,7 @@ const Navbar = () => {
             )}
           </li>
           <li className="dropdown">
-            <Link to="/collections" className={location.pathname.startsWith('/collections') ? 'active' : ''}>{t('nav.collections').toUpperCase()}</Link>
+            <Link to="#" className={location.pathname.startsWith('/collections') ? 'active' : ''}>{t('nav.collections').toUpperCase()}</Link>
             {collections.length > 0 && (
               <ul className="dropdown-menu">
                 {collections.map(collection => (

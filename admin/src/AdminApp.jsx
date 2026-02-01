@@ -265,11 +265,13 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
     // Form State
     const [openDialog, setOpenDialog] = useState(false);
     const [openSectionConfigDialog, setOpenSectionConfigDialog] = useState(false);
+    const [openJewelrySectionConfigDialog, setOpenJewelrySectionConfigDialog] = useState(false);
+    const [openCollectionSectionConfigDialog, setOpenCollectionSectionConfigDialog] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({});
 
     // Settings State
-    const [settings, setSettings] = useState({ CLOUD_NAME: '', API_KEY: '', API_SECRET: '', UPLOAD_PRESET: '', GEM_GRID_COLUMNS: '4' });
+    const [settings, setSettings] = useState({ CLOUD_NAME: '', API_KEY: '', API_SECRET: '', UPLOAD_PRESET: '', GEM_GRID_COLUMNS: '4', JEWELRY_GRID_COLUMNS: '4', COLLECTION_GRID_COLUMNS: '4' });
 
     const handleLogout = async () => {
         await logout();
@@ -279,6 +281,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
     useEffect(() => {
         loadDataForTab();
         fetchDropdowns();
+        loadSettings(); // Load settings for all tabs to use in section config dialogs
     }, [activeTab]);
 
     const fetchDropdowns = async () => {
@@ -807,21 +810,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                             <TextField label="Copyright Text" name="FOOTER_COPYRIGHT" value={settings.FOOTER_COPYRIGHT || '© 2026 RED ART. All rights reserved.'} onChange={handleSettingsChange} fullWidth />
                         </Stack>
 
-                        <Typography variant="h6" gutterBottom>Cấu hình Hiển thị Đá Quý</Typography>
-                        <Stack spacing={3}>
-                            <TextField
-                                label="Số cột hiển thị"
-                                name="GEM_GRID_COLUMNS"
-                                value={settings.GEM_GRID_COLUMNS || '4'}
-                                onChange={handleSettingsChange}
-                                fullWidth
-                                type="number"
-                                inputProps={{ min: 1, max: 6, step: 1 }}
-                                helperText="Số cột hiển thị đá quý trên website (1-6, mặc định: 4)"
-                            />
-
-                            <Button variant="contained" onClick={saveSettings} size="large">Lưu Cấu hình</Button>
-                        </Stack>
+                        <Button variant="contained" onClick={saveSettings} size="large">Lưu Cấu hình</Button>
                     </Paper>
                 )}
 
@@ -892,6 +881,14 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                             {activeTab === 'products' ? (
                                 <Button variant="outlined" startIcon={<SettingsIcon />} onClick={() => setOpenSectionConfigDialog(true)}>
+                                    Cấu hình Section
+                                </Button>
+                            ) : activeTab === 'jewelry' ? (
+                                <Button variant="outlined" startIcon={<SettingsIcon />} onClick={() => setOpenJewelrySectionConfigDialog(true)}>
+                                    Cấu hình Section
+                                </Button>
+                            ) : activeTab === 'collections' ? (
+                                <Button variant="outlined" startIcon={<SettingsIcon />} onClick={() => setOpenCollectionSectionConfigDialog(true)}>
                                     Cấu hình Section
                                 </Button>
                             ) : <div />}
@@ -975,6 +972,24 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                 settings={settings}
                 onChange={handleSettingsChange}
                 onSave={() => { saveSettings(); setOpenSectionConfigDialog(false); }}
+            />
+
+            {/* SECTION CONFIG DIALOG (For Jewelry) */}
+            <JewelrySectionConfigDialog
+                open={openJewelrySectionConfigDialog}
+                onClose={() => setOpenJewelrySectionConfigDialog(false)}
+                settings={settings}
+                onChange={handleSettingsChange}
+                onSave={() => { saveSettings(); setOpenJewelrySectionConfigDialog(false); }}
+            />
+
+            {/* SECTION CONFIG DIALOG (For Collections) */}
+            <CollectionSectionConfigDialog
+                open={openCollectionSectionConfigDialog}
+                onClose={() => setOpenCollectionSectionConfigDialog(false)}
+                settings={settings}
+                onChange={handleSettingsChange}
+                onSave={() => { saveSettings(); setOpenCollectionSectionConfigDialog(false); }}
             />
 
             {/* SHARED DIALOG FORM */}
@@ -1512,6 +1527,110 @@ const SectionConfigDialog = ({ open, onClose, settings, onSave, onChange }) => {
                         label="Ảnh nền Section (Background)"
                         value={settings.GEM_SECTION_BG}
                         onChange={(url) => onChange({ target: { name: 'GEM_SECTION_BG', value: url } })}
+                    />
+                    <TextField
+                        label="Số cột hiển thị"
+                        name="GEM_GRID_COLUMNS"
+                        value={settings.GEM_GRID_COLUMNS || '4'}
+                        onChange={onChange}
+                        fullWidth
+                        type="number"
+                        inputProps={{ min: 1, max: 6, step: 1 }}
+                        helperText="Số cột hiển thị đá quý trên website (1-6, mặc định: 4)"
+                    />
+                </Stack>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose} color="inherit">Hủy</Button>
+                <Button onClick={onSave} variant="contained" color="primary">Lưu thay đổi</Button>
+            </DialogActions>
+        </Dialog>
+    );
+};
+
+const JewelrySectionConfigDialog = ({ open, onClose, settings, onSave, onChange }) => {
+    return (
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+            <DialogTitle>Cấu hình Section "Trang Sức"</DialogTitle>
+            <DialogContent>
+                <Stack spacing={3} sx={{ mt: 1 }}>
+                    <TextField
+                        label="Tiêu đề Section"
+                        name="JEWELRY_SECTION_TITLE"
+                        value={settings.JEWELRY_SECTION_TITLE || ''}
+                        onChange={onChange}
+                        fullWidth
+                    />
+                    <TextField
+                        label="Mô tả Section"
+                        name="JEWELRY_SECTION_DESC"
+                        value={settings.JEWELRY_SECTION_DESC || ''}
+                        onChange={onChange}
+                        fullWidth
+                        multiline
+                        rows={3}
+                    />
+                    <SingleImageUpload
+                        label="Ảnh nền Section (Background)"
+                        value={settings.JEWELRY_SECTION_BG}
+                        onChange={(url) => onChange({ target: { name: 'JEWELRY_SECTION_BG', value: url } })}
+                    />
+                    <TextField
+                        label="Số cột hiển thị"
+                        name="JEWELRY_GRID_COLUMNS"
+                        value={settings.JEWELRY_GRID_COLUMNS || '4'}
+                        onChange={onChange}
+                        fullWidth
+                        type="number"
+                        inputProps={{ min: 1, max: 6, step: 1 }}
+                        helperText="Số cột hiển thị trang sức trên website (1-6, mặc định: 4)"
+                    />
+                </Stack>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose} color="inherit">Hủy</Button>
+                <Button onClick={onSave} variant="contained" color="primary">Lưu thay đổi</Button>
+            </DialogActions>
+        </Dialog>
+    );
+};
+
+const CollectionSectionConfigDialog = ({ open, onClose, settings, onSave, onChange }) => {
+    return (
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+            <DialogTitle>Cấu hình Section "Bộ Sưu Tập"</DialogTitle>
+            <DialogContent>
+                <Stack spacing={3} sx={{ mt: 1 }}>
+                    <TextField
+                        label="Tiêu đề Section"
+                        name="COLLECTION_SECTION_TITLE"
+                        value={settings.COLLECTION_SECTION_TITLE || ''}
+                        onChange={onChange}
+                        fullWidth
+                    />
+                    <TextField
+                        label="Mô tả Section"
+                        name="COLLECTION_SECTION_DESC"
+                        value={settings.COLLECTION_SECTION_DESC || ''}
+                        onChange={onChange}
+                        fullWidth
+                        multiline
+                        rows={3}
+                    />
+                    <SingleImageUpload
+                        label="Ảnh nền Section (Background)"
+                        value={settings.COLLECTION_SECTION_BG}
+                        onChange={(url) => onChange({ target: { name: 'COLLECTION_SECTION_BG', value: url } })}
+                    />
+                    <TextField
+                        label="Số cột hiển thị"
+                        name="COLLECTION_GRID_COLUMNS"
+                        value={settings.COLLECTION_GRID_COLUMNS || '4'}
+                        onChange={onChange}
+                        fullWidth
+                        type="number"
+                        inputProps={{ min: 1, max: 6, step: 1 }}
+                        helperText="Số cột hiển thị bộ sưu tập trên website (1-6, mặc định: 4)"
                     />
                 </Stack>
             </DialogContent>
