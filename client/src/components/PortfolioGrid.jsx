@@ -62,7 +62,7 @@ const PortfolioGrid = ({
                     <div className="overlay">
                       <div className="icons">
                         <Link to={`${linkBasePath}/${item.id}`} className="icon-btn">🔗</Link>
-                        <a href="#" className="icon-btn">🔍</a>
+                        {/* <a href="#" className="icon-btn">🔍</a> */}
                       </div>
                       <div className="details">
                         <h3>{categoryLabel}</h3>

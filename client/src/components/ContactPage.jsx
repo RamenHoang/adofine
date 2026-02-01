@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 import { useLoading } from '../context/LoadingContext';
 import Button from './Button';
+import PageHeader from './PageHeader';
 import './ContactPage.css';
 
 const ContactPage = () => {
@@ -194,10 +195,13 @@ const ContactPage = () => {
 
   return (
     <div className="contact-page">
-      <div className="contact-hero">
+      {/* <div className="contact-hero">
         <h1>{t('contact.title')}</h1>
         <p>{t('contact.subtitle')}</p>
-      </div>
+      </div> */}
+      <PageHeader
+        title={t('contact.title').toUpperCase()}
+      />
 
       <div className="contact-container">
         {submitStatus === 'success' && (

@@ -78,7 +78,7 @@ export default {
     learnMore: "Learn More"
   },
   contact: {
-    title: "Contact Us",
+    title: "Let us create the perfect custom jewelry piece for you",
     subtitle: "Let us create the perfect custom jewelry piece for you",
     basicInfo: "Basic Information",
     salutation: "Salutation",
