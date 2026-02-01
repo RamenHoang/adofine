@@ -273,6 +273,9 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
     // Settings State
     const [settings, setSettings] = useState({ CLOUD_NAME: '', API_KEY: '', API_SECRET: '', UPLOAD_PRESET: '', GEM_GRID_COLUMNS: '4', JEWELRY_GRID_COLUMNS: '4', COLLECTION_GRID_COLUMNS: '4' });
 
+    // Password Change State
+    const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+
     const handleLogout = async () => {
         await logout();
         toast.info('Đã đăng xuất');
@@ -379,6 +382,48 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
             else toast.error('Lỗi khi lưu cấu hình');
         } catch (error) {
             console.error('Error saving settings:', error);
+        }
+    };
+
+    const handlePasswordChange = async () => {
+        // Validation
+        if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+            toast.error('Vui lòng điền đầy đủ thông tin');
+            return;
+        }
+
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            toast.error('Mật khẩu mới không khớp');
+            return;
+        }
+
+        if (passwordData.newPassword.length < 6) {
+            toast.error('Mật khẩu mới phải có ít nhất 6 ký tự');
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/api/auth/change-password`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    currentPassword: passwordData.currentPassword,
+                    newPassword: passwordData.newPassword
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                toast.success('Đổi mật khẩu thành công!');
+                setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+            } else {
+                toast.error(data.error || 'Lỗi khi đổi mật khẩu');
+            }
+        } catch (error) {
+            console.error('Error changing password:', error);
+            toast.error('Lỗi khi đổi mật khẩu');
         }
     };
 
@@ -594,8 +639,8 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
     const drawer = (
         <div>
             <Toolbar sx={{ backgroundColor: '#1e1e1e', color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', pt: 2, pb: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', letterSpacing: 1 }}>GEM ADMIN</Typography>
-                <Typography variant="caption" sx={{ color: '#aaa' }}>v2.5 Dynamic Hero</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', letterSpacing: 1 }}>ADOFINE JEWELRY</Typography>
+                <Typography variant="caption" sx={{ color: '#aaa' }}>Admin Console</Typography>
             </Toolbar>
             <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, borderBottom: '1px solid #ddd', bgcolor: '#f5f5f5' }}>
                 <Box sx={{ width: 40, height: 40, borderRadius: '50%', bgcolor: '#333', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>A</Box>
@@ -815,6 +860,35 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                             </Grid>
 
                             <TextField label="Copyright Text" name="FOOTER_COPYRIGHT" value={settings.FOOTER_COPYRIGHT || '© 2026 RED ART. All rights reserved.'} onChange={handleSettingsChange} fullWidth />
+                        </Stack>
+
+                        <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>Đổi mật khẩu</Typography>
+                        <Stack spacing={3} sx={{ mb: 4 }}>
+                            <TextField 
+                                label="Mật khẩu hiện tại" 
+                                type="password" 
+                                value={passwordData.currentPassword}
+                                onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                                fullWidth 
+                            />
+                            <TextField 
+                                label="Mật khẩu mới" 
+                                type="password" 
+                                value={passwordData.newPassword}
+                                onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                                fullWidth 
+                                helperText="Ít nhất 6 ký tự"
+                            />
+                            <TextField 
+                                label="Xác nhận mật khẩu mới" 
+                                type="password" 
+                                value={passwordData.confirmPassword}
+                                onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                                fullWidth 
+                            />
+                            <Button variant="outlined" onClick={handlePasswordChange} size="large">
+                                Đổi mật khẩu
+                            </Button>
                         </Stack>
 
                         <Button variant="contained" onClick={saveSettings} size="large">Lưu Cấu hình</Button>

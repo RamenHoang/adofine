@@ -153,6 +153,54 @@ app.post('/api/auth/logout', (req, res) => {
     res.json({ message: 'Logged out successfully' });
 });
 
+// Change password
+app.post('/api/auth/change-password', authenticateToken, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ error: 'Current password and new password are required' });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({ error: 'New password must be at least 6 characters long' });
+        }
+
+        // Get current user
+        const [users] = await db.query(
+            'SELECT * FROM admin_users WHERE id = ?',
+            [req.user.id]
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const user = users[0];
+
+        // Verify current password
+        const validPassword = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!validPassword) {
+            return res.status(401).json({ error: 'Current password is incorrect' });
+        }
+
+        // Hash new password
+        const saltRounds = 10;
+        const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
+
+        // Update password
+        await db.query(
+            'UPDATE admin_users SET password_hash = ? WHERE id = ?',
+            [newPasswordHash, req.user.id]
+        );
+
+        res.json({ message: 'Password changed successfully' });
+    } catch (err) {
+        console.error('Change password error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // --- SETTINGS API (Cloudinary Config) ---
 app.get('/api/settings', async (req, res) => {
     try {
