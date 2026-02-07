@@ -512,7 +512,7 @@ const Navbar = () => {
             transition: all 0.4s ease;
             gap: 20px;
             margin: 0;
-            padding: 20px 0 20px;
+            padding: 40px 0 40px;
             overflow-y: auto;
           }
           .nav-links.show {
