@@ -35,10 +35,10 @@ const Footer = () => {
         fetchSettings();
         const fetchPosts = async () => {
             try {
-                const res = await fetch(`${API_URL}/api/posts`);
+                const res = await fetch(`${API_URL}/api/posts?limit=3&offset=0`);
                 if (res.ok) {
                     const data = await res.json();
-                    setPosts(data.slice(0, 3)); // Limit to 3 latest
+                    setPosts(data.posts); // Limit to 3 latest
                 }
             } catch (error) {
                 console.error('Error fetching posts:', error);
