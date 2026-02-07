@@ -431,7 +431,7 @@ Please change the parent <Route path="${D}"> to <Route path="${D==="/"?"*":`${D}
                     color: #fff;
                     text-align: center;
                 }
-            `})]})},Ms=({items:s=[],filters:i=[],activeFilter:u="TẤT CẢ",onFilterChange:r,sectionTitle:c="",sectionSubtitle:f="",sectionBg:h="https://placehold.co/1920x1080/111/FFF?text=BG",categoryLabel:p="PORTFOLIO",linkBasePath:y="/portfolio",numColumns:m=4})=>{const b=((T,N)=>{const j=Array.from({length:N},()=>[]);return T.forEach((M,L)=>{const D=L%N;j[D].push(M)}),j})(s,m),C=(100/m).toFixed(2);return g.jsxs("section",{className:"portfolio-section",children:[g.jsxs("div",{className:"container text-center",children:[g.jsx("h2",{className:"section-title",children:c}),g.jsx("p",{className:"section-subtitle",children:f}),g.jsx("div",{className:"filters",children:i.map(T=>g.jsx(Mt,{variant:"default",size:"medium",active:u===T,onClick:()=>r(T),children:T},T))}),g.jsx("div",{className:"grid",children:b.map((T,N)=>g.jsx("div",{className:"column",style:{"--col-width":`${C}%`},children:T.map(j=>g.jsx("div",{className:"grid-item",children:g.jsxs("div",{className:"frame",children:[g.jsx("img",{src:j.image,alt:j.title}),g.jsxs("div",{className:"overlay",children:[g.jsx("div",{className:"icons",children:g.jsx(at,{to:`${y}/${j.id}`,className:"icon-btn",children:"🔗"})}),g.jsxs("div",{className:"details",children:[g.jsx("h3",{children:p}),g.jsx("div",{className:"meta",children:g.jsxs("span",{children:[j.title,", ",j.price]})})]})]})]})},j.id))},N))})]}),g.jsx("style",{children:`
+            `})]})},Ms=({items:s=[],filters:i=[],activeFilter:u="TẤT CẢ",onFilterChange:r,sectionTitle:c="",sectionSubtitle:f="",sectionBg:h="https://placehold.co/1920x1080/111/FFF?text=BG",categoryLabel:p="PORTFOLIO",linkBasePath:y="/portfolio",numColumns:m=4})=>{const b=((T,N)=>{const j=Array.from({length:N},()=>[]);return T.forEach((M,L)=>{const D=L%N;j[D].push(M)}),j})(s,m),C=(100/m).toFixed(2);return g.jsxs("section",{className:"portfolio-section",children:[g.jsxs("div",{className:"container text-center",children:[g.jsx("h2",{className:"section-title",children:c}),g.jsx("p",{className:"section-subtitle",children:f}),g.jsx("div",{className:"filters",children:i.map(T=>g.jsx(Mt,{variant:"default",size:"medium",active:u===T,onClick:()=>r(T),children:T},T))}),g.jsx("div",{className:"grid",children:b.map((T,N)=>g.jsx("div",{className:"column",style:{"--col-width":`${C}%`},children:T.map(j=>g.jsx("div",{className:"grid-item",children:g.jsx(at,{to:`${y}/${j.id}`,className:"frame-link",children:g.jsxs("div",{className:"frame",children:[g.jsx("img",{src:j.image,alt:j.title}),g.jsx("div",{className:"overlay",children:g.jsxs("div",{className:"details",children:[g.jsx("h3",{children:p}),g.jsx("div",{className:"meta",children:g.jsxs("span",{children:[j.title,", ",j.price]})})]})})]})})},j.id))},N))})]}),g.jsx("style",{children:`
         .portfolio-section {
           padding: 80px 0;
           background-image: url('${h}');
@@ -507,12 +507,22 @@ Please change the parent <Route path="${D}"> to <Route path="${D==="/"?"*":`${D}
         .grid-item {
           width: 100%;
         }
+        .frame-link {
+          display: block;
+          text-decoration: none;
+          color: inherit;
+          cursor: pointer;
+        }
         .frame {
           padding: 10px;
           background: #fff;
           box-shadow: 0 5px 15px rgba(0,0,0,0.5);
           position: relative;
           overflow: hidden;
+          transition: transform 0.3s ease;
+        }
+        .frame-link:hover .frame {
+          transform: translateY(-5px);
         }
         .frame img {
           width: 100%;

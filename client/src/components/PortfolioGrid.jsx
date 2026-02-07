@@ -57,21 +57,23 @@ const PortfolioGrid = ({
             <div key={colIndex} className="column" style={{ '--col-width': `${columnWidth}%` }}>
               {column.map(item => (
                 <div key={item.id} className="grid-item">
-                  <div className="frame">
-                    <img src={item.image} alt={item.title} />
-                    <div className="overlay">
-                      <div className="icons">
-                        <Link to={`${linkBasePath}/${item.id}`} className="icon-btn">🔗</Link>
-                        {/* <a href="#" className="icon-btn">🔍</a> */}
-                      </div>
-                      <div className="details">
-                        <h3>{categoryLabel}</h3>
-                        <div className="meta">
-                          <span>{item.title}, {item.price}</span>
+                  <Link to={`${linkBasePath}/${item.id}`} className="frame-link">
+                    <div className="frame">
+                      <img src={item.image} alt={item.title} />
+                      <div className="overlay">
+                        {/* <div className="icons"> */}
+                          {/* <span className="icon-btn">🔗</span> */}
+                          {/* <a href="#" className="icon-btn">🔍</a> */}
+                        {/* </div> */}
+                        <div className="details">
+                          <h3>{categoryLabel}</h3>
+                          <div className="meta">
+                            <span>{item.title}, {item.price}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </div>
               ))}
             </div>
@@ -155,12 +157,22 @@ const PortfolioGrid = ({
         .grid-item {
           width: 100%;
         }
+        .frame-link {
+          display: block;
+          text-decoration: none;
+          color: inherit;
+          cursor: pointer;
+        }
         .frame {
           padding: 10px;
           background: #fff;
           box-shadow: 0 5px 15px rgba(0,0,0,0.5);
           position: relative;
           overflow: hidden;
+          transition: transform 0.3s ease;
+        }
+        .frame-link:hover .frame {
+          transform: translateY(-5px);
         }
         .frame img {
           width: 100%;
