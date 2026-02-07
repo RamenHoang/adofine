@@ -78,6 +78,28 @@ const Navbar = () => {
           if (data.NAVBAR_FONT) {
             document.documentElement.style.setProperty('--navbar-font', data.NAVBAR_FONT);
           }
+
+          // --- GLOBAL FONT CONFIGURATION ---
+          const fallbackStack = "'PT Sans Narrow', 'Arial Narrow', Arial, sans-serif";
+
+          if (data.GLOBAL_FONT_SOURCE === 'custom' && data.GLOBAL_FONT && data.GLOBAL_CUSTOM_FONT_URL) {
+            // Inject Global Custom Font if not already present
+            if (!document.getElementById('global-custom-font')) {
+              const style = document.createElement('style');
+              style.id = 'global-custom-font';
+              style.textContent = `
+                    @font-face {
+                        font-family: '${data.GLOBAL_FONT}';
+                        src: url('${data.GLOBAL_CUSTOM_FONT_URL}');
+                    }
+                `;
+              document.head.appendChild(style);
+            }
+            document.body.style.fontFamily = `'${data.GLOBAL_FONT}', ${fallbackStack}`;
+          } else {
+            // Revert to system default stack for body
+            document.body.style.fontFamily = fallbackStack;
+          }
         }
       } catch (error) {
         console.error('Error fetching settings:', error);

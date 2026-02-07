@@ -9,7 +9,7 @@ import {
     TableRow, TableCell, TableBody, IconButton, Switch, FormControlLabel,
     Dialog, DialogTitle, DialogContent, DialogActions, Select, MenuItem, InputLabel,
     FormControl, Tabs, Tab, Box, CircularProgress, Chip, Stack, InputAdornment,
-    LinearProgress, CssBaseline, Card, CardContent, Link, OutlinedInput
+    LinearProgress, CssBaseline, Card, CardContent, Link, OutlinedInput, Divider
 } from '@mui/material';
 import {
     Menu as MenuIcon, Dashboard, ShoppingBag, People, Receipt,
@@ -272,6 +272,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
     const [openCollectionSectionConfigDialog, setOpenCollectionSectionConfigDialog] = useState(false);
     const [openHeroConfigDialog, setOpenHeroConfigDialog] = useState(false);
     const [openMenuConfigDialog, setOpenMenuConfigDialog] = useState(false);
+    const [openGlobalFontConfigDialog, setOpenGlobalFontConfigDialog] = useState(false);
     const [openContactFormConfigDialog, setOpenContactFormConfigDialog] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({});
@@ -810,7 +811,12 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
 
                 {activeTab === 'settings' && (
                     <Paper sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
-                        <Typography variant="h6" gutterBottom>Cấu hình Logo & Thương hiệu</Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                            <Typography variant="h6">Cấu hình Logo & Thương hiệu</Typography>
+                            <Button variant="outlined" startIcon={<SettingsIcon />} onClick={() => setOpenGlobalFontConfigDialog(true)}>
+                                Cấu hình Font Hệ thống (Global)
+                            </Button>
+                        </Box>
                         <Stack spacing={3} sx={{ mb: 4 }}>
                             <SingleImageUpload
                                 label="Logo Icon / Ảnh"
@@ -1244,6 +1250,15 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                 onClose={() => setOpenMenuConfigDialog(false)}
                 settings={settings}
                 onSave={() => { saveSettings(); setOpenMenuConfigDialog(false); }}
+                onChange={handleSettingsChange}
+                setSettings={setSettings}
+            />
+
+            <GlobalConfigDialog
+                open={openGlobalFontConfigDialog}
+                onClose={() => setOpenGlobalFontConfigDialog(false)}
+                settings={settings}
+                onSave={() => { saveSettings(); setOpenGlobalFontConfigDialog(false); }}
                 onChange={handleSettingsChange}
                 setSettings={setSettings}
             />
@@ -2273,219 +2288,162 @@ const HeroConfigDialog = ({ open, onClose, settings, onSave, onChange, setSettin
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
             <DialogTitle>Cấu hình Font (Hero)</DialogTitle>
             <DialogContent>
-                <Stack spacing={3} sx={{ mt: 1 }}>
-                    {/* Hero Title Font */}
-                    <FormControl fullWidth>
-                        <InputLabel>Nguồn Font Tiêu đề (Hero Title)</InputLabel>
-                        <Select
-                            name="HERO_TITLE_FONT_SOURCE"
-                            value={settings.HERO_TITLE_FONT_SOURCE || 'system'}
-                            onChange={onChange}
-                            label="Nguồn Font Tiêu đề (Hero Title)"
-                        >
-                            <MenuItem value="system">System Default</MenuItem>
-                            <MenuItem value="google">Google Fonts</MenuItem>
-                            <MenuItem value="custom">Custom Font (Upload)</MenuItem>
-                        </Select>
-                    </FormControl>
-                    {settings.HERO_TITLE_FONT_SOURCE === 'google' && (
-                        <FormControl fullWidth>
-                            <InputLabel>Chọn Google Font (Tiêu đề)</InputLabel>
-                            <Select
-                                name="HERO_TITLE_FONT"
-                                value={settings.HERO_TITLE_FONT || 'PT Sans Narrow'}
-                                onChange={(e) => {
-                                    const fontName = e.target.value;
-                                    const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@100;400;700&display=swap`;
-                                    setSettings(prev => ({
-                                        ...prev,
-                                        HERO_TITLE_FONT: fontName,
-                                        HERO_TITLE_GOOGLE_FONT_URL: googleFontUrl
-                                    }));
-                                }}
-                                label="Chọn Google Font (Tiêu đề)"
-                            >
-                                <MenuItem value="Roboto">Roboto</MenuItem>
-                                <MenuItem value="Open Sans">Open Sans</MenuItem>
-                                <MenuItem value="Lato">Lato</MenuItem>
-                                <MenuItem value="Montserrat">Montserrat</MenuItem>
-                                <MenuItem value="PT Sans Narrow">PT Sans Narrow</MenuItem>
-                                <MenuItem value="Playfair Display">Playfair Display</MenuItem>
-                                <MenuItem value="Cinzel">Cinzel (Luxury)</MenuItem>
-                                <MenuItem value="Bodoni Moda">Bodoni Moda (Luxury)</MenuItem>
-                            </Select>
-                        </FormControl>
-                    )}
-                    {settings.HERO_TITLE_FONT_SOURCE === 'custom' && (
-                        <FormControl fullWidth>
-                            <InputLabel>Chọn Custom Font (Tiêu đề)</InputLabel>
-                            <Select
-                                name="HERO_TITLE_FONT"
-                                value={settings.HERO_TITLE_FONT || ''}
-                                onChange={(e) => {
-                                    const fontName = e.target.value; // Name
-                                    const selectedFont = uploadedFonts.find(f => f.name === fontName);
-                                    if (selectedFont) {
-                                        setSettings(prev => ({
-                                            ...prev,
-                                            HERO_TITLE_FONT: fontName,
-                                            HERO_TITLE_CUSTOM_FONT_URL: selectedFont.url
-                                        }));
-                                    }
-                                }}
-                                label="Chọn Custom Font (Tiêu đề)"
-                            >
-                                {uploadedFonts.map(font => (
-                                    <MenuItem key={font.id} value={font.name} sx={{ fontFamily: font.name }}>
-                                        {font.name} (Preview)
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                            <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
-                                Preview: <span style={{ fontFamily: settings.HERO_TITLE_FONT, fontSize: '1.2rem' }}>Hero Title Text</span>
-                            </Typography>
-                        </FormControl>
-                    )}
+                <Stack spacing={4} sx={{ mt: 1 }}>
+                    {/* --- SECTION: TIÊU ĐỀ --- */}
+                    <Box>
+                        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <span>TIÊU ĐỀ (Title)</span>
+                        </Typography>
+                        <Divider sx={{ mb: 2 }} />
+                        <Stack spacing={2}>
+                            <FormControl fullWidth>
+                                <InputLabel>Nguồn Font Tiêu đề</InputLabel>
+                                <Select
+                                    name="HERO_TITLE_FONT_SOURCE"
+                                    value={settings.HERO_TITLE_FONT_SOURCE || 'system'}
+                                    onChange={onChange}
+                                    label="Nguồn Font Tiêu đề"
+                                >
+                                    <MenuItem value="system">System Default</MenuItem>
+                                    <MenuItem value="custom">Custom Font (Upload)</MenuItem>
+                                </Select>
+                            </FormControl>
+                            {settings.HERO_TITLE_FONT_SOURCE === 'custom' && (
+                                <FormControl fullWidth>
+                                    <InputLabel>Chọn Custom Font (Tiêu đề)</InputLabel>
+                                    <Select
+                                        name="HERO_TITLE_FONT"
+                                        value={settings.HERO_TITLE_FONT || ''}
+                                        onChange={(e) => {
+                                            const fontName = e.target.value;
+                                            const selectedFont = uploadedFonts.find(f => f.name === fontName);
+                                            if (selectedFont) {
+                                                setSettings(prev => ({
+                                                    ...prev,
+                                                    HERO_TITLE_FONT: fontName,
+                                                    HERO_TITLE_CUSTOM_FONT_URL: selectedFont.url
+                                                }));
+                                            }
+                                        }}
+                                        label="Chọn Custom Font (Tiêu đề)"
+                                    >
+                                        {uploadedFonts.map(font => (
+                                            <MenuItem key={font.id} value={font.name} sx={{ fontFamily: font.name }}>
+                                                {font.name} (Preview)
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                    <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
+                                        Preview: <span style={{ fontFamily: settings.HERO_TITLE_FONT, fontSize: '1.2rem' }}>Hero Title Text</span>
+                                    </Typography>
+                                </FormControl>
+                            )}
+                        </Stack>
+                    </Box>
 
-                    {/* Hero Subtitle Font */}
-                    <FormControl fullWidth sx={{ mt: 2 }}>
-                        <InputLabel>Nguồn Font Phụ đề (Hero Subtitle)</InputLabel>
-                        <Select
-                            name="HERO_SUBTITLE_FONT_SOURCE"
-                            value={settings.HERO_SUBTITLE_FONT_SOURCE || 'system'}
-                            onChange={onChange}
-                            label="Nguồn Font Phụ đề (Hero Subtitle)"
-                        >
-                            <MenuItem value="system">System Default</MenuItem>
-                            <MenuItem value="google">Google Fonts</MenuItem>
-                            <MenuItem value="custom">Custom Font (Upload)</MenuItem>
-                        </Select>
-                    </FormControl>
-                    {settings.HERO_SUBTITLE_FONT_SOURCE === 'google' && (
-                        <FormControl fullWidth>
-                            <InputLabel>Chọn Google Font (Phụ đề)</InputLabel>
-                            <Select
-                                name="HERO_SUBTITLE_FONT"
-                                value={settings.HERO_SUBTITLE_FONT || 'PT Sans Narrow'}
-                                onChange={(e) => {
-                                    const fontName = e.target.value;
-                                    const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@300;400&display=swap`;
-                                    setSettings(prev => ({
-                                        ...prev,
-                                        HERO_SUBTITLE_FONT: fontName,
-                                        HERO_SUBTITLE_GOOGLE_FONT_URL: googleFontUrl
-                                    }));
-                                }}
-                                label="Chọn Google Font (Phụ đề)"
-                            >
-                                <MenuItem value="Roboto">Roboto</MenuItem>
-                                <MenuItem value="Open Sans">Open Sans</MenuItem>
-                                <MenuItem value="Lato">Lato</MenuItem>
-                                <MenuItem value="Montserrat">Montserrat</MenuItem>
-                                <MenuItem value="PT Sans Narrow">PT Sans Narrow</MenuItem>
-                            </Select>
-                        </FormControl>
-                    )}
-                    {settings.HERO_SUBTITLE_FONT_SOURCE === 'custom' && (
-                        <FormControl fullWidth>
-                            <InputLabel>Chọn Custom Font (Phụ đề)</InputLabel>
-                            <Select
-                                name="HERO_SUBTITLE_FONT"
-                                value={settings.HERO_SUBTITLE_FONT || ''}
-                                onChange={(e) => {
-                                    const fontName = e.target.value;
-                                    const selectedFont = uploadedFonts.find(f => f.name === fontName);
-                                    if (selectedFont) {
-                                        setSettings(prev => ({
-                                            ...prev,
-                                            HERO_SUBTITLE_FONT: fontName,
-                                            HERO_SUBTITLE_CUSTOM_FONT_URL: selectedFont.url
-                                        }));
-                                    }
-                                }}
-                                label="Chọn Custom Font (Phụ đề)"
-                            >
-                                {uploadedFonts.map(font => (
-                                    <MenuItem key={font.id} value={font.name} sx={{ fontFamily: font.name }}>
-                                        {font.name} (Preview)
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                            <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
-                                Preview: <span style={{ fontFamily: settings.HERO_SUBTITLE_FONT, fontSize: '1.2rem' }}>Subtitle Text</span>
-                            </Typography>
-                        </FormControl>
-                    )}
+                    {/* --- SECTION: PHỤ ĐỀ --- */}
+                    <Box>
+                        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <span>PHỤ ĐỀ (Subtitle)</span>
+                        </Typography>
+                        <Divider sx={{ mb: 2 }} />
+                        <Stack spacing={2}>
+                            <FormControl fullWidth>
+                                <InputLabel>Nguồn Font Phụ đề</InputLabel>
+                                <Select
+                                    name="HERO_SUBTITLE_FONT_SOURCE"
+                                    value={settings.HERO_SUBTITLE_FONT_SOURCE || 'system'}
+                                    onChange={onChange}
+                                    label="Nguồn Font Phụ đề"
+                                >
+                                    <MenuItem value="system">System Default</MenuItem>
+                                    <MenuItem value="custom">Custom Font (Upload)</MenuItem>
+                                </Select>
+                            </FormControl>
+                            {settings.HERO_SUBTITLE_FONT_SOURCE === 'custom' && (
+                                <FormControl fullWidth>
+                                    <InputLabel>Chọn Custom Font (Phụ đề)</InputLabel>
+                                    <Select
+                                        name="HERO_SUBTITLE_FONT"
+                                        value={settings.HERO_SUBTITLE_FONT || ''}
+                                        onChange={(e) => {
+                                            const fontName = e.target.value;
+                                            const selectedFont = uploadedFonts.find(f => f.name === fontName);
+                                            if (selectedFont) {
+                                                setSettings(prev => ({
+                                                    ...prev,
+                                                    HERO_SUBTITLE_FONT: fontName,
+                                                    HERO_SUBTITLE_CUSTOM_FONT_URL: selectedFont.url
+                                                }));
+                                            }
+                                        }}
+                                        label="Chọn Custom Font (Phụ đề)"
+                                    >
+                                        {uploadedFonts.map(font => (
+                                            <MenuItem key={font.id} value={font.name} sx={{ fontFamily: font.name }}>
+                                                {font.name} (Preview)
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                    <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
+                                        Preview: <span style={{ fontFamily: settings.HERO_SUBTITLE_FONT, fontSize: '1.2rem' }}>Subtitle Text</span>
+                                    </Typography>
+                                </FormControl>
+                            )}
+                        </Stack>
+                    </Box>
 
-                    {/* Hero Button Font */}
-                    <FormControl fullWidth sx={{ mt: 2 }}>
-                        <InputLabel>Nguồn Font Nút bấm (Hero Button)</InputLabel>
-                        <Select
-                            name="HERO_BUTTON_FONT_SOURCE"
-                            value={settings.HERO_BUTTON_FONT_SOURCE || 'system'}
-                            onChange={onChange}
-                            label="Nguồn Font Nút bấm (Hero Button)"
-                        >
-                            <MenuItem value="system">System Default</MenuItem>
-                            <MenuItem value="google">Google Fonts</MenuItem>
-                            <MenuItem value="custom">Custom Font (Upload)</MenuItem>
-                        </Select>
-                    </FormControl>
-                    {settings.HERO_BUTTON_FONT_SOURCE === 'google' && (
-                        <FormControl fullWidth>
-                            <InputLabel>Chọn Google Font (Nút bấm)</InputLabel>
-                            <Select
-                                name="HERO_BUTTON_FONT"
-                                value={settings.HERO_BUTTON_FONT || 'PT Sans Narrow'}
-                                onChange={(e) => {
-                                    const fontName = e.target.value;
-                                    const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@400;700&display=swap`;
-                                    setSettings(prev => ({
-                                        ...prev,
-                                        HERO_BUTTON_FONT: fontName,
-                                        HERO_BUTTON_GOOGLE_FONT_URL: googleFontUrl
-                                    }));
-                                }}
-                                label="Chọn Google Font (Nút bấm)"
-                            >
-                                <MenuItem value="Roboto">Roboto</MenuItem>
-                                <MenuItem value="Open Sans">Open Sans</MenuItem>
-                                <MenuItem value="Lato">Lato</MenuItem>
-                                <MenuItem value="Montserrat">Montserrat</MenuItem>
-                                <MenuItem value="PT Sans Narrow">PT Sans Narrow</MenuItem>
-                            </Select>
-                        </FormControl>
-                    )}
-                    {settings.HERO_BUTTON_FONT_SOURCE === 'custom' && (
-                        <FormControl fullWidth>
-                            <InputLabel>Chọn Custom Font (Nút bấm)</InputLabel>
-                            <Select
-                                name="HERO_BUTTON_FONT"
-                                value={settings.HERO_BUTTON_FONT || ''}
-                                onChange={(e) => {
-                                    const fontName = e.target.value;
-                                    const selectedFont = uploadedFonts.find(f => f.name === fontName);
-                                    if (selectedFont) {
-                                        setSettings(prev => ({
-                                            ...prev,
-                                            HERO_BUTTON_FONT: fontName,
-                                            HERO_BUTTON_CUSTOM_FONT_URL: selectedFont.url
-                                        }));
-                                    }
-                                }}
-                                label="Chọn Custom Font (Nút bấm)"
-                            >
-                                {uploadedFonts.map(font => (
-                                    <MenuItem key={font.id} value={font.name} sx={{ fontFamily: font.name }}>
-                                        {font.name} (Preview)
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                            <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
-                                Preview: <span style={{ fontFamily: settings.HERO_BUTTON_FONT, fontSize: '1.2rem', fontWeight: 'bold' }}>BUTTON TEXT</span>
-                            </Typography>
-                        </FormControl>
-                    )}
+                    {/* --- SECTION: NÚT BẤM --- */}
+                    <Box>
+                        <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <span>NÚT BẤM (Button)</span>
+                        </Typography>
+                        <Divider sx={{ mb: 2 }} />
+                        <Stack spacing={2}>
+                            <FormControl fullWidth>
+                                <InputLabel>Nguồn Font Nút bấm</InputLabel>
+                                <Select
+                                    name="HERO_BUTTON_FONT_SOURCE"
+                                    value={settings.HERO_BUTTON_FONT_SOURCE || 'system'}
+                                    onChange={onChange}
+                                    label="Nguồn Font Nút bấm"
+                                >
+                                    <MenuItem value="system">System Default</MenuItem>
+                                    <MenuItem value="custom">Custom Font (Upload)</MenuItem>
+                                </Select>
+                            </FormControl>
+                            {settings.HERO_BUTTON_FONT_SOURCE === 'custom' && (
+                                <FormControl fullWidth>
+                                    <InputLabel>Chọn Custom Font (Nút bấm)</InputLabel>
+                                    <Select
+                                        name="HERO_BUTTON_FONT"
+                                        value={settings.HERO_BUTTON_FONT || ''}
+                                        onChange={(e) => {
+                                            const fontName = e.target.value;
+                                            const selectedFont = uploadedFonts.find(f => f.name === fontName);
+                                            if (selectedFont) {
+                                                setSettings(prev => ({
+                                                    ...prev,
+                                                    HERO_BUTTON_FONT: fontName,
+                                                    HERO_BUTTON_CUSTOM_FONT_URL: selectedFont.url
+                                                }));
+                                            }
+                                        }}
+                                        label="Chọn Custom Font (Nút bấm)"
+                                    >
+                                        {uploadedFonts.map(font => (
+                                            <MenuItem key={font.id} value={font.name} sx={{ fontFamily: font.name }}>
+                                                {font.name} (Preview)
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                    <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
+                                        Preview: <span style={{ fontFamily: settings.HERO_BUTTON_FONT, fontSize: '1.2rem', fontWeight: 'bold' }}>BUTTON TEXT</span>
+                                    </Typography>
+                                </FormControl>
+                            )}
+                        </Stack>
+                    </Box>
                 </Stack>
             </DialogContent>
             <DialogActions>
@@ -2538,58 +2496,9 @@ const MenuConfigDialog = ({ open, onClose, settings, onSave, onChange, setSettin
                             label="Nguồn Font"
                         >
                             <MenuItem value="system">System Default</MenuItem>
-                            <MenuItem value="google">Google Fonts</MenuItem>
                             <MenuItem value="custom">Custom Font (Upload)</MenuItem>
                         </Select>
                     </FormControl>
-
-                    {settings.NAVBAR_FONT_SOURCE === 'google' && (
-                        <>
-                            <FormControl fullWidth>
-                                <InputLabel>Chọn Google Font</InputLabel>
-                                <Select
-                                    name="NAVBAR_FONT"
-                                    value={settings.NAVBAR_FONT || 'PT Sans Narrow'}
-                                    onChange={(e) => {
-                                        const fontName = e.target.value;
-                                        const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@400;700&display=swap`;
-                                        setSettings(prev => ({
-                                            ...prev,
-                                            NAVBAR_FONT: fontName,
-                                            NAVBAR_GOOGLE_FONT_URL: googleFontUrl
-                                        }));
-                                    }}
-                                    label="Chọn Google Font"
-                                >
-                                    <MenuItem value="Roboto">Roboto</MenuItem>
-                                    <MenuItem value="Open Sans">Open Sans</MenuItem>
-                                    <MenuItem value="Lato">Lato</MenuItem>
-                                    <MenuItem value="Montserrat">Montserrat</MenuItem>
-                                    <MenuItem value="PT Sans Narrow">PT Sans Narrow</MenuItem>
-                                    <MenuItem value="Playfair Display">Playfair Display</MenuItem>
-                                    <MenuItem value="Raleway">Raleway</MenuItem>
-                                    <MenuItem value="Poppins">Poppins</MenuItem>
-                                    <MenuItem value="Oswald">Oswald</MenuItem>
-                                    <MenuItem value="Merriweather">Merriweather</MenuItem>
-                                </Select>
-                            </FormControl>
-                            <Box sx={{ p: 3, bgcolor: '#f5f5f5', borderRadius: 1, border: '1px solid #ddd' }}>
-                                <Typography
-                                    variant="h6"
-                                    sx={{ fontFamily: settings.NAVBAR_FONT || 'PT Sans Narrow' }}
-                                >
-                                    Preview: This is how your navbar font looks
-                                </Typography>
-                                <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                    sx={{ fontFamily: settings.NAVBAR_FONT || 'PT Sans Narrow', mt: 1 }}
-                                >
-                                    HOME • PAGES • COLLECTIONS • NEWS
-                                </Typography>
-                            </Box>
-                        </>
-                    )}
 
                     {settings.NAVBAR_FONT_SOURCE === 'custom' && (
                         <>
@@ -2637,6 +2546,112 @@ const MenuConfigDialog = ({ open, onClose, settings, onSave, onChange, setSettin
                     )}
 
                     {settings.NAVBAR_FONT_SOURCE === 'system' && (
+                        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                            Sử dụng font mặc định: PT Sans Narrow (hoặc Arial Narrow fallback)
+                        </Typography>
+                    )}
+                </Stack>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Hủy</Button>
+                <Button variant="contained" onClick={onSave}>Lưu Cấu hình</Button>
+            </DialogActions>
+        </Dialog>
+    );
+};
+
+const GlobalConfigDialog = ({ open, onClose, settings, onSave, onChange, setSettings }) => {
+    const [uploadedFonts, setUploadedFonts] = useState([]);
+
+    useEffect(() => {
+        if (open) {
+            fetch(`${API_URL}/api/fonts`, { credentials: 'include' })
+                .then(res => res.json())
+                .then(data => {
+                    setUploadedFonts(data);
+                    data.forEach(font => {
+                        const styleId = `font-style-${font.id}`;
+                        if (!document.getElementById(styleId)) {
+                            const style = document.createElement('style');
+                            style.id = styleId;
+                            style.textContent = `
+                                @font-face {
+                                    font-family: '${font.name}';
+                                    src: url('${font.url}');
+                                }
+                            `;
+                            document.head.appendChild(style);
+                        }
+                    });
+                })
+                .catch(console.error);
+        }
+    }, [open]);
+
+    return (
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+            <DialogTitle>Cấu hình Font (Hệ thống - Ngoài Hero/Menu)</DialogTitle>
+            <DialogContent>
+                <Stack spacing={3} sx={{ mt: 1 }}>
+                    <FormControl fullWidth>
+                        <InputLabel>Nguồn Font Hệ thống</InputLabel>
+                        <Select
+                            name="GLOBAL_FONT_SOURCE"
+                            value={settings.GLOBAL_FONT_SOURCE || 'system'}
+                            onChange={onChange}
+                            label="Nguồn Font Hệ thống"
+                        >
+                            <MenuItem value="system">System Default</MenuItem>
+                            <MenuItem value="custom">Custom Font (Upload)</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                    {settings.GLOBAL_FONT_SOURCE === 'custom' && (
+                        <>
+                            <FormControl fullWidth>
+                                <InputLabel>Chọn Custom Font</InputLabel>
+                                <Select
+                                    name="GLOBAL_FONT"
+                                    value={settings.GLOBAL_FONT || ''}
+                                    onChange={(e) => {
+                                        const fontName = e.target.value;
+                                        const selectedFont = uploadedFonts.find(f => f.name === fontName);
+                                        if (selectedFont) {
+                                            setSettings(prev => ({
+                                                ...prev,
+                                                GLOBAL_FONT: fontName,
+                                                GLOBAL_CUSTOM_FONT_URL: selectedFont.url
+                                            }));
+                                        }
+                                    }}
+                                    label="Chọn Custom Font"
+                                >
+                                    {uploadedFonts.map(font => (
+                                        <MenuItem key={font.id} value={font.name} sx={{ fontFamily: font.name }}>
+                                            {font.name} (Preview)
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <Box sx={{ p: 3, bgcolor: '#f5f5f5', borderRadius: 1, border: '1px solid #ddd' }}>
+                                <Typography
+                                    variant="h6"
+                                    sx={{ fontFamily: settings.GLOBAL_FONT || 'Arial, sans-serif' }}
+                                >
+                                    Preview: Text sample using this font
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    sx={{ fontFamily: settings.GLOBAL_FONT || 'Arial, sans-serif', mt: 1 }}
+                                >
+                                    The quick brown fox jumps over the lazy dog. 1234567890.
+                                </Typography>
+                            </Box>
+                        </>
+                    )}
+
+                    {settings.GLOBAL_FONT_SOURCE === 'system' && (
                         <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
                             Sử dụng font mặc định: PT Sans Narrow (hoặc Arial Narrow fallback)
                         </Typography>

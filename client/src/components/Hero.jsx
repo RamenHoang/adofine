@@ -268,13 +268,13 @@ const Hero = () => {
 
         /* Dynamic Font Application */
         .hero-title {
-            font-family: ${heroSettings.HERO_TITLE_FONT ? `"${heroSettings.HERO_TITLE_FONT}", sans-serif` : 'inherit'};
+            font-family: ${heroSettings.HERO_TITLE_FONT ? `"${heroSettings.HERO_TITLE_FONT}", sans-serif` : "'PT Sans Narrow', 'Arial Narrow', Arial, sans-serif"};
         }
         .hero-intro {
-            font-family: ${heroSettings.HERO_SUBTITLE_FONT ? `"${heroSettings.HERO_SUBTITLE_FONT}", sans-serif` : 'inherit'};
+            font-family: ${heroSettings.HERO_SUBTITLE_FONT ? `"${heroSettings.HERO_SUBTITLE_FONT}", sans-serif` : "'PT Sans Narrow', 'Arial Narrow', Arial, sans-serif"};
         }
         .btn-hero {
-            font-family: ${heroSettings.HERO_BUTTON_FONT ? `"${heroSettings.HERO_BUTTON_FONT}", sans-serif` : 'inherit'};
+            font-family: ${heroSettings.HERO_BUTTON_FONT ? `"${heroSettings.HERO_BUTTON_FONT}", sans-serif` : "'PT Sans Narrow', 'Arial Narrow', Arial, sans-serif"};
         }
 
         .btn-hero {
