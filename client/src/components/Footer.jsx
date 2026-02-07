@@ -108,11 +108,10 @@ const Footer = () => {
             font-size: 0.9rem;
         }
         .footer-grid {
-            display: flex;
+            display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 40px;
             margin-bottom: 60px;
-            justify-content: space-between;
         }
         .footer-title {
             color: #fff;
@@ -155,6 +154,27 @@ const Footer = () => {
         }
         .social-links a:hover {
             color: #d31e44;
+        }
+
+        @media (max-width: 768px) {
+            .footer {
+                padding: 40px 0 20px;
+                text-align: center;
+            }
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .newsletter-form {
+                justify-content: center;
+            }
+            .social-links {
+                justify-content: center;
+            }
         }
       `}</style>
         </footer>

@@ -6,6 +6,7 @@ import { API_URL } from '../config';
 const Navbar = () => {
   const { t } = useTranslation();
   const location = useLocation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [logoSettings, setLogoSettings] = useState({
     LOGO_IMAGE: '',
     LOGO_TEXT_PREFIX: 'red',
@@ -15,6 +16,11 @@ const Navbar = () => {
   const [collections, setCollections] = useState([]);
   const [pages, setPages] = useState([]);
   const [navbarItems, setNavbarItems] = useState([]);
+
+  useEffect(() => {
+    // Close menu on route change
+    setIsMenuOpen(false);
+  }, [location]);
 
   useEffect(() => {
     const fetchPages = async () => {
@@ -265,7 +271,7 @@ const Navbar = () => {
 
     // Handle separator
     if (item.type === 'separator') {
-      return <li key={item.id} style={{ borderLeft: '1px solid #666', height: '20px', margin: '0 10px' }}></li>;
+      return <li key={item.id} className="nav-separator"></li>;
     }
 
     return null;
@@ -273,7 +279,7 @@ const Navbar = () => {
 
   return (
     <nav className="navbar">
-      <div className="container d-flex align-center">
+      <div className="container d-flex align-center justify-between">
         <div className="logo">
           <Link to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '10px' }}>
             {logoSettings.LOGO_IMAGE ? (
@@ -288,31 +294,28 @@ const Navbar = () => {
                 <div className="logo-sub">{logoSettings.LOGO_SUBTITLE}</div>
               </div>
             )}
-
-            {/* If Image exists, maybe still show text? Usually one or the other or side-by-side. 
-                Let's simplify: 
-                - If Image: Show Image.
-                - If No Image: Show Text as before.
-                User might want Image + Text. 
-                Let's stick to the current "V red ART" style which is Text based.
-                If they upload an Image, it likely replaces the "V". 
-                Let's do: Image replaces "V" icon. Text remains.
-            */}
           </Link>
         </div>
-        <ul className="nav-links d-flex">
+
+        <button
+          className="mobile-menu-btn"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          <span className={`hamburger ${isMenuOpen ? 'open' : ''}`}></span>
+        </button>
+
+        <ul className={`nav-links d-flex ${isMenuOpen ? 'show' : ''}`}>
           {navbarItems.map(item => renderNavItem(item))}
         </ul>
       </div>
       <style>{`
         .navbar {
-          padding: 30px 0;
+          padding: 20px 0;
           position: fixed;
           top: 0;
           width: 100%;
           z-index: 1000;
-          // background: rgba(0,0,0,0.8);
-          // backdrop-filter: blur(5px);
         }
         .logo {
           font-size: 1.5rem;
@@ -336,9 +339,17 @@ const Navbar = () => {
         .nav-links > li > a {
           padding: 10px 0;
           display: inline-block;
+          font-size: 0.9rem;
+          letter-spacing: 1px;
+          text-transform: uppercase;
         }
         .nav-links a.active {
           color: var(--primary-color);
+        }
+        .nav-separator {
+          border-left: 1px solid rgba(255, 255, 255, 0.2);
+          height: 20px;
+          margin: 0 10px;
         }
         .dropdown {
           position: relative;
@@ -360,23 +371,93 @@ const Navbar = () => {
         .dropdown:hover .dropdown-menu {
           display: block;
         }
-        .dropdown-menu li {
-          padding: 0;
-        }
         .dropdown-menu a {
           display: block;
           padding: 10px 20px;
           color: #333;
           text-decoration: none;
-          // font-size: 0.75rem;
-          // font-weight: 500;
           transition: all 0.3s ease;
           text-transform: none;
+          font-size: 0.85rem;
+          letter-spacing: 1px;
         }
         .dropdown-menu a:hover {
-          // background: rgba(211, 30, 68, 0.1);
+          background: rgba(255, 255, 255, 0.05);
           color: var(--primary-color);
-          // padding-left: 25px;
+        }
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+          display: none;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 10px;
+          z-index: 1001;
+        }
+        .hamburger {
+          display: block;
+          width: 25px;
+          height: 2px;
+          background: #fff;
+          position: relative;
+          transition: all 0.3s ease;
+        }
+        .hamburger::before,
+        .hamburger::after {
+          content: '';
+          position: absolute;
+          width: 25px;
+          height: 2px;
+          background: #fff;
+          left: 0;
+          transition: all 0.3s ease;
+        }
+        .hamburger::before { top: -8px; }
+        .hamburger::after { top: 8px; }
+        .hamburger.open { background: transparent; }
+        .hamburger.open::before { transform: rotate(45deg); top: 0; }
+        .hamburger.open::after { transform: rotate(-45deg); top: 0; }
+
+        @media (max-width: 992px) {
+          .mobile-menu-btn {
+            display: block;
+          }
+          .nav-links {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            height: 100vh;
+            background: #000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.4s ease;
+            gap: 20px;
+            margin: 0;
+            padding: 0;
+          }
+          .nav-links.show {
+            right: 0;
+          }
+          .nav-separator {
+            display: none;
+          }
+          .dropdown-menu {
+            position: static;
+            display: block;
+            background: none;
+            box-shadow: none;
+            padding: 0;
+            text-align: center;
+            min-width: unset;
+          }
+          .dropdown-menu a {
+            padding: 8px 10px;
+            font-size: 0.8rem;
+            color: #fff;
+          }
         }
       `}</style>
     </nav>

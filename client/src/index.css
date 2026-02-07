@@ -63,6 +63,39 @@ h1, h2, h3, h4, h5, h6 {
 .align-center { align-items: center; }
 .uppercase { text-transform: uppercase; }
 
+/* Responsive Typography */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+  .section-title {
+    font-size: 2rem;
+  }
+  .section-subtitle {
+    margin-bottom: 2rem;
+  }
+  .container {
+    padding: 0 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-title {
+    font-size: 1.8rem;
+  }
+}
+
+/* Global Overflow Fix */
+body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
+#root {
+  overflow-x: hidden;
+}
+
 /* Buttons */
 .btn {
   padding: 10px 20px;

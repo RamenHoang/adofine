@@ -232,6 +232,7 @@ const Hero = () => {
           color: #fff;
           text-align: center;
           transition: background-image 1s ease-in-out;
+          overflow: hidden;
         }
         .hero::before {
           content: '';
@@ -242,6 +243,8 @@ const Hero = () => {
         .hero-content {
           position: relative;
           z-index: 1;
+          width: 100%;
+          padding: 0 20px;
         }
         .hero-intro {
           color: #888;
@@ -338,6 +341,23 @@ const Hero = () => {
         }
         .fade-in-up {
             animation: fadeInUp 0.8s ease forwards;
+        }
+
+        @media (max-width: 768px) {
+          .hero-title {
+            font-size: 3rem;
+          }
+          .hero-intro {
+            font-size: 0.8rem;
+          }
+          .nav-arrow {
+            display: none;
+          }
+        }
+        @media (max-width: 480px) {
+          .hero-title {
+            font-size: 2.2rem;
+          }
         }
       `}</style>
     </div>
