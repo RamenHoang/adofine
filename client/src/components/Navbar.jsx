@@ -516,17 +516,18 @@ const Navbar = () => {
             right: -100%;
             width: 80%;
             height: 100vh;
-            height: 100dvh;
             background: #000;
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
             transition: all 0.4s ease;
-            gap: 20px;
             margin: 0;
-            padding: 40px 0 40px;
+            padding: 0;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+          }
+          .nav-links > li:nth-child(1) {
+            padding-top: 40px;
           }
           .nav-links.show {
             right: 0;
