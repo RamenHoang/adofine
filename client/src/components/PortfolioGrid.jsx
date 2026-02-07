@@ -42,7 +42,7 @@ const PortfolioGrid = ({
             <Button
               key={filter}
               variant="default"
-              size="small"
+              size="medium"
               active={activeFilter === filter}
               onClick={() => onFilterChange(filter)}
             >

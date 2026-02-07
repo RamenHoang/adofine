@@ -60,7 +60,7 @@ const Button = ({
   const baseStyles = {
     display: 'inline-flex',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-around',
     gap: '10px',
     borderWidth: '0',
     borderStyle: 'solid',
