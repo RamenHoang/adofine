@@ -417,7 +417,6 @@ const Navbar = () => {
         }
         .nav-links {
           list-style: none;
-          gap: 10px;
           font-weight: bold;
           font-family: var(--navbar-font, 'PT Sans Narrow', 'Arial Narrow', Arial, sans-serif);
           flex-grow: 1;
@@ -522,15 +521,17 @@ const Navbar = () => {
             align-items: stretch; /* Changed from center to stretch */
             transition: all 0.4s ease;
             margin: 0;
-            padding: 80px 0 40px; /* Added padding top and bottom */
+            padding: 0;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-y: contain;
-            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
           }
           .nav-links > li {
             width: 100%;
             text-align: center;
+          }
+          .nav-links > li:nth-child(1) {
+            margin-top: 40px;
           }
           .nav-links.show {
             right: 0;
@@ -538,7 +539,6 @@ const Navbar = () => {
           .nav-links > li > a {
             display: block; /* Make link full width */
             width: 100%;
-            padding: 15px 20px;
             font-size: 1.1rem; /* Slightly larger for mobile */
           }
           .nav-separator {
