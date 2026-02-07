@@ -152,6 +152,9 @@ Please change the parent <Route path="${O}"> to <Route path="${O==="/"?"*":`${O}
           .nav-links.show {
             right: 0;
           }
+          .nav-links > li > a {
+            font-size: min(var(--nav-font-size, 0.9rem), 1.5rem);
+          }
           .nav-separator {
             display: none;
           }
@@ -304,10 +307,10 @@ Please change the parent <Route path="${O}"> to <Route path="${O==="/"?"*":`${O}
 
         @media (max-width: 768px) {
           .hero-title {
-            font-size: 3rem;
+            font-size: min(calc(var(--hero-title-font-size, 5rem) * 0.7), 3.5rem);
           }
           .hero-intro {
-            font-size: 0.8rem;
+            font-size: min(calc(var(--hero-intro-font-size, 1rem) * 0.8), 1.2rem);
           }
           .nav-arrow {
             display: none;
@@ -315,7 +318,7 @@ Please change the parent <Route path="${O}"> to <Route path="${O==="/"?"*":`${O}
         }
         @media (max-width: 480px) {
           .hero-title {
-            font-size: 2.2rem;
+            font-size: min(calc(var(--hero-title-font-size, 5rem) * 0.5), 2.5rem);
           }
         }
       `})]})},lp=({posts:s=[],showButton:i=!0})=>{const{t:u}=kt();return s.length===0?null:m.jsxs(m.Fragment,{children:[m.jsx("div",{className:"blog-rows",children:s.map((r,c)=>m.jsxs("div",{className:`blog-row ${c%2===1?"reverse":""}`,children:[m.jsxs("div",{className:"blog-row-image",children:[m.jsx("div",{className:"blog-row-bg",style:{backgroundImage:`url(${r.image_url||"https://placehold.co/800x600/222/FFF?text=News"})`}}),m.jsx("img",{src:r.image_url||"https://placehold.co/800x600/222/FFF?text=News",alt:r.title,className:"blog-row-img-main"})]}),m.jsxs("div",{className:"blog-row-content",children:[m.jsx("h3",{className:"blog-row-title",children:r.title}),m.jsx("p",{className:"blog-row-excerpt",children:r.excerpt}),i&&m.jsx(Mt,{as:"link",to:`/news/${r.id}`,variant:"outline",size:"small",children:u("blog.readMore").toUpperCase()}),!i&&m.jsxs(Ve,{to:`/news/${r.id}`,className:"blog-row-link",children:[u("blog.readMore").toUpperCase()," →"]})]})]},r.id))}),m.jsx("style",{children:`

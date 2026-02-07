@@ -345,10 +345,10 @@ const Hero = () => {
 
         @media (max-width: 768px) {
           .hero-title {
-            font-size: 3rem;
+            font-size: min(calc(var(--hero-title-font-size, 5rem) * 0.7), 3.5rem);
           }
           .hero-intro {
-            font-size: 0.8rem;
+            font-size: min(calc(var(--hero-intro-font-size, 1rem) * 0.8), 1.2rem);
           }
           .nav-arrow {
             display: none;
@@ -356,7 +356,7 @@ const Hero = () => {
         }
         @media (max-width: 480px) {
           .hero-title {
-            font-size: 2.2rem;
+            font-size: min(calc(var(--hero-title-font-size, 5rem) * 0.5), 2.5rem);
           }
         }
       `}</style>

@@ -518,6 +518,9 @@ const Navbar = () => {
           .nav-links.show {
             right: 0;
           }
+          .nav-links > li > a {
+            font-size: min(var(--nav-font-size, 0.9rem), 1.5rem);
+          }
           .nav-separator {
             display: none;
           }
