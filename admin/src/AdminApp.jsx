@@ -17,7 +17,7 @@ import {
     Settings as SettingsIcon, CloudUpload as UploadIcon,
     ArrowBack as ArrowBackIcon, ArrowForward as ArrowForwardIcon, Close as CloseIcon,
     ViewCarousel as CarouselIcon, Book as BookIcon, Collections as CollectionIcon, Article as PageIcon,
-    ContactMail as ContactIcon
+    ContactMail as ContactIcon, Navigation as NavigationIcon, Visibility, VisibilityOff, DragIndicator
 } from '@mui/icons-material';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
@@ -313,6 +313,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
             case 'gem-categories': endpoint = '/api/gemstone-categories'; break;
             case 'jewelry-categories': endpoint = '/api/jewelry-categories'; break;
             case 'hero-slides': endpoint = '/api/hero-slides'; break; // Hero Slides
+            case 'menu': endpoint = '/api/navbar-items/all'; break; // Navbar Menu Items
             case 'blogs': endpoint = '/api/posts'; break;
             case 'pages': endpoint = '/api/pages'; break;
             case 'collections': endpoint = '/api/collections'; break;
@@ -509,6 +510,28 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
             } : {
                 title: '', slug: '', content: '', is_visible: true
             });
+        } else if (activeTab === 'menu') {
+            setFormData(fullItem ? {
+                label: fullItem.label || '',
+                type: fullItem.type || 'custom',
+                identifier: fullItem.identifier || '',
+                url: fullItem.url || '',
+                parent_id: fullItem.parent_id || null,
+                sort_order: fullItem.sort_order || 0,
+                is_visible: fullItem.is_visible !== false,
+                icon: fullItem.icon || '',
+                open_in_new_tab: fullItem.open_in_new_tab || false
+            } : {
+                label: '',
+                type: 'custom',
+                identifier: '',
+                url: '',
+                parent_id: null,
+                sort_order: 0,
+                is_visible: true,
+                icon: '',
+                open_in_new_tab: false
+            });
         } else if (activeTab === 'contacts') {
             // For contacts, we only edit (no add new), so item should always exist
             setFormData(fullItem ? {
@@ -552,6 +575,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
         else if (activeTab === 'gem-categories') endpoint = '/api/gemstone-categories';
         else if (activeTab === 'jewelry-categories') endpoint = '/api/jewelry-categories';
         else if (activeTab === 'hero-slides') endpoint = '/api/hero-slides';
+        else if (activeTab === 'menu') endpoint = '/api/navbar-items';
         else if (activeTab === 'blogs') endpoint = '/api/posts';
         else if (activeTab === 'collections') endpoint = '/api/collections';
         else if (activeTab === 'pages') endpoint = '/api/pages';
@@ -623,6 +647,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
         else if (activeTab === 'gem-categories') endpoint = '/api/gemstone-categories';
         else if (activeTab === 'jewelry-categories') endpoint = '/api/jewelry-categories';
         else if (activeTab === 'hero-slides') endpoint = '/api/hero-slides';
+        else if (activeTab === 'menu') endpoint = '/api/navbar-items';
         else if (activeTab === 'pages') endpoint = '/api/pages';
         else if (activeTab === 'contacts') endpoint = '/api/contact-requests';
 
@@ -679,6 +704,10 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                 </ListItem>
 
                 <Typography variant="overline" sx={{ px: 2, mt: 2, color: '#888', display: 'block' }}>Giao diện</Typography>
+                <ListItem button selected={activeTab === 'menu'} onClick={() => setActiveTab('menu')}>
+                    <ListItemIcon><NavigationIcon /></ListItemIcon>
+                    <ListItemText primary="Quản lý Menu" />
+                </ListItem>
                 <ListItem button selected={activeTab === 'hero-slides'} onClick={() => setActiveTab('hero-slides')}>
                     <ListItemIcon><CarouselIcon /></ListItemIcon>
                     <ListItemText primary="Quản lý Hero Slide" />
@@ -719,6 +748,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                 activeTab === 'products' ? 'Quản lý Đá Quý' :
                                     activeTab === 'jewelry' ? 'Quản lý Trang Sức' :
                                         activeTab === 'hero-slides' ? 'Quản lý Hero Slide' :
+                                            activeTab === 'menu' ? 'Quản lý Menu Điều hướng' :
                                             activeTab === 'blogs' ? 'Quản lý Tin tức' :
                                                 activeTab === 'pages' ? 'Quản lý Trang tĩnh' :
                                                     activeTab === 'collections' ? 'Quản lý Bộ sưu tập' :
@@ -862,6 +892,100 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                             <TextField label="Copyright Text" name="FOOTER_COPYRIGHT" value={settings.FOOTER_COPYRIGHT || '© 2026 RED ART. All rights reserved.'} onChange={handleSettingsChange} fullWidth />
                         </Stack>
 
+                        <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>Cấu hình Font (Navbar)</Typography>
+                        <Stack spacing={3} sx={{ mb: 4 }}>
+                            <FormControl fullWidth>
+                                <InputLabel>Nguồn Font</InputLabel>
+                                <Select
+                                    name="NAVBAR_FONT_SOURCE"
+                                    value={settings.NAVBAR_FONT_SOURCE || 'system'}
+                                    onChange={handleSettingsChange}
+                                    label="Nguồn Font"
+                                >
+                                    <MenuItem value="system">System Default</MenuItem>
+                                    <MenuItem value="google">Google Fonts</MenuItem>
+                                    <MenuItem value="custom">Custom Font (Upload)</MenuItem>
+                                </Select>
+                            </FormControl>
+
+                            {settings.NAVBAR_FONT_SOURCE === 'google' && (
+                                <>
+                                    <FormControl fullWidth>
+                                        <InputLabel>Chọn Google Font</InputLabel>
+                                        <Select
+                                            name="NAVBAR_FONT"
+                                            value={settings.NAVBAR_FONT || 'PT Sans Narrow'}
+                                            onChange={(e) => {
+                                                const fontName = e.target.value;
+                                                const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@400;700&display=swap`;
+                                                setSettings(prev => ({ 
+                                                    ...prev, 
+                                                    NAVBAR_FONT: fontName,
+                                                    NAVBAR_GOOGLE_FONT_URL: googleFontUrl
+                                                }));
+                                            }}
+                                            label="Chọn Google Font"
+                                        >
+                                            <MenuItem value="Roboto">Roboto</MenuItem>
+                                            <MenuItem value="Open Sans">Open Sans</MenuItem>
+                                            <MenuItem value="Lato">Lato</MenuItem>
+                                            <MenuItem value="Montserrat">Montserrat</MenuItem>
+                                            <MenuItem value="PT Sans Narrow">PT Sans Narrow</MenuItem>
+                                            <MenuItem value="Playfair Display">Playfair Display</MenuItem>
+                                            <MenuItem value="Raleway">Raleway</MenuItem>
+                                            <MenuItem value="Poppins">Poppins</MenuItem>
+                                            <MenuItem value="Oswald">Oswald</MenuItem>
+                                            <MenuItem value="Merriweather">Merriweather</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                    <Box sx={{ p: 3, bgcolor: '#f5f5f5', borderRadius: 1, border: '1px solid #ddd' }}>
+                                        <Typography 
+                                            variant="h6" 
+                                            sx={{ fontFamily: settings.NAVBAR_FONT || 'PT Sans Narrow' }}
+                                        >
+                                            Preview: This is how your navbar font looks
+                                        </Typography>
+                                        <Typography 
+                                            variant="body2" 
+                                            color="text.secondary"
+                                            sx={{ fontFamily: settings.NAVBAR_FONT || 'PT Sans Narrow', mt: 1 }}
+                                        >
+                                            HOME • PAGES • COLLECTIONS • NEWS
+                                        </Typography>
+                                    </Box>
+                                </>
+                            )}
+
+                            {settings.NAVBAR_FONT_SOURCE === 'custom' && (
+                                <>
+                                    <Typography variant="body2" color="info.main" sx={{ bgcolor: '#e3f2fd', p: 2, borderRadius: 1 }}>
+                                        ℹ️ Bạn có thể upload các file font định dạng .woff, .woff2, .ttf
+                                    </Typography>
+                                    <TextField 
+                                        fullWidth 
+                                        label="Font Family Name" 
+                                        name="NAVBAR_FONT" 
+                                        value={settings.NAVBAR_FONT || ''} 
+                                        onChange={handleSettingsChange} 
+                                        placeholder="MyCustomFont"
+                                        helperText="Tên font-family để sử dụng trong CSS"
+                                    />
+                                    <Box sx={{ p: 2, bgcolor: '#fafafa', borderRadius: 1, border: '1px dashed #ccc' }}>
+                                        <Typography variant="subtitle2" gutterBottom>Uploaded Fonts</Typography>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Chức năng upload font sẽ được thêm trong phiên bản tiếp theo.
+                                        </Typography>
+                                    </Box>
+                                </>
+                            )}
+
+                            {settings.NAVBAR_FONT_SOURCE === 'system' && (
+                                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                                    Sử dụng font mặc định: PT Sans Narrow (hoặc Arial Narrow fallback)
+                                </Typography>
+                            )}
+                        </Stack>
+
                         <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>Đổi mật khẩu</Typography>
                         <Stack spacing={3} sx={{ mb: 4 }}>
                             <TextField 
@@ -957,7 +1081,105 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                     </Box>
                 )}
 
-                {activeTab !== 'dashboard' && activeTab !== 'settings' && activeTab !== 'contacts' && (
+                {/* MENU MANAGEMENT TAB */}
+                {activeTab === 'menu' && (
+                    <Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                            <Typography variant="body2" color="textSecondary">
+                                Quản lý các mục điều hướng trên thanh menu. Các mục "Fixed" là cố định, chỉ có thể ẩn/hiện.
+                            </Typography>
+                            <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
+                                Thêm menu tùy chỉnh
+                            </Button>
+                        </Box>
+                        <TableContainer component={Paper}>
+                            <Table>
+                                <TableHead>
+                                    <TableRow sx={{ bgcolor: '#eee' }}>
+                                        <TableCell>Thứ tự</TableCell>
+                                        <TableCell>Label</TableCell>
+                                        <TableCell>Loại</TableCell>
+                                        <TableCell>URL</TableCell>
+                                        <TableCell>Parent</TableCell>
+                                        <TableCell align="center">Hiển thị</TableCell>
+                                        <TableCell align="right">Hành động</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {items.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={7} align="center" sx={{ py: 4, color: '#999' }}>
+                                                Chưa có menu items
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : items.map((item) => (
+                                        <React.Fragment key={item.id}>
+                                            <TableRow sx={{ bgcolor: item.type === 'fixed' ? '#f5f5f5' : 'white' }}>
+                                                <TableCell>{item.sort_order}</TableCell>
+                                                <TableCell sx={{ fontWeight: 'bold' }}>{item.label}</TableCell>
+                                                <TableCell>
+                                                    <Chip 
+                                                        label={item.type === 'fixed' ? 'CỐ ĐỊNH' : 'TÙY CHỈNH'} 
+                                                        size="small" 
+                                                        color={item.type === 'fixed' ? 'default' : 'primary'}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>{item.url || (item.identifier ? `Auto (${item.identifier})` : '-')}</TableCell>
+                                                <TableCell>-</TableCell>
+                                                <TableCell align="center">
+                                                    {item.is_visible ? (
+                                                        <Visibility color="success" />
+                                                    ) : (
+                                                        <VisibilityOff color="disabled" />
+                                                    )}
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    <IconButton size="small" color="primary" onClick={() => handleOpenDialog(item)}>
+                                                        <EditIcon />
+                                                    </IconButton>
+                                                    {item.type !== 'fixed' && (
+                                                        <IconButton size="small" color="error" onClick={() => handleDelete(item.id)}>
+                                                            <DeleteIcon />
+                                                        </IconButton>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                            {/* Render children (sub-items) */}
+                                            {item.children && item.children.map((child) => (
+                                                <TableRow key={child.id} sx={{ bgcolor: '#fafafa' }}>
+                                                    <TableCell sx={{ pl: 4 }}>↳ {child.sort_order}</TableCell>
+                                                    <TableCell sx={{ pl: 4 }}>{child.label}</TableCell>
+                                                    <TableCell>
+                                                        <Chip label="SUB-ITEM" size="small" color="secondary" />
+                                                    </TableCell>
+                                                    <TableCell>{child.url || '-'}</TableCell>
+                                                    <TableCell>{item.label}</TableCell>
+                                                    <TableCell align="center">
+                                                        {child.is_visible ? (
+                                                            <Visibility color="success" />
+                                                        ) : (
+                                                            <VisibilityOff color="disabled" />
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell align="right">
+                                                        <IconButton size="small" color="primary" onClick={() => handleOpenDialog(child)}>
+                                                            <EditIcon />
+                                                        </IconButton>
+                                                        <IconButton size="small" color="error" onClick={() => handleDelete(child.id)}>
+                                                            <DeleteIcon />
+                                                        </IconButton>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </React.Fragment>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Box>
+                )}
+
+                {activeTab !== 'dashboard' && activeTab !== 'settings' && activeTab !== 'contacts' && activeTab !== 'menu' && (
                     <Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                             {activeTab === 'products' ? (
@@ -1080,6 +1302,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                     {activeTab === 'products' ? ' Đá Quý' : 
                      activeTab === 'jewelry' ? ' Trang Sức' : 
                      activeTab === 'hero-slides' ? ' Hero Slide' : 
+                     activeTab === 'menu' ? ' Menu Item' : 
                      activeTab === 'blogs' ? ' Tin tức' : 
                      activeTab === 'pages' ? ' Trang' : 
                      activeTab === 'collections' ? ' Bộ sưu tập' :
@@ -1089,37 +1312,58 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                     <Grid container spacing={2} sx={{ mt: 1 }}>
                         {/* --- CATEGORY FORM --- */}
                         {(activeTab === 'gem-categories' || activeTab === 'jewelry-categories') && (
-                            <>
-                                <Grid item xs={12}>
-                                    <TextField fullWidth label="Tên danh mục" name="name" value={formData.name || ''} onChange={handleInputChange} required />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField fullWidth multiline rows={3} label="Mô tả" name="description" value={formData.description || ''} onChange={handleInputChange} />
-                                </Grid>
-                            </>
+                            <Grid item xs={12}>
+                                <Paper sx={{ p: 3 }}>
+                                    <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                        📋 Thông tin danh mục
+                                    </Typography>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12}>
+                                            <TextField fullWidth label="Tên danh mục" name="name" value={formData.name || ''} onChange={handleInputChange} required />
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <TextField fullWidth multiline rows={3} label="Mô tả" name="description" value={formData.description || ''} onChange={handleInputChange} />
+                                        </Grid>
+                                    </Grid>
+                                </Paper>
+                            </Grid>
                         )}
 
                         {/* --- HERO SLIDE FORM --- */}
                         {activeTab === 'hero-slides' && (
                             <>
                                 <Grid item xs={12}>
-                                    <SingleImageUpload
-                                        label="Ảnh nền (Background Image)"
-                                        value={formData.image_url}
-                                        onChange={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField fullWidth label="Tiêu đề chính" name="title" value={formData.title || ''} onChange={handleInputChange} placeholder="Ví dụ: Tinh hoa & SANG TRỌNG" />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField fullWidth label="Thứ tự hiển thị" name="sort_order" type="number" value={formData.sort_order || 0} onChange={handleInputChange} />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField fullWidth label="Phụ đề (Subtitle)" name="subtitle" value={formData.subtitle || ''} onChange={handleInputChange} placeholder="Ví dụ: CHÀO MỪNG BẠN..." />
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            🖼️ Hình ảnh nền
+                                        </Typography>
+                                        <SingleImageUpload
+                                            label="Ảnh nền (Background Image)"
+                                            value={formData.image_url}
+                                            onChange={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
+                                        />
+                                    </Paper>
                                 </Grid>
                                 <Grid item xs={12}>
-                                    <TextField fullWidth label="Link liên kết (Optional)" name="link" value={formData.link || ''} onChange={handleInputChange} placeholder="/portfolio/1" />
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            📝 Nội dung slide
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12} sm={6}>
+                                                <TextField fullWidth label="Tiêu đề chính" name="title" value={formData.title || ''} onChange={handleInputChange} placeholder="Ví dụ: Tinh hoa & SANG TRỌNG" />
+                                            </Grid>
+                                            <Grid item xs={12} sm={6}>
+                                                <TextField fullWidth label="Thứ tự hiển thị" name="sort_order" type="number" value={formData.sort_order || 0} onChange={handleInputChange} />
+                                            </Grid>
+                                            <Grid item xs={12} sm={6}>
+                                                <TextField fullWidth label="Phụ đề (Subtitle)" name="subtitle" value={formData.subtitle || ''} onChange={handleInputChange} placeholder="Ví dụ: CHÀO MỪNG BẠN..." />
+                                            </Grid>
+                                            <Grid item xs={12} sm={6}>
+                                                <TextField fullWidth label="Link liên kết (Optional)" name="link" value={formData.link || ''} onChange={handleInputChange} placeholder="/portfolio/1" />
+                                            </Grid>
+                                        </Grid>
+                                    </Paper>
                                 </Grid>
                             </>
                         )}
@@ -1128,35 +1372,52 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                         {activeTab === 'collections' && (
                             <>
                                 <Grid item xs={12}>
-                                    <TextField fullWidth label="Tên Bộ Sưu Tập" name="title" value={formData.title || ''} onChange={handleInputChange} required />
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            📋 Thông tin bộ sưu tập
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth label="Tên Bộ Sưu Tập" name="title" value={formData.title || ''} onChange={handleInputChange} required />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth multiline rows={3} label="Mô tả ngắn" name="description" value={formData.description || ''} onChange={handleInputChange} />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <FormControl fullWidth>
+                                                    <InputLabel>Hiển thị</InputLabel>
+                                                    <Select
+                                                        name="is_visible"
+                                                        value={formData.is_visible ? 1 : 0}
+                                                        onChange={(e) => setFormData(prev => ({ ...prev, is_visible: e.target.value === 1 }))}
+                                                        label="Hiển thị"
+                                                    >
+                                                        <MenuItem value={1}>Hiện</MenuItem>
+                                                        <MenuItem value={0}>Ẩn</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                        </Grid>
+                                    </Paper>
                                 </Grid>
                                 <Grid item xs={12}>
-                                    <SingleImageUpload
-                                        label="Ảnh Đại Diện (Main Image)"
-                                        value={formData.image}
-                                        onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField fullWidth multiline rows={3} label="Mô tả ngắn" name="description" value={formData.description || ''} onChange={handleInputChange} />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <FormControl fullWidth>
-                                        <InputLabel>Hiển thị</InputLabel>
-                                        <Select
-                                            name="is_visible"
-                                            value={formData.is_visible ? 1 : 0}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, is_visible: e.target.value === 1 }))}
-                                            label="Hiển thị"
-                                        >
-                                            <MenuItem value={1}>Hiện</MenuItem>
-                                            <MenuItem value={0}>Ẩn</MenuItem>
-                                        </Select>
-                                    </FormControl>
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            🖼️ Hình ảnh đại diện
+                                        </Typography>
+                                        <SingleImageUpload
+                                            label="Ảnh Đại Diện (Main Image)"
+                                            value={formData.image}
+                                            onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
+                                        />
+                                    </Paper>
                                 </Grid>
 
                                 <Grid item xs={12}>
-                                    <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Sản phẩm trong Bộ Sưu Tập</Typography>
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            💎 Sản phẩm trong Bộ Sưu Tập
+                                        </Typography>
 
                                     {/* Selector */}
                                     <Box sx={{ display: 'flex', gap: 1, mb: 2, alignItems: 'center' }}>
@@ -1243,6 +1504,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                             </TableBody>
                                         </Table>
                                     </TableContainer>
+                                    </Paper>
                                 </Grid>
                             </>
                         )}
@@ -1251,31 +1513,49 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                         {activeTab === 'blogs' && (
                             <>
                                 <Grid item xs={12}>
-                                    <TextField fullWidth label="Tiêu đề bài viết" name="title" value={formData.title || ''} onChange={handleInputChange} required />
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            📝 Thông tin bài viết
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth label="Tiêu đề bài viết" name="title" value={formData.title || ''} onChange={handleInputChange} required />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth multiline rows={3} label="Tóm tắt (Excerpt)" name="excerpt" value={formData.excerpt || ''} onChange={handleInputChange} />
+                                            </Grid>
+                                        </Grid>
+                                    </Paper>
                                 </Grid>
-                                {/* Removed Author Input */}
                                 <Grid item xs={12}>
-                                    <SingleImageUpload
-                                        label="Ảnh bài viết (Thumbnail)"
-                                        value={formData.image_url}
-                                        onChange={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField fullWidth multiline rows={3} label="Tóm tắt (Excerpt)" name="excerpt" value={formData.excerpt || ''} onChange={handleInputChange} />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <InputLabel shrink>Nội dung bài viết (Rich Text)</InputLabel>
-                                    <div style={{ border: '1px solid #ccc', marginTop: '8px' }}>
-                                        <CKEditor
-                                            editor={ClassicEditor}
-                                            data={formData.content || ''}
-                                            config={{
-                                                extraPlugins: [MyCustomUploadAdapterPlugin]
-                                            }}
-                                            onChange={handleEditorChange('content')}
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            🖼️ Hình ảnh
+                                        </Typography>
+                                        <SingleImageUpload
+                                            label="Ảnh bài viết (Thumbnail)"
+                                            value={formData.image_url}
+                                            onChange={(url) => setFormData(prev => ({ ...prev, image_url: url }))}
                                         />
-                                    </div>
+                                    </Paper>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            📜 Nội dung bài viết
+                                        </Typography>
+                                        <InputLabel shrink>Nội dung bài viết (Rich Text)</InputLabel>
+                                        <div style={{ border: '1px solid #ccc', marginTop: '8px' }}>
+                                            <CKEditor
+                                                editor={ClassicEditor}
+                                                data={formData.content || ''}
+                                                config={{
+                                                    extraPlugins: [MyCustomUploadAdapterPlugin]
+                                                }}
+                                                onChange={handleEditorChange('content')}
+                                            />
+                                        </div>
+                                    </Paper>
                                 </Grid>
                             </>
                         )}
@@ -1283,38 +1563,214 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                         {/* --- PAGES FORM --- */}
                         {activeTab === 'pages' && (
                             <>
-                                <Grid item xs={12} sm={8}>
-                                    <TextField fullWidth label="Tiêu đề trang" name="title" value={formData.title || ''} onChange={handleInputChange} required />
-                                </Grid>
-                                <Grid item xs={12} sm={4}>
-                                    <FormControl fullWidth>
-                                        <InputLabel>Hiển thị</InputLabel>
-                                        <Select
-                                            name="is_visible"
-                                            value={formData.is_visible ? 1 : 0}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, is_visible: e.target.value === 1 }))}
-                                            label="Hiển thị"
-                                        >
-                                            <MenuItem value={1}>Hiện (Trên Menu)</MenuItem>
-                                            <MenuItem value={0}>Ẩn</MenuItem>
-                                        </Select>
-                                    </FormControl>
+                                <Grid item xs={12}>
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            📋 Thông tin trang
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth label="Tiêu đề trang" name="title" value={formData.title || ''} onChange={handleInputChange} required />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <FormControl fullWidth>
+                                                    <InputLabel>Hiển thị</InputLabel>
+                                                    <Select
+                                                        name="is_visible"
+                                                        value={formData.is_visible ? 1 : 0}
+                                                        onChange={(e) => setFormData(prev => ({ ...prev, is_visible: e.target.value === 1 }))}
+                                                        label="Hiển thị"
+                                                    >
+                                                        <MenuItem value={1}>Hiện (Trên Menu)</MenuItem>
+                                                        <MenuItem value={0}>Ẩn</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <TextField fullWidth label="Slug (URL Path) - Để trống để tự tạo" name="slug" value={formData.slug || ''} onChange={handleInputChange} placeholder="vi-du-ve-trang" helperText="Đường dẫn: /pages/slug-nay" />
+                                            </Grid>
+                                        </Grid>
+                                    </Paper>
                                 </Grid>
                                 <Grid item xs={12}>
-                                    <TextField fullWidth label="Slug (URL Path) - Để trống để tự tạo" name="slug" value={formData.slug || ''} onChange={handleInputChange} placeholder="vi-du-ve-trang" helperText="Đường dẫn: /pages/slug-nay" />
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            📜 Nội dung trang
+                                        </Typography>
+                                        <InputLabel shrink>Nội dung trang (Rich Text)</InputLabel>
+                                        <div style={{ border: '1px solid #ccc', marginTop: '8px' }}>
+                                            <CKEditor
+                                                editor={ClassicEditor}
+                                                data={formData.content || ''}
+                                                config={{
+                                                    extraPlugins: [MyCustomUploadAdapterPlugin]
+                                                }}
+                                                onChange={handleEditorChange('content')}
+                                            />
+                                        </div>
+                                    </Paper>
                                 </Grid>
+                            </>
+                        )}
+
+                        {/* --- MENU ITEMS FORM --- */}
+                        {activeTab === 'menu' && (
+                            <>
+                                {/* Warning banner cho fixed items */}
+                                {formData.type === 'fixed' && (
+                                    <Grid item xs={12}>
+                                        <Typography variant="body2" color="warning.main" sx={{ bgcolor: '#fff3e0', p: 2, borderRadius: 1, display: 'block', width: '100%' }}>
+                                            ⚠️ Đây là mục menu cố định. Bạn chỉ có thể thay đổi thứ tự hiển thị và bật/tắt.
+                                        </Typography>
+                                    </Grid>
+                                )}
+
+                                {/* Section: Thông tin cơ bản */}
                                 <Grid item xs={12}>
-                                    <InputLabel shrink>Nội dung trang (Rich Text)</InputLabel>
-                                    <div style={{ border: '1px solid #ccc', marginTop: '8px' }}>
-                                        <CKEditor
-                                            editor={ClassicEditor}
-                                            data={formData.content || ''}
-                                            config={{
-                                                extraPlugins: [MyCustomUploadAdapterPlugin]
-                                            }}
-                                            onChange={handleEditorChange('content')}
-                                        />
-                                    </div>
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            📝 Thông tin cơ bản
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12}>
+                                                <TextField 
+                                                    fullWidth 
+                                                    label="Tên hiển thị (Label)"
+                                                    name="label" 
+                                                    value={formData.label || ''} 
+                                                    onChange={handleInputChange} 
+                                                    disabled={formData.type === 'fixed'}
+                                                    required 
+                                                    placeholder="Về chúng tôi"
+                                                    helperText={formData.type === 'fixed' ? 'Không thể chỉnh sửa label của mục cố định' : 'Tên sẽ hiển thị trên thanh menu'}
+                                                />
+                                            </Grid>
+                                
+                                            {/* Dòng 1: Type (chỉ khi không phải fixed) */}
+                                            {formData.type !== 'fixed' && (
+                                                <Grid item xs={12}>
+                                                    <FormControl fullWidth>
+                                                        <InputLabel>Loại</InputLabel>
+                                                        <Select
+                                                            name="type"
+                                                            value={formData.type || 'custom'}
+                                                            onChange={handleInputChange}
+                                                            disabled={editingId}
+                                                            label="Loại"
+                                                        >
+                                                            <MenuItem value="custom">URL Tùy chỉnh</MenuItem>
+                                                            <MenuItem value="separator">Separator</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                            )}
+
+                                            {/* Dòng 2: URL (full width) */}
+                                            {formData.type !== 'separator' && formData.type !== 'fixed' && (
+                                                <Grid item xs={12}>
+                                                    <TextField 
+                                                        fullWidth 
+                                                        label="Đường dẫn (URL)"
+                                                        name="url" 
+                                                        value={formData.url || ''} 
+                                                        onChange={handleInputChange} 
+                                                        placeholder="/about hoặc https://example.com"
+                                                        helperText="Đường dẫn nội bộ (ví dụ: /about) hoặc URL đầy đủ"
+                                                    />
+                                                </Grid>
+                                            )}
+                                        </Grid>
+                                    </Paper>
+                                </Grid>
+
+                                {/* Section: Cấu trúc & Hiển thị */}
+                                <Grid item xs={12}>
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            📊 Cấu trúc & Hiển thị
+                                        </Typography>
+                                        <Grid container spacing={2}>
+
+                                            {/* Dòng 3: Parent Menu */}
+                                            <Grid item xs={12} sm={4}>
+                                                <FormControl fullWidth>
+                                                    <InputLabel>Menu cha (Parent Menu)</InputLabel>
+                                                    <Select
+                                                        name="parent_id"
+                                                        value={formData.parent_id || ''}
+                                                        onChange={(e) => setFormData(prev => ({ ...prev, parent_id: e.target.value || null }))}
+                                                        label="Menu cha (Parent Menu)"
+                                                    >
+                                                        <MenuItem value="">Không có (Top level)</MenuItem>
+                                                        {items.filter(item => !item.parent_id && item.id !== editingId).map(item => (
+                                                            <MenuItem key={item.id} value={item.id}>{item.label}</MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            
+                                            {/* Dòng 3: Sort Order */}
+                                            <Grid item xs={12} sm={4}>
+                                                <TextField 
+                                                    fullWidth 
+                                                    label="Thứ tự sắp xếp"
+                                                    name="sort_order" 
+                                                    type="number"
+                                                    value={formData.sort_order || 0} 
+                                                    onChange={handleInputChange} 
+                                                    helperText="Số nhỏ hơn → hiển thị trước (10, 20, 30...)"
+                                                    InputProps={{
+                                                        inputProps: { min: 0, step: 10 }
+                                                    }}
+                                                />
+                                            </Grid>
+
+                                            {/* Dòng 4: Hiển thị */}
+                                            <Grid item xs={12} sm={4}>
+                                                <FormControl fullWidth>
+                                                    <InputLabel>Hiển thị</InputLabel>
+                                                    <Select
+                                                        name="is_visible"
+                                                        value={formData.is_visible ? 1 : 0}
+                                                        onChange={(e) => setFormData(prev => ({ ...prev, is_visible: e.target.value === 1 }))}
+                                                        label="Hiển thị"
+                                                    >
+                                                        <MenuItem value={1}>✓ Hiện</MenuItem>
+                                                        <MenuItem value={0}>✕ Ẩn</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            
+                                            {/* Dòng 4: Mở tab mới */}
+                                            <Grid item xs={12} sm={4}>
+                                                <FormControl fullWidth>
+                                                    <InputLabel>Mở tab mới</InputLabel>
+                                                    <Select
+                                                        name="open_in_new_tab"
+                                                        value={formData.open_in_new_tab ? 1 : 0}
+                                                        onChange={(e) => setFormData(prev => ({ ...prev, open_in_new_tab: e.target.value === 1 }))}
+                                                        label="Mở tab mới"
+                                                    >
+                                                        <MenuItem value={0}>Không</MenuItem>
+                                                        <MenuItem value={1}>Có</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            
+                                            {/* Dòng 4: Icon */}
+                                            <Grid item xs={12} sm={4}>
+                                                <TextField 
+                                                    fullWidth 
+                                                    label="Icon (Optional)"
+                                                    name="icon" 
+                                                    value={formData.icon || ''} 
+                                                    onChange={handleInputChange} 
+                                                    placeholder="🏠"
+                                                    helperText="Emoji"
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                    </Paper>
                                 </Grid>
                             </>
                         )}
@@ -1422,141 +1878,208 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                         {/* --- GEMSTONE FORM --- */}
                         {activeTab === 'products' && (
                             <>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField fullWidth label="Tên đá quý" name="title" value={formData.title || ''} onChange={handleInputChange} required />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl fullWidth required>
-                                        <InputLabel>Danh mục Đá Quý</InputLabel>
-                                        <Select
-                                            name="gemstone_category_id"
-                                            value={formData.gemstone_category_id || ''}
-                                            onChange={handleInputChange}
-                                            label="Danh mục Đá Quý"
-                                        >
-                                            <MenuItem value=""><em>Chọn</em></MenuItem>
-                                            {gemstoneCategories.map(c => (
-                                                <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField fullWidth label="Giá" name="price" value={formData.price || ''} onChange={handleInputChange} />
-                                </Grid>
-
-                                {/* Image Upload (Single + Gallery) */}
                                 <Grid item xs={12}>
-                                    {/* Main Image Upload */}
-                                    <SingleImageUpload
-                                        label="Ảnh Chính (Thumbnail)"
-                                        value={formData.image}
-                                        onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    {/* Gallery Upload */}
-                                    <ImageUpload gallery={formData.gallery || []} setGallery={(newGal) => setFormData(prev => ({ ...prev, gallery: typeof newGal === 'function' ? newGal(prev.gallery) : newGal }))} />
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            📝 Thông tin cơ bản
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12} sm={4}>
+                                                <TextField fullWidth label="Tên đá quý" name="title" value={formData.title || ''} onChange={handleInputChange} required />
+                                            </Grid>
+                                            <Grid item xs={12} sm={4}>
+                                                <FormControl fullWidth required>
+                                                    <InputLabel>Danh mục Đá Quý</InputLabel>
+                                                    <Select
+                                                        name="gemstone_category_id"
+                                                        value={formData.gemstone_category_id || ''}
+                                                        onChange={handleInputChange}
+                                                        label="Danh mục Đá Quý"
+                                                    >
+                                                        <MenuItem value=""><em>Chọn</em></MenuItem>
+                                                        {gemstoneCategories.map(c => (
+                                                            <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12} sm={4}>
+                                                <TextField fullWidth label="Giá" name="price" value={formData.price || ''} onChange={handleInputChange} />
+                                            </Grid>
+                                        </Grid>
+                                    </Paper>
                                 </Grid>
 
                                 <Grid item xs={12}>
-                                    <InputLabel shrink>Mô tả chi tiết (Rich Text + Ảnh)</InputLabel>
-                                    <div style={{ border: '1px solid #ccc', marginTop: '8px' }}>
-                                        <CKEditor
-                                            editor={ClassicEditor}
-                                            data={formData.description || ''}
-                                            config={{
-                                                extraPlugins: [MyCustomUploadAdapterPlugin]
-                                            }}
-                                            onChange={handleEditorChange('description')}
-                                        />
-                                    </div>
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            🖼️ Hình ảnh
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12}>
+                                                <SingleImageUpload
+                                                    label="Ảnh Chính (Thumbnail)"
+                                                    value={formData.image}
+                                                    onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <ImageUpload gallery={formData.gallery || []} setGallery={(newGal) => setFormData(prev => ({ ...prev, gallery: typeof newGal === 'function' ? newGal(prev.gallery) : newGal }))} />
+                                            </Grid>
+                                        </Grid>
+                                    </Paper>
                                 </Grid>
-                                {/* Technical Specs */}
-                                <Grid item xs={12}><Typography variant="subtitle2" sx={{ mt: 2 }}>Thông số kỹ thuật</Typography></Grid>
-                                <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="Trọng lượng (Carat)" name="weight" value={formData.weight || ''} onChange={handleInputChange} /></Grid>
-                                <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="Kích thước (Dimensions)" name="dimensions" value={formData.dimensions || ''} onChange={handleInputChange} /></Grid>
-                                <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="Màu sắc (Color)" name="color" value={formData.color || ''} onChange={handleInputChange} /></Grid>
-                                <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="Độ tinh khiết (Clarity)" name="clarity" value={formData.clarity || ''} onChange={handleInputChange} /></Grid>
-                                <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="Giác cắt (Cut)" name="cut" value={formData.cut || ''} onChange={handleInputChange} /></Grid>
-                                <Grid item xs={12} sm={6}><TextField fullWidth size="small" label="Xuất xứ (Origin)" name="origin" value={formData.origin || ''} onChange={handleInputChange} /></Grid>
+
+                                <Grid item xs={12}>
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            📄 Mô tả chi tiết
+                                        </Typography>
+                                        <InputLabel shrink>Mô tả chi tiết (Rich Text + Ảnh)</InputLabel>
+                                        <div style={{ border: '1px solid #ccc', marginTop: '8px' }}>
+                                            <CKEditor
+                                                editor={ClassicEditor}
+                                                data={formData.description || ''}
+                                                config={{
+                                                    extraPlugins: [MyCustomUploadAdapterPlugin]
+                                                }}
+                                                onChange={handleEditorChange('description')}
+                                            />
+                                        </div>
+                                    </Paper>
+                                </Grid>
+
+                                <Grid item xs={12}>
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            🔬 Thông số kỹ thuật
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12} sm={4}>
+                                                <TextField fullWidth label="Trọng lượng (Carat)" name="weight" value={formData.weight || ''} onChange={handleInputChange} />
+                                            </Grid>
+                                            <Grid item xs={12} sm={4}>
+                                                <TextField fullWidth label="Kích thước (Dimensions)" name="dimensions" value={formData.dimensions || ''} onChange={handleInputChange} />
+                                            </Grid>
+                                            <Grid item xs={12} sm={4}>
+                                                <TextField fullWidth label="Màu sắc (Color)" name="color" value={formData.color || ''} onChange={handleInputChange} />
+                                            </Grid>
+                                            <Grid item xs={12} sm={4}>
+                                                <TextField fullWidth label="Độ tinh khiết (Clarity)" name="clarity" value={formData.clarity || ''} onChange={handleInputChange} />
+                                            </Grid>
+                                            <Grid item xs={12} sm={4}>
+                                                <TextField fullWidth label="Giác cắt (Cut)" name="cut" value={formData.cut || ''} onChange={handleInputChange} />
+                                            </Grid>
+                                            <Grid item xs={12} sm={4}>
+                                                <TextField fullWidth label="Xuất xứ (Origin)" name="origin" value={formData.origin || ''} onChange={handleInputChange} />
+                                            </Grid>
+                                        </Grid>
+                                    </Paper>
+                                </Grid>
                             </>
                         )}
 
                         {/* --- JEWELRY FORM --- */}
                         {activeTab === 'jewelry' && (
                             <>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField fullWidth label="Tên trang sức" name="title" value={formData.title || ''} onChange={handleInputChange} required />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl fullWidth required>
-                                        <InputLabel>Loại Trang Sức</InputLabel>
-                                        <Select
-                                            name="jewelry_category_id"
-                                            value={formData.jewelry_category_id || ''}
-                                            onChange={handleInputChange}
-                                            label="Loại Trang Sức"
-                                        >
-                                            {jewelryCategories.map(c => (
-                                                <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <FormControl fullWidth>
-                                        <InputLabel>Thành phần Đá Quý</InputLabel>
-                                        <Select
-                                            multiple
-                                            name="gemstone_category_ids"
-                                            value={formData.gemstone_category_ids || []}
-                                            onChange={handleInputChange}
-                                            input={<OutlinedInput label="Thành phần Đá Quý" />}
-                                            renderValue={(selected) => (
-                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                                    {selected.map((value) => {
-                                                        const cat = gemstoneCategories.find(c => c.id === value);
-                                                        return <Chip key={value} label={cat ? cat.name : value} />;
-                                                    })}
-                                                </Box>
-                                            )}
-                                        >
-                                            {gemstoneCategories.map((c) => (
-                                                <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField fullWidth label="Giá" name="price" value={formData.price || ''} onChange={handleInputChange} />
+                                <Grid item xs={12}>
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            📝 Thông tin cơ bản
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12} sm={4}>
+                                                <TextField fullWidth label="Tên trang sức" name="title" value={formData.title || ''} onChange={handleInputChange} required />
+                                            </Grid>
+                                            <Grid item xs={12} sm={4}>
+                                                <FormControl fullWidth required>
+                                                    <InputLabel>Loại Trang Sức</InputLabel>
+                                                    <Select
+                                                        name="jewelry_category_id"
+                                                        value={formData.jewelry_category_id || ''}
+                                                        onChange={handleInputChange}
+                                                        label="Loại Trang Sức"
+                                                    >
+                                                        {jewelryCategories.map(c => (
+                                                            <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12} sm={4}>
+                                                <TextField fullWidth label="Giá" name="price" value={formData.price || ''} onChange={handleInputChange} />
+                                            </Grid>
+                                        </Grid>
+                                    </Paper>
                                 </Grid>
 
                                 <Grid item xs={12}>
-                                    {/* Main Image Upload */}
-                                    <SingleImageUpload
-                                        label="Ảnh Chính (Thumbnail)"
-                                        value={formData.image}
-                                        onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
-                                    />
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            💎 Thành phần đá quý
+                                        </Typography>
+                                        <FormControl fullWidth>
+                                            <InputLabel>Thành phần Đá Quý</InputLabel>
+                                            <Select
+                                                multiple
+                                                name="gemstone_category_ids"
+                                                value={formData.gemstone_category_ids || []}
+                                                onChange={handleInputChange}
+                                                input={<OutlinedInput label="Thành phần Đá Quý" />}
+                                                renderValue={(selected) => (
+                                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                                        {selected.map((value) => {
+                                                            const cat = gemstoneCategories.find(c => c.id === value);
+                                                            return <Chip key={value} label={cat ? cat.name : value} />;
+                                                        })}
+                                                    </Box>
+                                                )}
+                                            >
+                                                {gemstoneCategories.map((c) => (
+                                                    <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    </Paper>
                                 </Grid>
 
                                 <Grid item xs={12}>
-                                    <ImageUpload gallery={formData.gallery || []} setGallery={(newGal) => setFormData(prev => ({ ...prev, gallery: typeof newGal === 'function' ? newGal(prev.gallery) : newGal }))} />
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            🖼️ Hình ảnh
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12}>
+                                                <SingleImageUpload
+                                                    label="Ảnh Chính (Thumbnail)"
+                                                    value={formData.image}
+                                                    onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <ImageUpload gallery={formData.gallery || []} setGallery={(newGal) => setFormData(prev => ({ ...prev, gallery: typeof newGal === 'function' ? newGal(prev.gallery) : newGal }))} />
+                                            </Grid>
+                                        </Grid>
+                                    </Paper>
                                 </Grid>
 
                                 <Grid item xs={12}>
-                                    <InputLabel shrink>Mô tả chi tiết (Rich Text + Ảnh)</InputLabel>
-                                    <div style={{ border: '1px solid #ccc', marginTop: '8px' }}>
-                                        <CKEditor
-                                            editor={ClassicEditor}
-                                            data={formData.description || ''}
-                                            config={{
-                                                extraPlugins: [MyCustomUploadAdapterPlugin]
-                                            }}
-                                            onChange={handleEditorChange}
-                                        />
-                                    </div>
+                                    <Paper sx={{ p: 3 }}>
+                                        <Typography variant="h6" sx={{ mb: 3, pb: 1, borderBottom: '2px solid #e0e0e0' }}>
+                                            📄 Mô tả chi tiết
+                                        </Typography>
+                                        <InputLabel shrink>Mô tả chi tiết (Rich Text + Ảnh)</InputLabel>
+                                        <div style={{ border: '1px solid #ccc', marginTop: '8px' }}>
+                                            <CKEditor
+                                                editor={ClassicEditor}
+                                                data={formData.description || ''}
+                                                config={{
+                                                    extraPlugins: [MyCustomUploadAdapterPlugin]
+                                                }}
+                                                onChange={handleEditorChange}
+                                            />
+                                        </div>
+                                    </Paper>
                                 </Grid>
                             </>
                         )}

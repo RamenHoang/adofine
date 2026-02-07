@@ -1150,6 +1150,195 @@ app.delete('/api/contact-requests/:id', authenticateToken, async (req, res) => {
     }
 });
 
+// ============================================
+// NAVBAR ITEMS API
+// ============================================
+
+// GET /api/navbar-items (Public - returns visible items with nested structure)
+app.get('/api/navbar-items', async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            'SELECT * FROM navbar_items WHERE is_visible = TRUE ORDER BY sort_order ASC'
+        );
+        
+        // Build nested structure (parent-children)
+        const items = rows.filter(item => !item.parent_id);
+        const children = rows.filter(item => item.parent_id);
+        
+        items.forEach(item => {
+            item.children = children.filter(child => child.parent_id === item.id);
+        });
+        
+        res.json(items);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// GET /api/navbar-items/all (Admin - returns all items)
+app.get('/api/navbar-items/all', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM navbar_items ORDER BY sort_order ASC');
+        
+        // Build nested structure
+        const items = rows.filter(item => !item.parent_id);
+        const children = rows.filter(item => item.parent_id);
+        
+        items.forEach(item => {
+            item.children = children.filter(child => child.parent_id === item.id);
+        });
+        
+        res.json(items);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// POST /api/navbar-items (Admin - create new item)
+app.post('/api/navbar-items', authenticateToken, async (req, res) => {
+    try {
+        const { label, type, identifier, url, parent_id, sort_order, is_visible, icon, open_in_new_tab } = req.body;
+        
+        const [result] = await db.query(
+            `INSERT INTO navbar_items 
+            (label, type, identifier, url, parent_id, sort_order, is_visible, icon, open_in_new_tab) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [label, type || 'custom', identifier, url, parent_id || null, sort_order || 0, is_visible !== false, icon, open_in_new_tab || false]
+        );
+        
+        res.status(201).json({ id: result.insertId, ...req.body });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// PUT /api/navbar-items/:id (Admin - update item)
+app.put('/api/navbar-items/:id', authenticateToken, async (req, res) => {
+    try {
+        const { label, url, parent_id, sort_order, is_visible, icon, open_in_new_tab } = req.body;
+        
+        const [result] = await db.query(
+            `UPDATE navbar_items 
+            SET label=?, url=?, parent_id=?, sort_order=?, is_visible=?, icon=?, open_in_new_tab=? 
+            WHERE id=?`,
+            [label, url, parent_id || null, sort_order, is_visible, icon, open_in_new_tab, req.params.id]
+        );
+        
+        if (result.affectedRows === 0) return res.status(404).json({ error: 'Not found' });
+        res.json({ id: req.params.id, ...req.body });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// DELETE /api/navbar-items/:id (Admin - delete only custom items)
+app.delete('/api/navbar-items/:id', authenticateToken, async (req, res) => {
+    try {
+        // Check if item is 'fixed' type
+        const [item] = await db.query('SELECT type FROM navbar_items WHERE id = ?', [req.params.id]);
+        if (item.length === 0) return res.status(404).json({ error: 'Not found' });
+        if (item[0].type === 'fixed') {
+            return res.status(403).json({ error: 'Cannot delete fixed navigation items' });
+        }
+        
+        const [result] = await db.query('DELETE FROM navbar_items WHERE id = ?', [req.params.id]);
+        res.json({ message: 'Deleted successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// POST /api/navbar-items/reorder (Admin - batch update sort_order)
+app.post('/api/navbar-items/reorder', authenticateToken, async (req, res) => {
+    try {
+        const { items } = req.body; // Array of { id, sort_order }
+        
+        for (const item of items) {
+            await db.query('UPDATE navbar_items SET sort_order = ? WHERE id = ?', [item.sort_order, item.id]);
+        }
+        
+        res.json({ message: 'Reordered successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// ============================================
+// FONTS API
+// ============================================
+
+// GET /api/fonts (Public - returns all uploaded fonts)
+app.get('/api/fonts', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM uploaded_fonts ORDER BY created_at DESC');
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// POST /api/fonts/upload (Admin - upload font file)
+app.post('/api/fonts/upload', authenticateToken, upload.single('font'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No font file provided' });
+        }
+
+        const { name, font_family } = req.body;
+        const file_format = path.extname(req.file.originalname).substring(1); // Remove the dot
+        
+        // Upload to Cloudinary
+        const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: 'fonts',
+            resource_type: 'raw', // For non-image files
+            public_id: `${font_family.replace(/\s+/g, '_')}_${Date.now()}`
+        });
+
+        // Clean up temp file
+        fs.unlinkSync(req.file.path);
+
+        // Save to database
+        const [dbResult] = await db.query(
+            'INSERT INTO uploaded_fonts (name, font_family, file_url, file_format) VALUES (?, ?, ?, ?)',
+            [name, font_family, result.secure_url, file_format]
+        );
+
+        res.status(201).json({
+            id: dbResult.insertId,
+            name,
+            font_family,
+            file_url: result.secure_url,
+            file_format
+        });
+    } catch (err) {
+        console.error(err);
+        // Clean up temp file on error
+        if (req.file?.path) {
+            try { fs.unlinkSync(req.file.path); } catch (e) {}
+        }
+        res.status(500).json({ error: 'Upload failed' });
+    }
+});
+
+// DELETE /api/fonts/:id (Admin - delete font)
+app.delete('/api/fonts/:id', authenticateToken, async (req, res) => {
+    try {
+        const [result] = await db.query('DELETE FROM uploaded_fonts WHERE id = ?', [req.params.id]);
+        if (result.affectedRows === 0) return res.status(404).json({ error: 'Not found' });
+        res.json({ message: 'Font deleted successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
 app.get('/test-db', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT 1 + 1 AS solution');

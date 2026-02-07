@@ -14,6 +14,7 @@ const Navbar = () => {
   });
   const [collections, setCollections] = useState([]);
   const [pages, setPages] = useState([]);
+  const [navbarItems, setNavbarItems] = useState([]);
 
   useEffect(() => {
     const fetchPages = async () => {
@@ -41,6 +42,34 @@ const Navbar = () => {
             ...prev,
             ...data
           }));
+
+          // Inject Google Font if configured
+          if (data.NAVBAR_FONT_SOURCE === 'google' && data.NAVBAR_GOOGLE_FONT_URL) {
+            // Remove existing navbar font link if any
+            const existingLink = document.getElementById('navbar-google-font');
+            if (existingLink) {
+              existingLink.remove();
+            }
+
+            // Add new Google Font link
+            const link = document.createElement('link');
+            link.id = 'navbar-google-font';
+            link.rel = 'stylesheet';
+            link.href = data.NAVBAR_GOOGLE_FONT_URL;
+            document.head.appendChild(link);
+          }
+
+          // Inject custom font if configured
+          if (data.NAVBAR_FONT_SOURCE === 'custom' && data.NAVBAR_FONT) {
+            // Custom font injection would require font files from uploaded_fonts table
+            // For now, just apply the font-family name
+            // In future, fetch from /api/fonts and create @font-face rules
+          }
+
+          // Update CSS variable for navbar font
+          if (data.NAVBAR_FONT) {
+            document.documentElement.style.setProperty('--navbar-font', data.NAVBAR_FONT);
+          }
         }
       } catch (error) {
         console.error('Error fetching settings:', error);
@@ -64,9 +93,157 @@ const Navbar = () => {
     fetchCollections();
   }, []);
 
+  useEffect(() => {
+    const fetchNavbarItems = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/navbar-items`);
+        if (res.ok) {
+          const data = await res.json();
+          setNavbarItems(data);
+        }
+      } catch (error) {
+        console.error('Error fetching navbar items:', error);
+      }
+    };
+    fetchNavbarItems();
+  }, []);
+
+  const renderNavItem = (item) => {
+    // Handle fixed items
+    if (item.type === 'fixed') {
+      switch (item.identifier) {
+        case 'home':
+          return (
+            <li key={item.id}>
+              <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
+                {item.icon && <span style={{ marginRight: '5px' }}>{item.icon}</span>}
+                {item.label}
+              </Link>
+            </li>
+          );
+        case 'news':
+          return (
+            <li key={item.id}>
+              <Link to="/news" className={location.pathname.startsWith('/news') ? 'active' : ''}>
+                {item.icon && <span style={{ marginRight: '5px' }}>{item.icon}</span>}
+                {item.label}
+              </Link>
+            </li>
+          );
+        case 'pages':
+          return (
+            <li key={item.id} className="dropdown">
+              <Link to="#" className={location.pathname.startsWith('/pages') ? 'active' : ''}>
+                {item.icon && <span style={{ marginRight: '5px' }}>{item.icon}</span>}
+                {item.label}
+              </Link>
+              {pages.length > 0 && (
+                <ul className="dropdown-menu">
+                  {pages.map(page => (
+                    <li key={page.id}>
+                      <Link to={`/pages/${page.slug}`}>{page.title}</Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          );
+        case 'collections':
+          return (
+            <li key={item.id} className="dropdown">
+              <Link to="#" className={location.pathname.startsWith('/collections') ? 'active' : ''}>
+                {item.icon && <span style={{ marginRight: '5px' }}>{item.icon}</span>}
+                {item.label}
+              </Link>
+              {collections.length > 0 && (
+                <ul className="dropdown-menu">
+                  {collections.map(collection => (
+                    <li key={collection.id}>
+                      <Link to={`/collections/${collection.id}`}>{collection.title}</Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          );
+        default:
+          return null;
+      }
+    }
+
+    // Handle custom items
+    if (item.type === 'custom') {
+      const hasChildren = item.children && item.children.length > 0;
+      const isExternal = item.url?.startsWith('http');
+      const linkProps = item.open_in_new_tab ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+
+      if (hasChildren) {
+        return (
+          <li key={item.id} className="dropdown">
+            <Link to={item.url || '#'} {...linkProps}>
+              {item.icon && <span style={{ marginRight: '5px' }}>{item.icon}</span>}
+              {item.label}
+            </Link>
+            <ul className="dropdown-menu">
+              {item.children.map(child => (
+                <li key={child.id}>
+                  {child.url?.startsWith('http') ? (
+                    <a
+                      href={child.url}
+                      {...(child.open_in_new_tab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    >
+                      {child.icon && <span style={{ marginRight: '5px' }}>{child.icon}</span>}
+                      {child.label}
+                    </a>
+                  ) : (
+                    <Link
+                      to={child.url || '#'}
+                      {...(child.open_in_new_tab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    >
+                      {child.icon && <span style={{ marginRight: '5px' }}>{child.icon}</span>}
+                      {child.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </li>
+        );
+      }
+
+      // Single custom item without children
+      if (isExternal) {
+        return (
+          <li key={item.id}>
+            <a href={item.url} {...linkProps}>
+              {item.icon && <span style={{ marginRight: '5px' }}>{item.icon}</span>}
+              {item.label}
+            </a>
+          </li>
+        );
+      }
+
+      return (
+        <li key={item.id}>
+          <Link to={item.url || '#'} {...linkProps}>
+            {item.icon && <span style={{ marginRight: '5px' }}>{item.icon}</span>}
+            {item.label}
+          </Link>
+        </li>
+      );
+    }
+
+    // Handle separator
+    if (item.type === 'separator') {
+      return <li key={item.id} style={{ borderLeft: '1px solid #666', height: '20px', margin: '0 10px' }}></li>;
+    }
+
+    return null;
+  };
+
   return (
     <nav className="navbar">
-      <div className="container d-flex justify-between align-center">
+      <div className="container d-flex align-center">
         <div className="logo">
           <Link to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '10px' }}>
             {logoSettings.LOGO_IMAGE ? (
@@ -94,37 +271,7 @@ const Navbar = () => {
           </Link>
         </div>
         <ul className="nav-links d-flex">
-          <li><Link to="/" className={location.pathname === '/' ? 'active' : ''}>{t('nav.home').toUpperCase()}</Link></li>
-          {/* <li><a href="#pages">TRANG</a></li> */}
-          <li className="dropdown">
-            <Link to="#" className={location.pathname.startsWith('/pages') ? 'active' : ''}>PAGES</Link>
-            {pages.length > 0 && (
-              <ul className="dropdown-menu">
-                {pages.map(page => (
-                  <li key={page.id}>
-                    <Link to={`/pages/${page.slug}`}>{page.title}</Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-          <li className="dropdown">
-            <Link to="#" className={location.pathname.startsWith('/collections') ? 'active' : ''}>{t('nav.collections').toUpperCase()}</Link>
-            {collections.length > 0 && (
-              <ul className="dropdown-menu">
-                {collections.map(collection => (
-                  <li key={collection.id}>
-                    <Link to={`/collections/${collection.id}`}>{collection.title}</Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-          {/* <li><a href="#gallery">CÁC LOẠI ĐÁ</a></li> */}
-          <li><Link to="/news" className={location.pathname.startsWith('/news') ? 'active' : ''}>{t('nav.news').toUpperCase()}</Link></li>
-          {/* <li><a href="#contact">LIÊN HỆ</a></li> */}
-          {/* <li><a href="#shop">CỬA HÀNG</a></li> */}
-          {/* <li><Link to="/admin" className={location.pathname.startsWith('/admin') ? 'active' : ''} style={{ color: location.pathname.startsWith('/admin') ? '#d31e44' : 'inherit' }}>ADMIN</Link></li> */}
+          {navbarItems.map(item => renderNavItem(item))}
         </ul>
       </div>
       <style>{`
@@ -150,8 +297,11 @@ const Navbar = () => {
         }
         .nav-links {
           list-style: none;
-          gap: 30px;
+          gap: 10px;
           font-weight: bold;
+          font-family: var(--navbar-font, 'PT Sans Narrow', 'Arial Narrow', Arial, sans-serif);
+          flex-grow: 1;
+          justify-content: space-evenly;
         }
         .nav-links > li > a {
           padding: 10px 0;

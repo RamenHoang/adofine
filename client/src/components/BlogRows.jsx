@@ -14,7 +14,17 @@ const BlogRows = ({ posts = [], showButton = true }) => {
                 {posts.map((post, index) => (
                     <div key={post.id} className={`blog-row ${index % 2 === 1 ? 'reverse' : ''}`}>
                         <div className="blog-row-image">
-                            <img src={post.image_url || 'https://placehold.co/800x600/222/FFF?text=News'} alt={post.title} />
+                            {/* Static blurred background */}
+                            <div
+                                className="blog-row-bg"
+                                style={{ backgroundImage: `url(${post.image_url || 'https://placehold.co/800x600/222/FFF?text=News'})` }}
+                            ></div>
+                            {/* Main image */}
+                            <img
+                                src={post.image_url || 'https://placehold.co/800x600/222/FFF?text=News'}
+                                alt={post.title}
+                                className="blog-row-img-main"
+                            />
                         </div>
                         <div className="blog-row-content">
                             <h3 className="blog-row-title">{post.title}</h3>
@@ -44,14 +54,19 @@ const BlogRows = ({ posts = [], showButton = true }) => {
                     display: flex;
                     flex-direction: column;
                     gap: 0;
-                    max-width: 1200px;
-                    margin: 0 auto;
+                    max-width: 100%; /* Full width */
+                    width: 100vw;
+                    margin: 0;
+                }
+                .blog-rows * {
+                    box-sizing: border-box;
                 }
                 .blog-row {
                     display: flex;
                     text-align: left;
                     overflow: hidden;
                     opacity: 0;
+                    width: 100%; /* Ensure row takes full width */
                     animation: fadeInUp 0.8s ease forwards;
                 }
                 .blog-row.reverse {
@@ -59,38 +74,48 @@ const BlogRows = ({ posts = [], showButton = true }) => {
                 }
                 .blog-row-image {
                     flex: 0 0 50%;
-                    height: 300px;
+                    max-width: 50%;
+                    height: 33.33vh; /* 1/3 Viewport Height */
                     overflow: hidden;
                     position: relative;
                 }
-                .blog-row-image::before {
-                    content: '';
+                /* Blurred Background Layer */
+                .blog-row-bg {
                     position: absolute;
-                    top: 20px;
-                    left: 20px;
-                    right: 20px;
-                    bottom: 20px;
-                    border: 2px solid #fff;
-                    pointer-events: none;
-                    z-index: 1;
-                }
-                .blog-row-image img {
+                    top: 0;
+                    left: 0;
                     width: 100%;
                     height: 100%;
-                    object-fit: cover;
+                    background-size: cover;
+                    background-position: center;
+                    filter: blur(20px) brightness(0.6);
+                    z-index: 0;
+                    transform: scale(1.1); /* Prevent blurred edges from leaking white */
+                }
+
+                /* Main Image */
+                .blog-row-img-main {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain; /* Ensure full image is visible */
+                    z-index: 1;
                     transition: transform 0.5s;
                 }
-                .blog-row:hover .blog-row-image img {
+                .blog-row:hover .blog-row-img-main {
                     transform: scale(1.05);
                 }
                 .blog-row-content {
-                    flex: 1;
+                    flex: 0 0 50%;
+                    max-width: 50%;
+                    height: 33.33vh; /* Match image height */
                     padding: 20px;
                     display: flex;
                     flex-direction: column;
                     justify-content: center;
                     align-items: center;
                     text-align: center;
+                    overflow-y: auto; /* Handle overflow if text is too long */
                 }
                 .blog-row-title {
                     font-size: 1.5rem;
@@ -130,21 +155,7 @@ const BlogRows = ({ posts = [], showButton = true }) => {
                     to { opacity: 1; transform: translateY(0); }
                 }
 
-                @media (max-width: 768px) {
-                    .blog-row, .blog-row.reverse {
-                        flex-direction: column;
-                    }
-                    .blog-row-image {
-                        flex: 0 0 auto;
-                        height: 250px;
-                    }
-                    .blog-row-title {
-                        font-size: 1.2rem;
-                    }
-                    .blog-row-excerpt {
-                        font-size: 0.9rem;
-                    }
-                }
+
             `}</style>
         </>
     );

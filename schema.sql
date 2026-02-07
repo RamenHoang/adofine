@@ -227,3 +227,30 @@ CREATE TABLE IF NOT EXISTS contact_requests (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+-- NAVBAR CUSTOMIZATION --
+CREATE TABLE IF NOT EXISTS navbar_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    label VARCHAR(255) NOT NULL,
+    type ENUM('fixed', 'custom', 'separator') DEFAULT 'custom',
+    identifier VARCHAR(50),  -- For fixed items: 'home', 'news', 'pages', 'collections'
+    url VARCHAR(500),  -- For custom items
+    parent_id INT DEFAULT NULL,  -- For nested items (sub-menu)
+    sort_order INT DEFAULT 0,
+    is_visible BOOLEAN DEFAULT TRUE,
+    icon VARCHAR(100),  -- Optional icon class or emoji
+    open_in_new_tab BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (parent_id) REFERENCES navbar_items(id) ON DELETE CASCADE
+);
+
+-- UPLOADED FONTS --
+CREATE TABLE IF NOT EXISTS uploaded_fonts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    font_family VARCHAR(255) NOT NULL,
+    file_url VARCHAR(500) NOT NULL,
+    file_format VARCHAR(20),  -- woff, woff2, ttf, otf
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

@@ -26,11 +26,9 @@ const BlogSection = () => {
 
     return (
         <section className="blog-section" id="news">
-            <div className="container">
-                <h2 className="section-title">{t('blog.title').toUpperCase()}</h2>
-                <div style={{ marginTop: '40px' }}>
-                    <BlogRows posts={posts} showButton={true} />
-                </div>
+            <h2 className="section-title">{t('blog.title').toUpperCase()}</h2>
+            <div>
+                <BlogRows posts={posts} showButton={true} />
             </div>
             <style>{`
                 .blog-section {
