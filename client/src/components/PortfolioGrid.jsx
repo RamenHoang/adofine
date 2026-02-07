@@ -62,8 +62,8 @@ const PortfolioGrid = ({
                       <img src={item.image} alt={item.title} />
                       <div className="overlay">
                         {/* <div className="icons"> */}
-                          {/* <span className="icon-btn">🔗</span> */}
-                          {/* <a href="#" className="icon-btn">🔍</a> */}
+                        {/* <span className="icon-btn">🔗</span> */}
+                        {/* <a href="#" className="icon-btn">🔍</a> */}
                         {/* </div> */}
                         <div className="details">
                           <h3>{categoryLabel}</h3>
@@ -124,7 +124,7 @@ const PortfolioGrid = ({
           color: #fff;
           padding: 10px 25px;
           text-transform: uppercase;
-          font-size: 0.85rem;
+          font-size: var(--filter-font-size, 0.85rem);
           cursor: pointer;
           letter-spacing: 1px;
           transition: all 0.3s;

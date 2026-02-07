@@ -247,15 +247,15 @@ const Hero = () => {
           padding: 0 20px;
         }
         .hero-intro {
-          color: #888;
-          font-size: 1rem;
+          color: #fff;
+          font-size: var(--hero-intro-font-size, 1rem);
           letter-spacing: 2px;
           margin-bottom: 20px;
           text-transform: uppercase;
         }
         .text-white { color: #fff; }
         .hero-title {
-          font-size: 5rem;
+          font-size: var(--hero-title-font-size, 5rem);
           line-height: 1.1;
           font-weight: 100;
         }

@@ -26,6 +26,13 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { API_URL } from './config';
 
+const FONT_SIZE_OPTIONS = [
+    '0.5rem', '0.6rem', '0.7rem', '0.75rem', '0.8rem', '0.85rem', '0.9rem', '0.95rem', '1rem',
+    '1.1rem', '1.2rem', '1.3rem', '1.4rem', '1.5rem', '1.6rem', '1.7rem', '1.8rem', '1.9rem', '2rem',
+    '2.2rem', '2.5rem', '3rem', '3.5rem', '4rem', '4.5rem', '5rem', '5.5rem', '6rem', '6.5rem', '7rem', '7.5rem', '8rem',
+    '10px', '11px', '12px', '13px', '14px', '15px', '16px', '18px', '20px', '22px', '24px', '26px', '28px', '30px', '32px', '36px', '40px', '44px', '48px', '54px', '60px', '66px', '72px', '80px', '90px', '100px'
+];
+
 const drawerWidth = 260;
 
 // --- CUSTOM UPLOAD ADAPTER FOR CKEDITOR ---
@@ -2453,6 +2460,19 @@ const HeroConfigDialog = ({ open, onClose, settings, onSave, onChange, setSettin
                                     </Typography>
                                 </FormControl>
                             )}
+                            <FormControl fullWidth>
+                                <InputLabel>Kích thước chữ Tiêu đề</InputLabel>
+                                <Select
+                                    name="HERO_TITLE_FONT_SIZE"
+                                    value={settings.HERO_TITLE_FONT_SIZE || '5rem'}
+                                    onChange={onChange}
+                                    label="Kích thước chữ Tiêu đề"
+                                >
+                                    {FONT_SIZE_OPTIONS.map(size => (
+                                        <MenuItem key={size} value={size}>{size}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                         </Stack>
                     </Box>
 
@@ -2505,6 +2525,19 @@ const HeroConfigDialog = ({ open, onClose, settings, onSave, onChange, setSettin
                                     </Typography>
                                 </FormControl>
                             )}
+                            <FormControl fullWidth>
+                                <InputLabel>Kích thước chữ Phụ đề</InputLabel>
+                                <Select
+                                    name="HERO_SUBTITLE_FONT_SIZE"
+                                    value={settings.HERO_SUBTITLE_FONT_SIZE || '1rem'}
+                                    onChange={onChange}
+                                    label="Kích thước chữ Phụ đề"
+                                >
+                                    {FONT_SIZE_OPTIONS.map(size => (
+                                        <MenuItem key={size} value={size}>{size}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                         </Stack>
                     </Box>
 
@@ -2660,6 +2693,20 @@ const MenuConfigDialog = ({ open, onClose, settings, onSave, onChange, setSettin
                         </>
                     )}
 
+                    <FormControl fullWidth>
+                        <InputLabel>Kích thước chữ Menu</InputLabel>
+                        <Select
+                            name="NAV_FONT_SIZE"
+                            value={settings.NAV_FONT_SIZE || '0.9rem'}
+                            onChange={onChange}
+                            label="Kích thước chữ Menu"
+                        >
+                            {FONT_SIZE_OPTIONS.map(size => (
+                                <MenuItem key={size} value={size}>{size}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
                     {settings.NAVBAR_FONT_SOURCE === 'system' && (
                         <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
                             Sử dụng font mặc định: PT Sans Narrow (hoặc Arial Narrow fallback)
@@ -2765,6 +2812,20 @@ const GlobalConfigDialog = ({ open, onClose, settings, onSave, onChange, setSett
                             </Box>
                         </>
                     )}
+
+                    <FormControl fullWidth>
+                        <InputLabel>Kích thước chữ Filter (Portfolio Grids)</InputLabel>
+                        <Select
+                            name="FILTER_FONT_SIZE"
+                            value={settings.FILTER_FONT_SIZE || '0.85rem'}
+                            onChange={onChange}
+                            label="Kích thước chữ Filter (Portfolio Grids)"
+                        >
+                            {FONT_SIZE_OPTIONS.map(size => (
+                                <MenuItem key={size} value={size}>{size}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
 
                     {settings.GLOBAL_FONT_SOURCE === 'system' && (
                         <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>

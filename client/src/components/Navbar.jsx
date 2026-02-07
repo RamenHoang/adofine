@@ -85,6 +85,20 @@ const Navbar = () => {
             document.documentElement.style.setProperty('--navbar-font', data.NAVBAR_FONT);
           }
 
+          // Update CSS variables for font sizes
+          if (data.NAV_FONT_SIZE) {
+            document.documentElement.style.setProperty('--nav-font-size', data.NAV_FONT_SIZE);
+          }
+          if (data.FILTER_FONT_SIZE) {
+            document.documentElement.style.setProperty('--filter-font-size', data.FILTER_FONT_SIZE);
+          }
+          if (data.HERO_TITLE_FONT_SIZE) {
+            document.documentElement.style.setProperty('--hero-title-font-size', data.HERO_TITLE_FONT_SIZE);
+          }
+          if (data.HERO_SUBTITLE_FONT_SIZE) {
+            document.documentElement.style.setProperty('--hero-intro-font-size', data.HERO_SUBTITLE_FONT_SIZE);
+          }
+
           // --- GLOBAL FONT CONFIGURATION ---
           const fallbackStack = "'PT Sans Narrow', 'Arial Narrow', Arial, sans-serif";
 
@@ -339,7 +353,7 @@ const Navbar = () => {
         .nav-links > li > a {
           padding: 10px 0;
           display: inline-block;
-          font-size: 0.9rem;
+          font-size: var(--nav-font-size, 0.9rem);
           letter-spacing: 1px;
           text-transform: uppercase;
         }
