@@ -267,6 +267,8 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
     const [openSectionConfigDialog, setOpenSectionConfigDialog] = useState(false);
     const [openJewelrySectionConfigDialog, setOpenJewelrySectionConfigDialog] = useState(false);
     const [openCollectionSectionConfigDialog, setOpenCollectionSectionConfigDialog] = useState(false);
+    const [openHeroConfigDialog, setOpenHeroConfigDialog] = useState(false);
+    const [openMenuConfigDialog, setOpenMenuConfigDialog] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({});
 
@@ -324,14 +326,14 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
         try {
             const res = await fetch(`${API_URL}${endpoint}`, { credentials: 'include' });
             const data = await res.json();
-            
+
             // Handle new blog API response format
             if (activeTab === 'blogs' && data.posts) {
                 setItems(data.posts);
             } else {
                 setItems(data);
             }
-            
+
             if (activeTab === 'products' || activeTab === 'jewelry') {
                 setStats(prev => ({ ...prev, products: data.length }));
             }
@@ -585,14 +587,14 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
         const method = editingId ? 'PUT' : 'POST';
 
         const payload = { ...formData };
-        
+
         // For contacts, only send status and admin_notes (read-only form)
         if (activeTab === 'contacts') {
             const contactPayload = {
                 status: formData.status,
                 admin_notes: formData.admin_notes
             };
-            
+
             try {
                 const res = await fetch(url, {
                     method,
@@ -613,7 +615,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
             }
             return;
         }
-        
+
         if ((activeTab === 'products' || activeTab === 'jewelry') && !payload.image && payload.gallery && payload.gallery.length > 0) {
             // Optional: still fallback to gallery[0] if no main image
         }
@@ -749,11 +751,11 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                     activeTab === 'jewelry' ? 'Quản lý Trang Sức' :
                                         activeTab === 'hero-slides' ? 'Quản lý Hero Slide' :
                                             activeTab === 'menu' ? 'Quản lý Menu Điều hướng' :
-                                            activeTab === 'blogs' ? 'Quản lý Tin tức' :
-                                                activeTab === 'pages' ? 'Quản lý Trang tĩnh' :
-                                                    activeTab === 'collections' ? 'Quản lý Bộ sưu tập' :
-                                                        activeTab === 'contacts' ? 'Quản lý Liên hệ thiết kế' :
-                                                            activeTab === 'gem-categories' ? 'Danh mục Đá Quý' : 'Danh mục Trang Sức'}
+                                                activeTab === 'blogs' ? 'Quản lý Tin tức' :
+                                                    activeTab === 'pages' ? 'Quản lý Trang tĩnh' :
+                                                        activeTab === 'collections' ? 'Quản lý Bộ sưu tập' :
+                                                            activeTab === 'contacts' ? 'Quản lý Liên hệ thiết kế' :
+                                                                activeTab === 'gem-categories' ? 'Danh mục Đá Quý' : 'Danh mục Trang Sức'}
                     </Typography>
                     <Button color="inherit" onClick={handleLogout}>Đăng xuất</Button>
                 </Toolbar>
@@ -824,47 +826,47 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
 
                         <Typography variant="h6" gutterBottom>Cấu hình Email (SMTP)</Typography>
                         <Stack spacing={3} sx={{ mb: 4 }}>
-                            <TextField 
-                                label="SMTP Host" 
-                                name="SMTP_HOST" 
-                                value={settings.SMTP_HOST || 'smtp.gmail.com'} 
-                                onChange={handleSettingsChange} 
-                                fullWidth 
+                            <TextField
+                                label="SMTP Host"
+                                name="SMTP_HOST"
+                                value={settings.SMTP_HOST || 'smtp.gmail.com'}
+                                onChange={handleSettingsChange}
+                                fullWidth
                                 helperText="Ví dụ: smtp.gmail.com, smtp.sendgrid.net"
                             />
-                            <TextField 
-                                label="SMTP Port" 
-                                name="SMTP_PORT" 
-                                value={settings.SMTP_PORT || '587'} 
-                                onChange={handleSettingsChange} 
-                                fullWidth 
+                            <TextField
+                                label="SMTP Port"
+                                name="SMTP_PORT"
+                                value={settings.SMTP_PORT || '587'}
+                                onChange={handleSettingsChange}
+                                fullWidth
                                 type="number"
                                 helperText="587 (TLS) hoặc 465 (SSL)"
                             />
-                            <TextField 
-                                label="Email gửi (SMTP User)" 
-                                name="SMTP_USER" 
-                                value={settings.SMTP_USER || ''} 
-                                onChange={handleSettingsChange} 
-                                fullWidth 
+                            <TextField
+                                label="Email gửi (SMTP User)"
+                                name="SMTP_USER"
+                                value={settings.SMTP_USER || ''}
+                                onChange={handleSettingsChange}
+                                fullWidth
                                 type="email"
                                 helperText="Email dùng để gửi thông báo"
                             />
-                            <TextField 
-                                label="Mật khẩu Email (SMTP Pass)" 
-                                name="SMTP_PASS" 
-                                value={settings.SMTP_PASS || ''} 
-                                onChange={handleSettingsChange} 
-                                fullWidth 
+                            <TextField
+                                label="Mật khẩu Email (SMTP Pass)"
+                                name="SMTP_PASS"
+                                value={settings.SMTP_PASS || ''}
+                                onChange={handleSettingsChange}
+                                fullWidth
                                 type="password"
                                 helperText="Gmail: dùng App Password (không phải mật khẩu thường)"
                             />
-                            <TextField 
-                                label="Email nhận liên hệ" 
-                                name="CONTACT_EMAIL" 
-                                value={settings.CONTACT_EMAIL || ''} 
-                                onChange={handleSettingsChange} 
-                                fullWidth 
+                            <TextField
+                                label="Email nhận liên hệ"
+                                name="CONTACT_EMAIL"
+                                value={settings.CONTACT_EMAIL || ''}
+                                onChange={handleSettingsChange}
+                                fullWidth
                                 type="email"
                                 helperText="Email admin nhận thông báo liên hệ (để trống = dùng SMTP_USER)"
                             />
@@ -892,123 +894,30 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                             <TextField label="Copyright Text" name="FOOTER_COPYRIGHT" value={settings.FOOTER_COPYRIGHT || '© 2026 RED ART. All rights reserved.'} onChange={handleSettingsChange} fullWidth />
                         </Stack>
 
-                        <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>Cấu hình Font (Navbar)</Typography>
-                        <Stack spacing={3} sx={{ mb: 4 }}>
-                            <FormControl fullWidth>
-                                <InputLabel>Nguồn Font</InputLabel>
-                                <Select
-                                    name="NAVBAR_FONT_SOURCE"
-                                    value={settings.NAVBAR_FONT_SOURCE || 'system'}
-                                    onChange={handleSettingsChange}
-                                    label="Nguồn Font"
-                                >
-                                    <MenuItem value="system">System Default</MenuItem>
-                                    <MenuItem value="google">Google Fonts</MenuItem>
-                                    <MenuItem value="custom">Custom Font (Upload)</MenuItem>
-                                </Select>
-                            </FormControl>
-
-                            {settings.NAVBAR_FONT_SOURCE === 'google' && (
-                                <>
-                                    <FormControl fullWidth>
-                                        <InputLabel>Chọn Google Font</InputLabel>
-                                        <Select
-                                            name="NAVBAR_FONT"
-                                            value={settings.NAVBAR_FONT || 'PT Sans Narrow'}
-                                            onChange={(e) => {
-                                                const fontName = e.target.value;
-                                                const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@400;700&display=swap`;
-                                                setSettings(prev => ({ 
-                                                    ...prev, 
-                                                    NAVBAR_FONT: fontName,
-                                                    NAVBAR_GOOGLE_FONT_URL: googleFontUrl
-                                                }));
-                                            }}
-                                            label="Chọn Google Font"
-                                        >
-                                            <MenuItem value="Roboto">Roboto</MenuItem>
-                                            <MenuItem value="Open Sans">Open Sans</MenuItem>
-                                            <MenuItem value="Lato">Lato</MenuItem>
-                                            <MenuItem value="Montserrat">Montserrat</MenuItem>
-                                            <MenuItem value="PT Sans Narrow">PT Sans Narrow</MenuItem>
-                                            <MenuItem value="Playfair Display">Playfair Display</MenuItem>
-                                            <MenuItem value="Raleway">Raleway</MenuItem>
-                                            <MenuItem value="Poppins">Poppins</MenuItem>
-                                            <MenuItem value="Oswald">Oswald</MenuItem>
-                                            <MenuItem value="Merriweather">Merriweather</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                    <Box sx={{ p: 3, bgcolor: '#f5f5f5', borderRadius: 1, border: '1px solid #ddd' }}>
-                                        <Typography 
-                                            variant="h6" 
-                                            sx={{ fontFamily: settings.NAVBAR_FONT || 'PT Sans Narrow' }}
-                                        >
-                                            Preview: This is how your navbar font looks
-                                        </Typography>
-                                        <Typography 
-                                            variant="body2" 
-                                            color="text.secondary"
-                                            sx={{ fontFamily: settings.NAVBAR_FONT || 'PT Sans Narrow', mt: 1 }}
-                                        >
-                                            HOME • PAGES • COLLECTIONS • NEWS
-                                        </Typography>
-                                    </Box>
-                                </>
-                            )}
-
-                            {settings.NAVBAR_FONT_SOURCE === 'custom' && (
-                                <>
-                                    <Typography variant="body2" color="info.main" sx={{ bgcolor: '#e3f2fd', p: 2, borderRadius: 1 }}>
-                                        ℹ️ Bạn có thể upload các file font định dạng .woff, .woff2, .ttf
-                                    </Typography>
-                                    <TextField 
-                                        fullWidth 
-                                        label="Font Family Name" 
-                                        name="NAVBAR_FONT" 
-                                        value={settings.NAVBAR_FONT || ''} 
-                                        onChange={handleSettingsChange} 
-                                        placeholder="MyCustomFont"
-                                        helperText="Tên font-family để sử dụng trong CSS"
-                                    />
-                                    <Box sx={{ p: 2, bgcolor: '#fafafa', borderRadius: 1, border: '1px dashed #ccc' }}>
-                                        <Typography variant="subtitle2" gutterBottom>Uploaded Fonts</Typography>
-                                        <Typography variant="caption" color="text.secondary">
-                                            Chức năng upload font sẽ được thêm trong phiên bản tiếp theo.
-                                        </Typography>
-                                    </Box>
-                                </>
-                            )}
-
-                            {settings.NAVBAR_FONT_SOURCE === 'system' && (
-                                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                                    Sử dụng font mặc định: PT Sans Narrow (hoặc Arial Narrow fallback)
-                                </Typography>
-                            )}
-                        </Stack>
 
                         <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>Đổi mật khẩu</Typography>
                         <Stack spacing={3} sx={{ mb: 4 }}>
-                            <TextField 
-                                label="Mật khẩu hiện tại" 
-                                type="password" 
+                            <TextField
+                                label="Mật khẩu hiện tại"
+                                type="password"
                                 value={passwordData.currentPassword}
                                 onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                                fullWidth 
+                                fullWidth
                             />
-                            <TextField 
-                                label="Mật khẩu mới" 
-                                type="password" 
+                            <TextField
+                                label="Mật khẩu mới"
+                                type="password"
                                 value={passwordData.newPassword}
                                 onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                                fullWidth 
+                                fullWidth
                                 helperText="Ít nhất 6 ký tự"
                             />
-                            <TextField 
-                                label="Xác nhận mật khẩu mới" 
-                                type="password" 
+                            <TextField
+                                label="Xác nhận mật khẩu mới"
+                                type="password"
                                 value={passwordData.confirmPassword}
                                 onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                                fullWidth 
+                                fullWidth
                             />
                             <Button variant="outlined" onClick={handlePasswordChange} size="large">
                                 Đổi mật khẩu
@@ -1053,13 +962,13 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                                 <Chip
                                                     label={
                                                         contact.status === 'new' ? 'Mới' :
-                                                        contact.status === 'contacted' ? 'Đã liên hệ' :
-                                                        'Hoàn thành'
+                                                            contact.status === 'contacted' ? 'Đã liên hệ' :
+                                                                'Hoàn thành'
                                                     }
                                                     color={
                                                         contact.status === 'new' ? 'error' :
-                                                        contact.status === 'contacted' ? 'warning' :
-                                                        'success'
+                                                            contact.status === 'contacted' ? 'warning' :
+                                                                'success'
                                                     }
                                                     size="small"
                                                 />
@@ -1088,9 +997,14 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                             <Typography variant="body2" color="textSecondary">
                                 Quản lý các mục điều hướng trên thanh menu. Các mục "Fixed" là cố định, chỉ có thể ẩn/hiện.
                             </Typography>
-                            <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
-                                Thêm menu tùy chỉnh
-                            </Button>
+                            <Box>
+                                <Button variant="outlined" startIcon={<SettingsIcon />} onClick={() => setOpenMenuConfigDialog(true)} sx={{ mr: 2 }}>
+                                    Cấu hình Menu
+                                </Button>
+                                <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
+                                    Thêm menu tùy chỉnh
+                                </Button>
+                            </Box>
                         </Box>
                         <TableContainer component={Paper}>
                             <Table>
@@ -1118,9 +1032,9 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                                 <TableCell>{item.sort_order}</TableCell>
                                                 <TableCell sx={{ fontWeight: 'bold' }}>{item.label}</TableCell>
                                                 <TableCell>
-                                                    <Chip 
-                                                        label={item.type === 'fixed' ? 'CỐ ĐỊNH' : 'TÙY CHỈNH'} 
-                                                        size="small" 
+                                                    <Chip
+                                                        label={item.type === 'fixed' ? 'CỐ ĐỊNH' : 'TÙY CHỈNH'}
+                                                        size="small"
                                                         color={item.type === 'fixed' ? 'default' : 'primary'}
                                                     />
                                                 </TableCell>
@@ -1193,6 +1107,10 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                             ) : activeTab === 'collections' ? (
                                 <Button variant="outlined" startIcon={<SettingsIcon />} onClick={() => setOpenCollectionSectionConfigDialog(true)}>
                                     Cấu hình Section
+                                </Button>
+                            ) : activeTab === 'hero-slides' ? (
+                                <Button variant="outlined" startIcon={<SettingsIcon />} onClick={() => setOpenHeroConfigDialog(true)}>
+                                    Cấu hình Hero
                                 </Button>
                             ) : <div />}
                             <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
@@ -1295,18 +1213,36 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                 onSave={() => { saveSettings(); setOpenCollectionSectionConfigDialog(false); }}
             />
 
+            <HeroConfigDialog
+                open={openHeroConfigDialog}
+                onClose={() => setOpenHeroConfigDialog(false)}
+                settings={settings}
+                onSave={() => { saveSettings(); setOpenHeroConfigDialog(false); }}
+                onChange={handleSettingsChange}
+                setSettings={setSettings}
+            />
+
+            <MenuConfigDialog
+                open={openMenuConfigDialog}
+                onClose={() => setOpenMenuConfigDialog(false)}
+                settings={settings}
+                onSave={() => { saveSettings(); setOpenMenuConfigDialog(false); }}
+                onChange={handleSettingsChange}
+                setSettings={setSettings}
+            />
+
             {/* SHARED DIALOG FORM */}
             <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="md">
                 <DialogTitle>
                     {editingId ? 'Chỉnh sửa' : 'Thêm mới'}
-                    {activeTab === 'products' ? ' Đá Quý' : 
-                     activeTab === 'jewelry' ? ' Trang Sức' : 
-                     activeTab === 'hero-slides' ? ' Hero Slide' : 
-                     activeTab === 'menu' ? ' Menu Item' : 
-                     activeTab === 'blogs' ? ' Tin tức' : 
-                     activeTab === 'pages' ? ' Trang' : 
-                     activeTab === 'collections' ? ' Bộ sưu tập' :
-                     activeTab === 'contacts' ? 'Chi tiết liên hệ' : ' Danh mục'}
+                    {activeTab === 'products' ? ' Đá Quý' :
+                        activeTab === 'jewelry' ? ' Trang Sức' :
+                            activeTab === 'hero-slides' ? ' Hero Slide' :
+                                activeTab === 'menu' ? ' Menu Item' :
+                                    activeTab === 'blogs' ? ' Tin tức' :
+                                        activeTab === 'pages' ? ' Trang' :
+                                            activeTab === 'collections' ? ' Bộ sưu tập' :
+                                                activeTab === 'contacts' ? 'Chi tiết liên hệ' : ' Danh mục'}
                 </DialogTitle>
                 <DialogContent>
                     <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -1419,91 +1355,91 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                             💎 Sản phẩm trong Bộ Sưu Tập
                                         </Typography>
 
-                                    {/* Selector */}
-                                    <Box sx={{ display: 'flex', gap: 1, mb: 2, alignItems: 'center' }}>
-                                        <FormControl sx={{ minWidth: 120 }} size="small">
-                                            <InputLabel>Loại</InputLabel>
-                                            <Select
-                                                value={formData._tempType || 'gemstone'}
-                                                label="Loại"
-                                                onChange={(e) => setFormData(p => ({ ...p, _tempType: e.target.value, _tempId: '' }))}
-                                            >
-                                                <MenuItem value="gemstone">Đá Quý</MenuItem>
-                                                <MenuItem value="jewelry">Trang Sức</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                        <FormControl sx={{ minWidth: 200, flexGrow: 1 }} size="small">
-                                            <InputLabel>Sản phẩm</InputLabel>
-                                            <Select
-                                                value={formData._tempId || ''}
-                                                label="Sản phẩm"
-                                                onChange={(e) => setFormData(p => ({ ...p, _tempId: e.target.value }))}
-                                            >
-                                                {(formData._tempType === 'jewelry' ? allJewelry : allGemstones).map(p => (
-                                                    <MenuItem key={p.id} value={p.id}>
-                                                        {p.title} (#{p.id})
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        </FormControl>
-                                        <Button variant="contained" onClick={() => {
-                                            if (!formData._tempId) return;
-                                            const type = formData._tempType || 'gemstone';
-                                            const list = formData._tempType === 'jewelry' ? allJewelry : allGemstones;
-                                            const product = list.find(p => p.id === formData._tempId);
+                                        {/* Selector */}
+                                        <Box sx={{ display: 'flex', gap: 1, mb: 2, alignItems: 'center' }}>
+                                            <FormControl sx={{ minWidth: 120 }} size="small">
+                                                <InputLabel>Loại</InputLabel>
+                                                <Select
+                                                    value={formData._tempType || 'gemstone'}
+                                                    label="Loại"
+                                                    onChange={(e) => setFormData(p => ({ ...p, _tempType: e.target.value, _tempId: '' }))}
+                                                >
+                                                    <MenuItem value="gemstone">Đá Quý</MenuItem>
+                                                    <MenuItem value="jewelry">Trang Sức</MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                            <FormControl sx={{ minWidth: 200, flexGrow: 1 }} size="small">
+                                                <InputLabel>Sản phẩm</InputLabel>
+                                                <Select
+                                                    value={formData._tempId || ''}
+                                                    label="Sản phẩm"
+                                                    onChange={(e) => setFormData(p => ({ ...p, _tempId: e.target.value }))}
+                                                >
+                                                    {(formData._tempType === 'jewelry' ? allJewelry : allGemstones).map(p => (
+                                                        <MenuItem key={p.id} value={p.id}>
+                                                            {p.title} (#{p.id})
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                            <Button variant="contained" onClick={() => {
+                                                if (!formData._tempId) return;
+                                                const type = formData._tempType || 'gemstone';
+                                                const list = formData._tempType === 'jewelry' ? allJewelry : allGemstones;
+                                                const product = list.find(p => p.id === formData._tempId);
 
-                                            // Add to items
-                                            const newItem = {
-                                                id: product.id, // product id
-                                                type: type,
-                                                title: product.title,
-                                                image: product.image || product.image_url,
-                                                price: product.price
-                                            };
+                                                // Add to items
+                                                const newItem = {
+                                                    id: product.id, // product id
+                                                    type: type,
+                                                    title: product.title,
+                                                    image: product.image || product.image_url,
+                                                    price: product.price
+                                                };
 
-                                            setFormData(prev => {
-                                                const current = prev.items || [];
-                                                // Avoid duplicates
-                                                if (current.find(i => i.id === newItem.id && i.type === newItem.type)) return prev;
-                                                return { ...prev, items: [...current, newItem], _tempId: '' };
-                                            });
-                                        }}>Thêm</Button>
-                                    </Box>
+                                                setFormData(prev => {
+                                                    const current = prev.items || [];
+                                                    // Avoid duplicates
+                                                    if (current.find(i => i.id === newItem.id && i.type === newItem.type)) return prev;
+                                                    return { ...prev, items: [...current, newItem], _tempId: '' };
+                                                });
+                                            }}>Thêm</Button>
+                                        </Box>
 
-                                    {/* List */}
-                                    <TableContainer component={Paper} variant="outlined">
-                                        <Table size="small">
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell>Ảnh</TableCell>
-                                                    <TableCell>Tên</TableCell>
-                                                    <TableCell>Loại</TableCell>
-                                                    <TableCell align="right">Xóa</TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {(formData.items || []).map((item, idx) => (
-                                                    <TableRow key={`${item.type}-${item.id}-${idx}`}>
-                                                        <TableCell>
-                                                            <img src={item.image} alt="" style={{ width: 40, height: 40, obectFit: 'cover' }} />
-                                                        </TableCell>
-                                                        <TableCell>{item.title}</TableCell>
-                                                        <TableCell>{item.type === 'gemstone' ? 'Đá Quý' : 'Trang Sức'}</TableCell>
-                                                        <TableCell align="right">
-                                                            <IconButton size="small" color="error" onClick={() => {
-                                                                setFormData(prev => ({
-                                                                    ...prev,
-                                                                    items: prev.items.filter((_, i) => i !== idx)
-                                                                }));
-                                                            }}>
-                                                                <CloseIcon />
-                                                            </IconButton>
-                                                        </TableCell>
+                                        {/* List */}
+                                        <TableContainer component={Paper} variant="outlined">
+                                            <Table size="small">
+                                                <TableHead>
+                                                    <TableRow>
+                                                        <TableCell>Ảnh</TableCell>
+                                                        <TableCell>Tên</TableCell>
+                                                        <TableCell>Loại</TableCell>
+                                                        <TableCell align="right">Xóa</TableCell>
                                                     </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
+                                                </TableHead>
+                                                <TableBody>
+                                                    {(formData.items || []).map((item, idx) => (
+                                                        <TableRow key={`${item.type}-${item.id}-${idx}`}>
+                                                            <TableCell>
+                                                                <img src={item.image} alt="" style={{ width: 40, height: 40, obectFit: 'cover' }} />
+                                                            </TableCell>
+                                                            <TableCell>{item.title}</TableCell>
+                                                            <TableCell>{item.type === 'gemstone' ? 'Đá Quý' : 'Trang Sức'}</TableCell>
+                                                            <TableCell align="right">
+                                                                <IconButton size="small" color="error" onClick={() => {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        items: prev.items.filter((_, i) => i !== idx)
+                                                                    }));
+                                                                }}>
+                                                                    <CloseIcon />
+                                                                </IconButton>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </TableContainer>
                                     </Paper>
                                 </Grid>
                             </>
@@ -1633,19 +1569,19 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                         </Typography>
                                         <Grid container spacing={2}>
                                             <Grid item xs={12}>
-                                                <TextField 
-                                                    fullWidth 
+                                                <TextField
+                                                    fullWidth
                                                     label="Tên hiển thị (Label)"
-                                                    name="label" 
-                                                    value={formData.label || ''} 
-                                                    onChange={handleInputChange} 
+                                                    name="label"
+                                                    value={formData.label || ''}
+                                                    onChange={handleInputChange}
                                                     disabled={formData.type === 'fixed'}
-                                                    required 
+                                                    required
                                                     placeholder="Về chúng tôi"
                                                     helperText={formData.type === 'fixed' ? 'Không thể chỉnh sửa label của mục cố định' : 'Tên sẽ hiển thị trên thanh menu'}
                                                 />
                                             </Grid>
-                                
+
                                             {/* Dòng 1: Type (chỉ khi không phải fixed) */}
                                             {formData.type !== 'fixed' && (
                                                 <Grid item xs={12}>
@@ -1668,12 +1604,12 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                             {/* Dòng 2: URL (full width) */}
                                             {formData.type !== 'separator' && formData.type !== 'fixed' && (
                                                 <Grid item xs={12}>
-                                                    <TextField 
-                                                        fullWidth 
+                                                    <TextField
+                                                        fullWidth
                                                         label="Đường dẫn (URL)"
-                                                        name="url" 
-                                                        value={formData.url || ''} 
-                                                        onChange={handleInputChange} 
+                                                        name="url"
+                                                        value={formData.url || ''}
+                                                        onChange={handleInputChange}
                                                         placeholder="/about hoặc https://example.com"
                                                         helperText="Đường dẫn nội bộ (ví dụ: /about) hoặc URL đầy đủ"
                                                     />
@@ -1708,16 +1644,16 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                                     </Select>
                                                 </FormControl>
                                             </Grid>
-                                            
+
                                             {/* Dòng 3: Sort Order */}
                                             <Grid item xs={12} sm={4}>
-                                                <TextField 
-                                                    fullWidth 
+                                                <TextField
+                                                    fullWidth
                                                     label="Thứ tự sắp xếp"
-                                                    name="sort_order" 
+                                                    name="sort_order"
                                                     type="number"
-                                                    value={formData.sort_order || 0} 
-                                                    onChange={handleInputChange} 
+                                                    value={formData.sort_order || 0}
+                                                    onChange={handleInputChange}
                                                     helperText="Số nhỏ hơn → hiển thị trước (10, 20, 30...)"
                                                     InputProps={{
                                                         inputProps: { min: 0, step: 10 }
@@ -1740,7 +1676,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                                     </Select>
                                                 </FormControl>
                                             </Grid>
-                                            
+
                                             {/* Dòng 4: Mở tab mới */}
                                             <Grid item xs={12} sm={4}>
                                                 <FormControl fullWidth>
@@ -1756,15 +1692,15 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                                     </Select>
                                                 </FormControl>
                                             </Grid>
-                                            
+
                                             {/* Dòng 4: Icon */}
                                             <Grid item xs={12} sm={4}>
-                                                <TextField 
-                                                    fullWidth 
+                                                <TextField
+                                                    fullWidth
                                                     label="Icon (Optional)"
-                                                    name="icon" 
-                                                    value={formData.icon || ''} 
-                                                    onChange={handleInputChange} 
+                                                    name="icon"
+                                                    value={formData.icon || ''}
+                                                    onChange={handleInputChange}
                                                     placeholder="🏠"
                                                     helperText="Emoji"
                                                 />
@@ -2241,6 +2177,289 @@ const CollectionSectionConfigDialog = ({ open, onClose, settings, onSave, onChan
             <DialogActions>
                 <Button onClick={onClose} color="inherit">Hủy</Button>
                 <Button onClick={onSave} variant="contained" color="primary">Lưu thay đổi</Button>
+            </DialogActions>
+        </Dialog>
+    );
+};
+
+
+const HeroConfigDialog = ({ open, onClose, settings, onSave, onChange, setSettings }) => {
+    return (
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+            <DialogTitle>Cấu hình Font (Hero)</DialogTitle>
+            <DialogContent>
+                <Stack spacing={3} sx={{ mt: 1 }}>
+                    {/* Hero Title Font */}
+                    <FormControl fullWidth>
+                        <InputLabel>Nguồn Font Tiêu đề (Hero Title)</InputLabel>
+                        <Select
+                            name="HERO_TITLE_FONT_SOURCE"
+                            value={settings.HERO_TITLE_FONT_SOURCE || 'system'}
+                            onChange={onChange}
+                            label="Nguồn Font Tiêu đề (Hero Title)"
+                        >
+                            <MenuItem value="system">System Default</MenuItem>
+                            <MenuItem value="google">Google Fonts</MenuItem>
+                            <MenuItem value="custom">Custom Font (Upload)</MenuItem>
+                        </Select>
+                    </FormControl>
+                    {settings.HERO_TITLE_FONT_SOURCE === 'google' && (
+                        <FormControl fullWidth>
+                            <InputLabel>Chọn Google Font (Tiêu đề)</InputLabel>
+                            <Select
+                                name="HERO_TITLE_FONT"
+                                value={settings.HERO_TITLE_FONT || 'PT Sans Narrow'}
+                                onChange={(e) => {
+                                    const fontName = e.target.value;
+                                    const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@100;400;700&display=swap`;
+                                    setSettings(prev => ({
+                                        ...prev,
+                                        HERO_TITLE_FONT: fontName,
+                                        HERO_TITLE_GOOGLE_FONT_URL: googleFontUrl
+                                    }));
+                                }}
+                                label="Chọn Google Font (Tiêu đề)"
+                            >
+                                <MenuItem value="Roboto">Roboto</MenuItem>
+                                <MenuItem value="Open Sans">Open Sans</MenuItem>
+                                <MenuItem value="Lato">Lato</MenuItem>
+                                <MenuItem value="Montserrat">Montserrat</MenuItem>
+                                <MenuItem value="PT Sans Narrow">PT Sans Narrow</MenuItem>
+                                <MenuItem value="Playfair Display">Playfair Display</MenuItem>
+                                <MenuItem value="Raleway">Raleway</MenuItem>
+                                <MenuItem value="Poppins">Poppins</MenuItem>
+                                <MenuItem value="Oswald">Oswald</MenuItem>
+                                <MenuItem value="Merriweather">Merriweather</MenuItem>
+                                <MenuItem value="Cinzel">Cinzel (Luxury)</MenuItem>
+                                <MenuItem value="Bodoni Moda">Bodoni Moda (Luxury)</MenuItem>
+                            </Select>
+                        </FormControl>
+                    )}
+                    {settings.HERO_TITLE_FONT_SOURCE === 'custom' && (
+                        <TextField
+                            fullWidth
+                            label="Hero Title Font Family Name"
+                            name="HERO_TITLE_FONT"
+                            value={settings.HERO_TITLE_FONT || ''}
+                            onChange={onChange}
+                            placeholder="MyCustomTitleFont"
+                        />
+                    )}
+
+                    {/* Hero Subtitle Font */}
+                    <FormControl fullWidth sx={{ mt: 2 }}>
+                        <InputLabel>Nguồn Font Phụ đề (Hero Subtitle)</InputLabel>
+                        <Select
+                            name="HERO_SUBTITLE_FONT_SOURCE"
+                            value={settings.HERO_SUBTITLE_FONT_SOURCE || 'system'}
+                            onChange={onChange}
+                            label="Nguồn Font Phụ đề (Hero Subtitle)"
+                        >
+                            <MenuItem value="system">System Default</MenuItem>
+                            <MenuItem value="google">Google Fonts</MenuItem>
+                            <MenuItem value="custom">Custom Font (Upload)</MenuItem>
+                        </Select>
+                    </FormControl>
+                    {settings.HERO_SUBTITLE_FONT_SOURCE === 'google' && (
+                        <FormControl fullWidth>
+                            <InputLabel>Chọn Google Font (Phụ đề)</InputLabel>
+                            <Select
+                                name="HERO_SUBTITLE_FONT"
+                                value={settings.HERO_SUBTITLE_FONT || 'PT Sans Narrow'}
+                                onChange={(e) => {
+                                    const fontName = e.target.value;
+                                    const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@300;400&display=swap`;
+                                    setSettings(prev => ({
+                                        ...prev,
+                                        HERO_SUBTITLE_FONT: fontName,
+                                        HERO_SUBTITLE_GOOGLE_FONT_URL: googleFontUrl
+                                    }));
+                                }}
+                                label="Chọn Google Font (Phụ đề)"
+                            >
+                                <MenuItem value="Roboto">Roboto</MenuItem>
+                                <MenuItem value="Open Sans">Open Sans</MenuItem>
+                                <MenuItem value="Lato">Lato</MenuItem>
+                                <MenuItem value="Montserrat">Montserrat</MenuItem>
+                                <MenuItem value="PT Sans Narrow">PT Sans Narrow</MenuItem>
+                                <MenuItem value="Playfair Display">Playfair Display</MenuItem>
+                                <MenuItem value="Raleway">Raleway</MenuItem>
+                                <MenuItem value="Poppins">Poppins</MenuItem>
+                            </Select>
+                        </FormControl>
+                    )}
+                    {settings.HERO_SUBTITLE_FONT_SOURCE === 'custom' && (
+                        <TextField
+                            fullWidth
+                            label="Hero Subtitle Font Family Name"
+                            name="HERO_SUBTITLE_FONT"
+                            value={settings.HERO_SUBTITLE_FONT || ''}
+                            onChange={onChange}
+                            placeholder="MyCustomSubtitleFont"
+                        />
+                    )}
+
+                    {/* Hero Button Font */}
+                    <FormControl fullWidth sx={{ mt: 2 }}>
+                        <InputLabel>Nguồn Font Nút bấm (Hero Button)</InputLabel>
+                        <Select
+                            name="HERO_BUTTON_FONT_SOURCE"
+                            value={settings.HERO_BUTTON_FONT_SOURCE || 'system'}
+                            onChange={onChange}
+                            label="Nguồn Font Nút bấm (Hero Button)"
+                        >
+                            <MenuItem value="system">System Default</MenuItem>
+                            <MenuItem value="google">Google Fonts</MenuItem>
+                            <MenuItem value="custom">Custom Font (Upload)</MenuItem>
+                        </Select>
+                    </FormControl>
+                    {settings.HERO_BUTTON_FONT_SOURCE === 'google' && (
+                        <FormControl fullWidth>
+                            <InputLabel>Chọn Google Font (Nút bấm)</InputLabel>
+                            <Select
+                                name="HERO_BUTTON_FONT"
+                                value={settings.HERO_BUTTON_FONT || 'PT Sans Narrow'}
+                                onChange={(e) => {
+                                    const fontName = e.target.value;
+                                    const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@400;700&display=swap`;
+                                    setSettings(prev => ({
+                                        ...prev,
+                                        HERO_BUTTON_FONT: fontName,
+                                        HERO_BUTTON_GOOGLE_FONT_URL: googleFontUrl
+                                    }));
+                                }}
+                                label="Chọn Google Font (Nút bấm)"
+                            >
+                                <MenuItem value="Roboto">Roboto</MenuItem>
+                                <MenuItem value="Open Sans">Open Sans</MenuItem>
+                                <MenuItem value="Lato">Lato</MenuItem>
+                                <MenuItem value="Montserrat">Montserrat</MenuItem>
+                                <MenuItem value="PT Sans Narrow">PT Sans Narrow</MenuItem>
+                                <MenuItem value="Playfair Display">Playfair Display</MenuItem>
+                            </Select>
+                        </FormControl>
+                    )}
+                    {settings.HERO_BUTTON_FONT_SOURCE === 'custom' && (
+                        <TextField
+                            fullWidth
+                            label="Hero Button Font Family Name"
+                            name="HERO_BUTTON_FONT"
+                            value={settings.HERO_BUTTON_FONT || ''}
+                            onChange={onChange}
+                            placeholder="MyCustomButtonFont"
+                        />
+                    )}
+                </Stack>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Hủy</Button>
+                <Button variant="contained" onClick={onSave}>Lưu Cấu hình</Button>
+            </DialogActions>
+        </Dialog>
+    );
+};
+
+const MenuConfigDialog = ({ open, onClose, settings, onSave, onChange, setSettings }) => {
+    return (
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+            <DialogTitle>Cấu hình Font (Menu/Navbar)</DialogTitle>
+            <DialogContent>
+                <Stack spacing={3} sx={{ mt: 1 }}>
+                    <FormControl fullWidth>
+                        <InputLabel>Nguồn Font</InputLabel>
+                        <Select
+                            name="NAVBAR_FONT_SOURCE"
+                            value={settings.NAVBAR_FONT_SOURCE || 'system'}
+                            onChange={onChange}
+                            label="Nguồn Font"
+                        >
+                            <MenuItem value="system">System Default</MenuItem>
+                            <MenuItem value="google">Google Fonts</MenuItem>
+                            <MenuItem value="custom">Custom Font (Upload)</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                    {settings.NAVBAR_FONT_SOURCE === 'google' && (
+                        <>
+                            <FormControl fullWidth>
+                                <InputLabel>Chọn Google Font</InputLabel>
+                                <Select
+                                    name="NAVBAR_FONT"
+                                    value={settings.NAVBAR_FONT || 'PT Sans Narrow'}
+                                    onChange={(e) => {
+                                        const fontName = e.target.value;
+                                        const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@400;700&display=swap`;
+                                        setSettings(prev => ({
+                                            ...prev,
+                                            NAVBAR_FONT: fontName,
+                                            NAVBAR_GOOGLE_FONT_URL: googleFontUrl
+                                        }));
+                                    }}
+                                    label="Chọn Google Font"
+                                >
+                                    <MenuItem value="Roboto">Roboto</MenuItem>
+                                    <MenuItem value="Open Sans">Open Sans</MenuItem>
+                                    <MenuItem value="Lato">Lato</MenuItem>
+                                    <MenuItem value="Montserrat">Montserrat</MenuItem>
+                                    <MenuItem value="PT Sans Narrow">PT Sans Narrow</MenuItem>
+                                    <MenuItem value="Playfair Display">Playfair Display</MenuItem>
+                                    <MenuItem value="Raleway">Raleway</MenuItem>
+                                    <MenuItem value="Poppins">Poppins</MenuItem>
+                                    <MenuItem value="Oswald">Oswald</MenuItem>
+                                    <MenuItem value="Merriweather">Merriweather</MenuItem>
+                                </Select>
+                            </FormControl>
+                            <Box sx={{ p: 3, bgcolor: '#f5f5f5', borderRadius: 1, border: '1px solid #ddd' }}>
+                                <Typography
+                                    variant="h6"
+                                    sx={{ fontFamily: settings.NAVBAR_FONT || 'PT Sans Narrow' }}
+                                >
+                                    Preview: This is how your navbar font looks
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    sx={{ fontFamily: settings.NAVBAR_FONT || 'PT Sans Narrow', mt: 1 }}
+                                >
+                                    HOME • PAGES • COLLECTIONS • NEWS
+                                </Typography>
+                            </Box>
+                        </>
+                    )}
+
+                    {settings.NAVBAR_FONT_SOURCE === 'custom' && (
+                        <>
+                            <Typography variant="body2" color="info.main" sx={{ bgcolor: '#e3f2fd', p: 2, borderRadius: 1 }}>
+                                ℹ️ Bạn có thể upload các file font định dạng .woff, .woff2, .ttf
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                label="Font Family Name"
+                                name="NAVBAR_FONT"
+                                value={settings.NAVBAR_FONT || ''}
+                                onChange={onChange}
+                                placeholder="MyCustomFont"
+                                helperText="Tên font-family để sử dụng trong CSS"
+                            />
+                            <Box sx={{ p: 2, bgcolor: '#fafafa', borderRadius: 1, border: '1px dashed #ccc' }}>
+                                <Typography variant="subtitle2" gutterBottom>Uploaded Fonts</Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                    Chức năng upload font sẽ được thêm trong phiên bản tiếp theo.
+                                </Typography>
+                            </Box>
+                        </>
+                    )}
+
+                    {settings.NAVBAR_FONT_SOURCE === 'system' && (
+                        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                            Sử dụng font mặc định: PT Sans Narrow (hoặc Arial Narrow fallback)
+                        </Typography>
+                    )}
+                </Stack>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Hủy</Button>
+                <Button variant="contained" onClick={onSave}>Lưu Cấu hình</Button>
             </DialogActions>
         </Dialog>
     );

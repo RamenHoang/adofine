@@ -52,6 +52,41 @@ const Hero = () => {
   const { showLoading, hideLoading } = useLoading();
   const [slides, setSlides] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [heroSettings, setHeroSettings] = useState({});
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/settings`);
+        if (res.ok) {
+          const data = await res.json();
+          setHeroSettings(data);
+
+          // Inject Google Fonts
+          const fontConfigs = [
+            { key: 'HERO_TITLE_FONT_SOURCE', urlKey: 'HERO_TITLE_GOOGLE_FONT_URL', id: 'hero-title-font' },
+            { key: 'HERO_SUBTITLE_FONT_SOURCE', urlKey: 'HERO_SUBTITLE_GOOGLE_FONT_URL', id: 'hero-subtitle-font' },
+            { key: 'HERO_BUTTON_FONT_SOURCE', urlKey: 'HERO_BUTTON_GOOGLE_FONT_URL', id: 'hero-button-font' }
+          ];
+
+          fontConfigs.forEach(config => {
+            if (data[config.key] === 'google' && data[config.urlKey]) {
+              if (!document.getElementById(config.id)) {
+                const link = document.createElement('link');
+                link.id = config.id;
+                link.rel = 'stylesheet';
+                link.href = data[config.urlKey];
+                document.head.appendChild(link);
+              }
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   useEffect(() => {
     const fetchSlides = async () => {
@@ -206,6 +241,17 @@ const Hero = () => {
           font-weight: bold;
           text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
           color: #fff;
+        }
+
+        /* Dynamic Font Application */
+        .hero-title {
+            font-family: ${heroSettings.HERO_TITLE_FONT ? `"${heroSettings.HERO_TITLE_FONT}", sans-serif` : 'inherit'};
+        }
+        .hero-intro {
+            font-family: ${heroSettings.HERO_SUBTITLE_FONT ? `"${heroSettings.HERO_SUBTITLE_FONT}", sans-serif` : 'inherit'};
+        }
+        .btn-hero {
+            font-family: ${heroSettings.HERO_BUTTON_FONT ? `"${heroSettings.HERO_BUTTON_FONT}", sans-serif` : 'inherit'};
         }
 
         .btn-hero {
