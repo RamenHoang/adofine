@@ -25,6 +25,17 @@ const Navbar = () => {
   }, [location]);
 
   useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isMenuOpen]);
+
+  useEffect(() => {
     const fetchPages = async () => {
       try {
         const res = await fetch(`${API_URL}/api/pages/public`);
@@ -505,6 +516,7 @@ const Navbar = () => {
             right: -100%;
             width: 80%;
             height: 100vh;
+            height: 100dvh;
             background: #000;
             flex-direction: column;
             justify-content: flex-start;
@@ -514,6 +526,7 @@ const Navbar = () => {
             margin: 0;
             padding: 40px 0 40px;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
           }
           .nav-links.show {
             right: 0;
