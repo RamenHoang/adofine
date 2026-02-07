@@ -56,6 +56,14 @@ const authenticateToken = (req, res, next) => {
     }
 };
 
+const isAdmin = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        next();
+    } else {
+        res.status(403).json({ error: 'Access denied. Admin role required.' });
+    }
+};
+
 // Configure Multer
 const upload = multer({ dest: 'uploads/' });
 
@@ -217,12 +225,91 @@ app.get('/api/settings', async (req, res) => {
 app.post('/api/settings', authenticateToken, async (req, res) => {
     try {
         const settings = req.body; // { CLOUD_NAME: '...', API_KEY: '...', ... }
+        const userRole = req.user.role;
+
+        const restrictedKeys = [
+            'CLOUD_NAME', 'API_KEY', 'API_SECRET', 'UPLOAD_PRESET',
+            'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS'
+        ];
+
         for (const [key, value] of Object.entries(settings)) {
-            if (value) {
+            // If user is staff, skip restricted keys
+            if (userRole === 'staff' && restrictedKeys.includes(key)) {
+                continue;
+            }
+
+            if (value !== undefined && value !== null) {
                 await db.query('INSERT INTO app_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value=?', [key, value, value]);
             }
         }
         res.json({ message: 'Settings saved' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// --- USER MANAGEMENT API (Admin Only) ---
+app.get('/api/users', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT id, username, email, role, is_active, last_login, created_at FROM admin_users ORDER BY created_at DESC');
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.post('/api/users', authenticateToken, isAdmin, [
+    body('username').trim().notEmpty().withMessage('Username is required'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+    body('email').isEmail().withMessage('Valid email is required'),
+    body('role').isIn(['admin', 'staff']).withMessage('Invalid role')
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+        const { username, password, email, role } = req.body;
+
+        // Check if user already exists
+        const [existing] = await db.query('SELECT id FROM admin_users WHERE username = ? OR email = ?', [username, email]);
+        if (existing.length > 0) {
+            return res.status(400).json({ error: 'Username or email already exists' });
+        }
+
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(password, saltRounds);
+
+        const [result] = await db.query(
+            'INSERT INTO admin_users (username, password_hash, email, role) VALUES (?, ?, ?, ?)',
+            [username, passwordHash, email, role]
+        );
+
+        res.status(201).json({ id: result.insertId, username, email, role });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.delete('/api/users/:id', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        // Prevent self-deletion
+        if (parseInt(userId) === req.user.id) {
+            return res.status(400).json({ error: 'Cannot delete your own account' });
+        }
+
+        const [result] = await db.query('DELETE FROM admin_users WHERE id = ?', [userId]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({ message: 'User deleted successfully' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Database error' });

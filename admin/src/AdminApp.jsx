@@ -274,6 +274,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
     const [openMenuConfigDialog, setOpenMenuConfigDialog] = useState(false);
     const [openGlobalFontConfigDialog, setOpenGlobalFontConfigDialog] = useState(false);
     const [openContactFormConfigDialog, setOpenContactFormConfigDialog] = useState(false);
+    const [openAddUserDialog, setOpenAddUserDialog] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({});
 
@@ -325,6 +326,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
             case 'pages': endpoint = '/api/pages'; break;
             case 'collections': endpoint = '/api/collections'; break;
             case 'contacts': endpoint = '/api/contact-requests'; break;
+            case 'users': endpoint = '/api/users'; break;
             default: return;
         }
 
@@ -661,10 +663,53 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
         try {
             await fetch(`${API_URL}${endpoint}/${id}`, { method: 'DELETE', credentials: 'include' });
             loadDataForTab();
-            toast.success('Xóa thành công!');
         } catch (error) {
             console.error('Error deleting:', error);
             toast.error('Có lỗi xảy ra!');
+        }
+    };
+
+    const handleAddUser = async (userData) => {
+        try {
+            const res = await fetch(`${API_URL}/api/users`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+
+            if (res.ok) {
+                toast.success('Đã thêm user mới!');
+                setOpenAddUserDialog(false);
+                loadDataForTab();
+            } else {
+                const err = await res.json();
+                toast.error(err.error || 'Lỗi khi thêm user');
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error('Lỗi kết nối');
+        }
+    };
+
+    const handleDeleteUser = async (id) => {
+        if (!window.confirm('Bạn có chắc chắn muốn xóa user này?')) return;
+        try {
+            const res = await fetch(`${API_URL}/api/users/${id}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            if (res.ok) {
+                toast.success('Đã xóa user!');
+                loadDataForTab();
+            } else {
+                const err = await res.json();
+                toast.error(err.error || 'Lỗi khi xóa user');
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error('Lỗi kết nối');
         }
     };
 
@@ -675,10 +720,12 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                 <Typography variant="caption" sx={{ color: '#aaa' }}>Admin Console</Typography>
             </Toolbar>
             <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, borderBottom: '1px solid #ddd', bgcolor: '#f5f5f5' }}>
-                <Box sx={{ width: 40, height: 40, borderRadius: '50%', bgcolor: '#333', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>A</Box>
+                <Box sx={{ width: 40, height: 40, borderRadius: '50%', bgcolor: '#333', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                    {user.username ? user.username.charAt(0).toUpperCase() : 'U'}
+                </Box>
                 <Box>
-                    <Typography variant="subtitle2">Admin User</Typography>
-                    <Typography variant="caption" color="textSecondary">Administrator</Typography>
+                    <Typography variant="subtitle2">{user.username}</Typography>
+                    <Typography variant="caption" color="textSecondary">{user.role === 'admin' ? 'Administrator' : 'Staff'}</Typography>
                 </Box>
             </Box>
             <List>
@@ -741,6 +788,13 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                     <ListItemIcon><SettingsIcon /></ListItemIcon>
                     <ListItemText primary="Cấu hình (Settings)" />
                 </ListItem>
+
+                {user.role === 'admin' && (
+                    <ListItem button selected={activeTab === 'users'} onClick={() => setActiveTab('users')}>
+                        <ListItemIcon><People /></ListItemIcon>
+                        <ListItemText primary="Quản lý User" />
+                    </ListItem>
+                )}
             </List>
         </div>
     );
@@ -764,7 +818,8 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                                     activeTab === 'pages' ? 'Quản lý Trang tĩnh' :
                                                         activeTab === 'collections' ? 'Quản lý Bộ sưu tập' :
                                                             activeTab === 'contacts' ? 'Quản lý Liên hệ thiết kế' :
-                                                                activeTab === 'gem-categories' ? 'Danh mục Đá Quý' : 'Danh mục Trang Sức'}
+                                                                activeTab === 'users' ? 'Quản lý Người dùng' :
+                                                                    activeTab === 'gem-categories' ? 'Danh mục Đá Quý' : 'Danh mục Trang Sức'}
                     </Typography>
                     <Button color="inherit" onClick={handleLogout}>Đăng xuất</Button>
                 </Toolbar>
@@ -782,6 +837,56 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
             <Box component="main" sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` }, bgcolor: '#f4f6f8', minHeight: '100vh' }}>
                 <Toolbar />
 
+                {activeTab === 'users' && user.role === 'admin' && (
+                    <Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                            <Typography variant="body2" color="textSecondary">
+                                Quản lý tài khoản quản trị và nhân viên. Admin có toàn quyền, Staff bị giới hạn cấu hình hệ thống.
+                            </Typography>
+                            <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpenAddUserDialog(true)}>
+                                Thêm User mới
+                            </Button>
+                        </Box>
+                        <TableContainer component={Paper}>
+                            <Table>
+                                <TableHead>
+                                    <TableRow sx={{ bgcolor: '#eee' }}>
+                                        <TableCell>Username</TableCell>
+                                        <TableCell>Email</TableCell>
+                                        <TableCell>Role</TableCell>
+                                        <TableCell>Last Login</TableCell>
+                                        <TableCell align="right">Hành động</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {items.map((u) => (
+                                        <TableRow key={u.id}>
+                                            <TableCell sx={{ fontWeight: 'bold' }}>{u.username}</TableCell>
+                                            <TableCell>{u.email}</TableCell>
+                                            <TableCell>
+                                                <Chip
+                                                    label={u.role.toUpperCase()}
+                                                    color={u.role === 'admin' ? 'primary' : 'default'}
+                                                    size="small"
+                                                />
+                                            </TableCell>
+                                            <TableCell>{u.last_login ? new Date(u.last_login).toLocaleString('vi-VN') : 'Never'}</TableCell>
+                                            <TableCell align="right">
+                                                <IconButton
+                                                    color="error"
+                                                    onClick={() => handleDeleteUser(u.id)}
+                                                    disabled={u.id === user.id}
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Box>
+                )}
                 {activeTab === 'dashboard' && (
                     <Grid container spacing={3}>
                         {[
@@ -834,61 +939,65 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                             <TextField label="Slogan / Phụ đề logo" name="LOGO_SUBTITLE" value={settings.LOGO_SUBTITLE || ''} onChange={handleSettingsChange} fullWidth placeholder="TRANG SỨC ĐÁ QUÝ" />
                         </Stack>
 
-                        <Typography variant="h6" gutterBottom>Cấu hình Cloudinary (Upload Ảnh)</Typography>
-                        <Stack spacing={3} sx={{ mb: 4 }}>
-                            <TextField label="Cloud Name" name="CLOUD_NAME" value={settings.CLOUD_NAME} onChange={handleSettingsChange} fullWidth />
-                            <TextField label="API Key" name="API_KEY" value={settings.API_KEY} onChange={handleSettingsChange} fullWidth />
-                            <TextField label="API Secret" name="API_SECRET" value={settings.API_SECRET} onChange={handleSettingsChange} fullWidth type="password" />
-                            <TextField label="Upload Preset" name="UPLOAD_PRESET" value={settings.UPLOAD_PRESET} onChange={handleSettingsChange} fullWidth helperText="Tạo preset 'unsigned' trong Cloudinary Settings > Upload" />
-                        </Stack>
+                        {user.role === 'admin' && (
+                            <>
+                                <Typography variant="h6" gutterBottom>Cấu hình Cloudinary (Upload Ảnh)</Typography>
+                                <Stack spacing={3} sx={{ mb: 4 }}>
+                                    <TextField label="Cloud Name" name="CLOUD_NAME" value={settings.CLOUD_NAME} onChange={handleSettingsChange} fullWidth />
+                                    <TextField label="API Key" name="API_KEY" value={settings.API_KEY} onChange={handleSettingsChange} fullWidth />
+                                    <TextField label="API Secret" name="API_SECRET" value={settings.API_SECRET} onChange={handleSettingsChange} fullWidth type="password" />
+                                    <TextField label="Upload Preset" name="UPLOAD_PRESET" value={settings.UPLOAD_PRESET} onChange={handleSettingsChange} fullWidth helperText="Tạo preset 'unsigned' trong Cloudinary Settings > Upload" />
+                                </Stack>
 
-                        <Typography variant="h6" gutterBottom>Cấu hình Email (SMTP)</Typography>
-                        <Stack spacing={3} sx={{ mb: 4 }}>
-                            <TextField
-                                label="SMTP Host"
-                                name="SMTP_HOST"
-                                value={settings.SMTP_HOST || 'smtp.gmail.com'}
-                                onChange={handleSettingsChange}
-                                fullWidth
-                                helperText="Ví dụ: smtp.gmail.com, smtp.sendgrid.net"
-                            />
-                            <TextField
-                                label="SMTP Port"
-                                name="SMTP_PORT"
-                                value={settings.SMTP_PORT || '587'}
-                                onChange={handleSettingsChange}
-                                fullWidth
-                                type="number"
-                                helperText="587 (TLS) hoặc 465 (SSL)"
-                            />
-                            <TextField
-                                label="Email gửi (SMTP User)"
-                                name="SMTP_USER"
-                                value={settings.SMTP_USER || ''}
-                                onChange={handleSettingsChange}
-                                fullWidth
-                                type="email"
-                                helperText="Email dùng để gửi thông báo"
-                            />
-                            <TextField
-                                label="Mật khẩu Email (SMTP Pass)"
-                                name="SMTP_PASS"
-                                value={settings.SMTP_PASS || ''}
-                                onChange={handleSettingsChange}
-                                fullWidth
-                                type="password"
-                                helperText="Gmail: dùng App Password (không phải mật khẩu thường)"
-                            />
-                            <TextField
-                                label="Email nhận liên hệ"
-                                name="CONTACT_EMAIL"
-                                value={settings.CONTACT_EMAIL || ''}
-                                onChange={handleSettingsChange}
-                                fullWidth
-                                type="email"
-                                helperText="Email admin nhận thông báo liên hệ (để trống = dùng SMTP_USER)"
-                            />
-                        </Stack>
+                                <Typography variant="h6" gutterBottom>Cấu hình Email (SMTP)</Typography>
+                                <Stack spacing={3} sx={{ mb: 4 }}>
+                                    <TextField
+                                        label="SMTP Host"
+                                        name="SMTP_HOST"
+                                        value={settings.SMTP_HOST || 'smtp.gmail.com'}
+                                        onChange={handleSettingsChange}
+                                        fullWidth
+                                        helperText="Ví dụ: smtp.gmail.com, smtp.sendgrid.net"
+                                    />
+                                    <TextField
+                                        label="SMTP Port"
+                                        name="SMTP_PORT"
+                                        value={settings.SMTP_PORT || '587'}
+                                        onChange={handleSettingsChange}
+                                        fullWidth
+                                        type="number"
+                                        helperText="587 (TLS) hoặc 465 (SSL)"
+                                    />
+                                    <TextField
+                                        label="Email gửi (SMTP User)"
+                                        name="SMTP_USER"
+                                        value={settings.SMTP_USER || ''}
+                                        onChange={handleSettingsChange}
+                                        fullWidth
+                                        type="email"
+                                        helperText="Email dùng để gửi thông báo"
+                                    />
+                                    <TextField
+                                        label="Mật khẩu Email (SMTP Pass)"
+                                        name="SMTP_PASS"
+                                        value={settings.SMTP_PASS || ''}
+                                        onChange={handleSettingsChange}
+                                        fullWidth
+                                        type="password"
+                                        helperText="Gmail: dùng App Password (không phải mật khẩu thường)"
+                                    />
+                                    <TextField
+                                        label="Email nhận liên hệ"
+                                        name="CONTACT_EMAIL"
+                                        value={settings.CONTACT_EMAIL || ''}
+                                        onChange={handleSettingsChange}
+                                        fullWidth
+                                        type="email"
+                                        helperText="Email admin nhận thông báo liên hệ (để trống = dùng SMTP_USER)"
+                                    />
+                                </Stack>
+                            </>
+                        )}
 
                         <Typography variant="h6" gutterBottom>Cấu hình Footer (Liên hệ)</Typography>
                         <Stack spacing={3} sx={{ mb: 4 }}>
@@ -1116,7 +1225,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                     </Box>
                 )}
 
-                {activeTab !== 'dashboard' && activeTab !== 'settings' && activeTab !== 'contacts' && activeTab !== 'menu' && activeTab !== 'fonts' && (
+                {activeTab !== 'dashboard' && activeTab !== 'settings' && activeTab !== 'contacts' && activeTab !== 'menu' && activeTab !== 'fonts' && activeTab !== 'users' && (
                     <Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                             {activeTab === 'products' ? (
@@ -1304,6 +1413,12 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                         toast.error('Lỗi kết nối');
                     }
                 }}
+            />
+
+            <AddUserDialog
+                open={openAddUserDialog}
+                onClose={() => setOpenAddUserDialog(false)}
+                onSave={handleAddUser}
             />
 
             {/* SHARED DIALOG FORM */}
@@ -2831,6 +2946,38 @@ const FontManager = () => {
                 </Table>
             </TableContainer>
         </Paper>
+    );
+};
+
+const AddUserDialog = ({ open, onClose, onSave }) => {
+    const [userData, setUserData] = useState({ username: '', password: '', email: '', role: 'staff' });
+
+    const handleChange = (e) => {
+        setUserData({ ...userData, [e.target.name]: e.target.value });
+    };
+
+    return (
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+            <DialogTitle>Thêm User mới</DialogTitle>
+            <DialogContent>
+                <Stack spacing={3} sx={{ mt: 1 }}>
+                    <TextField label="Username" name="username" value={userData.username} onChange={handleChange} fullWidth required />
+                    <TextField label="Email" name="email" type="email" value={userData.email} onChange={handleChange} fullWidth required />
+                    <TextField label="Password" name="password" type="password" value={userData.password} onChange={handleChange} fullWidth required />
+                    <FormControl fullWidth>
+                        <InputLabel>Role</InputLabel>
+                        <Select name="role" value={userData.role} onChange={handleChange} label="Role">
+                            <MenuItem value="staff">Staff (Limited Access)</MenuItem>
+                            <MenuItem value="admin">Admin (Full Control)</MenuItem>
+                        </Select>
+                    </FormControl>
+                </Stack>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Hủy</Button>
+                <Button variant="contained" onClick={() => onSave(userData)}>Thêm mới</Button>
+            </DialogActions>
+        </Dialog>
     );
 };
 
