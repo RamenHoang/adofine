@@ -9,7 +9,7 @@ import './ContactPage.css';
 const ContactPage = () => {
   const { t } = useTranslation();
   const { showLoading, hideLoading } = useLoading();
-  
+
   // Form state
   const [formData, setFormData] = useState({
     salutation: '',
@@ -29,6 +29,14 @@ const ContactPage = () => {
   const [errors, setErrors] = useState({});
   const [submitStatus, setSubmitStatus] = useState(null); // 'success' | 'error' | null
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formConfig, setFormConfig] = useState({
+    title: t('contact.title'),
+    salutation: { label: t('contact.salutation'), placeholder: t('contact.salutationPlaceholder'), required: false },
+    phone: { label: t('contact.phone'), placeholder: t('contact.phonePlaceholder'), required: true },
+    email: { label: t('contact.email'), placeholder: t('contact.emailPlaceholder'), required: true },
+    subject: { label: t('contact.subject'), placeholder: t('contact.subjectPlaceholder'), required: true },
+    message: { label: t('contact.message'), placeholder: t('contact.messagePlaceholder'), required: true }
+  });
 
   // Fetch gemstones and jewelry on mount
   useEffect(() => {
@@ -48,6 +56,23 @@ const ContactPage = () => {
         if (jewelryRes.ok) {
           const jewelryData = await jewelryRes.json();
           setJewelry(jewelryData);
+        }
+
+        // Fetch settings for form config
+        const settingsRes = await fetch(`${API_URL}/api/settings`);
+        if (settingsRes.ok) {
+          const settings = await settingsRes.json();
+          if (settings.CONTACT_FORM_CONFIG) {
+            try {
+              const config = JSON.parse(settings.CONTACT_FORM_CONFIG);
+              setFormConfig(prev => ({
+                ...prev,
+                ...config
+              }));
+            } catch (e) {
+              console.error('Error parsing contact form config:', e);
+            }
+          }
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -124,21 +149,21 @@ const ContactPage = () => {
   const validate = () => {
     const newErrors = {};
 
-    if (!formData.phone.trim()) {
+    if (formConfig.phone.required && !formData.phone.trim()) {
       newErrors.phone = t('contact.errors.phoneRequired');
     }
 
-    if (!formData.email.trim()) {
+    if (formConfig.email.required && !formData.email.trim()) {
       newErrors.email = t('contact.errors.emailRequired');
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    } else if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = t('contact.errors.emailInvalid');
     }
 
-    if (!formData.subject.trim()) {
+    if (formConfig.subject.required && !formData.subject.trim()) {
       newErrors.subject = t('contact.errors.subjectRequired');
     }
 
-    if (!formData.message.trim()) {
+    if (formConfig.message.required && !formData.message.trim()) {
       newErrors.message = t('contact.errors.messageRequired');
     }
 
@@ -200,7 +225,7 @@ const ContactPage = () => {
         <p>{t('contact.subtitle')}</p>
       </div> */}
       <PageHeader
-        title={t('contact.title').toUpperCase()}
+        title={(formConfig.title || t('contact.title')).toUpperCase()}
       />
 
       <div className="contact-container">
@@ -226,17 +251,20 @@ const ContactPage = () => {
           {/* Basic Information */}
           <div className="form-section">
             <h2>{t('contact.basicInfo')}</h2>
-            
+
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="salutation">{t('contact.salutation')}</label>
+                <label htmlFor="salutation">
+                  {formConfig.salutation.label}
+                  {formConfig.salutation.required && <span className="required"> *</span>}
+                </label>
                 <input
                   type="text"
                   id="salutation"
                   name="salutation"
                   value={formData.salutation}
                   onChange={handleChange}
-                  placeholder={t('contact.salutationPlaceholder')}
+                  placeholder={formConfig.salutation.placeholder}
                 />
               </div>
             </div>
@@ -244,7 +272,8 @@ const ContactPage = () => {
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="phone">
-                  {t('contact.phone')} <span className="required">*</span>
+                  {formConfig.phone.label}
+                  {formConfig.phone.required && <span className="required"> *</span>}
                 </label>
                 <input
                   type="tel"
@@ -252,7 +281,7 @@ const ContactPage = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder={t('contact.phonePlaceholder')}
+                  placeholder={formConfig.phone.placeholder}
                   className={errors.phone ? 'error' : ''}
                 />
                 {errors.phone && <span className="error-message">{errors.phone}</span>}
@@ -260,7 +289,8 @@ const ContactPage = () => {
 
               <div className="form-group">
                 <label htmlFor="email">
-                  {t('contact.email')} <span className="required">*</span>
+                  {formConfig.email.label}
+                  {formConfig.email.required && <span className="required"> *</span>}
                 </label>
                 <input
                   type="email"
@@ -268,7 +298,7 @@ const ContactPage = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder={t('contact.emailPlaceholder')}
+                  placeholder={formConfig.email.placeholder}
                   className={errors.email ? 'error' : ''}
                 />
                 {errors.email && <span className="error-message">{errors.email}</span>}
@@ -277,7 +307,8 @@ const ContactPage = () => {
 
             <div className="form-group">
               <label htmlFor="subject">
-                {t('contact.subject')} <span className="required">*</span>
+                {formConfig.subject.label}
+                {formConfig.subject.required && <span className="required"> *</span>}
               </label>
               <input
                 type="text"
@@ -285,7 +316,7 @@ const ContactPage = () => {
                 name="subject"
                 value={formData.subject}
                 onChange={handleChange}
-                placeholder={t('contact.subjectPlaceholder')}
+                placeholder={formConfig.subject.placeholder}
                 className={errors.subject ? 'error' : ''}
               />
               {errors.subject && <span className="error-message">{errors.subject}</span>}
@@ -293,14 +324,15 @@ const ContactPage = () => {
 
             <div className="form-group">
               <label htmlFor="message">
-                {t('contact.message')} <span className="required">*</span>
+                {formConfig.message.label}
+                {formConfig.message.required && <span className="required"> *</span>}
               </label>
               <textarea
                 id="message"
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
-                placeholder={t('contact.messagePlaceholder')}
+                placeholder={formConfig.message.placeholder}
                 rows="6"
                 className={errors.message ? 'error' : ''}
               />
@@ -312,7 +344,7 @@ const ContactPage = () => {
           <div className="form-section">
             <h2>{t('contact.selectGemstones')}</h2>
             <p className="section-description">{t('contact.selectGemstonesDesc')}</p>
-            
+
             {gemstones.length === 0 ? (
               <p className="no-items">{t('contact.noGemstones')}</p>
             ) : (
@@ -332,7 +364,7 @@ const ContactPage = () => {
                             <input
                               type="checkbox"
                               checked={isSelected}
-                              onChange={() => {}}
+                              onChange={() => { }}
                               onClick={(e) => e.stopPropagation()}
                             />
                           </div>
@@ -374,7 +406,7 @@ const ContactPage = () => {
           <div className="form-section">
             <h2>{t('contact.selectJewelry')}</h2>
             <p className="section-description">{t('contact.selectJewelryDesc')}</p>
-            
+
             {jewelry.length === 0 ? (
               <p className="no-items">{t('contact.noJewelry')}</p>
             ) : (
@@ -394,7 +426,7 @@ const ContactPage = () => {
                             <input
                               type="checkbox"
                               checked={isSelected}
-                              onChange={() => {}}
+                              onChange={() => { }}
                               onClick={(e) => e.stopPropagation()}
                             />
                           </div>

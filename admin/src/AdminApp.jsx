@@ -272,6 +272,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
     const [openCollectionSectionConfigDialog, setOpenCollectionSectionConfigDialog] = useState(false);
     const [openHeroConfigDialog, setOpenHeroConfigDialog] = useState(false);
     const [openMenuConfigDialog, setOpenMenuConfigDialog] = useState(false);
+    const [openContactFormConfigDialog, setOpenContactFormConfigDialog] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({});
 
@@ -941,6 +942,11 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
 
                 {activeTab === 'contacts' && (
                     <Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                            <Button variant="outlined" startIcon={<SettingsIcon />} onClick={() => setOpenContactFormConfigDialog(true)}>
+                                Cấu hình Form
+                            </Button>
+                        </Box>
                         <TableContainer component={Paper}>
                             <Table>
                                 <TableHead>
@@ -1240,6 +1246,49 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                 onSave={() => { saveSettings(); setOpenMenuConfigDialog(false); }}
                 onChange={handleSettingsChange}
                 setSettings={setSettings}
+            />
+
+            <ContactFormConfigDialog
+                open={openContactFormConfigDialog}
+                onClose={() => setOpenContactFormConfigDialog(false)}
+                config={(() => {
+                    try {
+                        return settings.CONTACT_FORM_CONFIG ? JSON.parse(settings.CONTACT_FORM_CONFIG) : {
+                            title: 'LET US CREATE THE PERFECT CUSTOM JEWELRY PIECE FOR YOU',
+                            salutation: { label: 'Danh xưng', placeholder: 'Mr., Mrs., Ms., etc.', required: false },
+                            phone: { label: 'Số điện thoại', placeholder: 'Nhập số điện thoại', required: true },
+                            email: { label: 'Email', placeholder: 'Nhập địa chỉ email', required: true },
+                            subject: { label: 'Tiêu đề', placeholder: 'Mô tả ngắn gọn yêu cầu', required: true },
+                            message: { label: 'Nội dung', placeholder: 'Tell us about your custom jewelry design ideas...', required: true }
+                        };
+                    } catch (e) {
+                        return {};
+                    }
+                })()}
+                onSave={async (newConfig) => {
+                    const updatedSettings = {
+                        ...settings,
+                        CONTACT_FORM_CONFIG: JSON.stringify(newConfig)
+                    };
+                    try {
+                        const res = await fetch(`${API_URL}/api/settings`, {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(updatedSettings)
+                        });
+                        if (res.ok) {
+                            setSettings(updatedSettings);
+                            setOpenContactFormConfigDialog(false);
+                            toast.success('Đã lưu cấu hình form!');
+                        } else {
+                            toast.error('Lỗi khi lưu cấu hình');
+                        }
+                    } catch (error) {
+                        console.error('Error saving form config:', error);
+                        toast.error('Lỗi kết nối');
+                    }
+                }}
             />
 
             {/* SHARED DIALOG FORM */}
@@ -2106,6 +2155,91 @@ const CollectionSectionConfigDialog = ({ open, onClose, settings, onSave, onChan
     );
 };
 
+const ContactFormConfigDialog = ({ open, onClose, config, onSave }) => {
+    const [localConfig, setLocalConfig] = useState(config || {});
+
+    useEffect(() => {
+        if (open) {
+            setLocalConfig(config || {});
+        }
+    }, [open, config]);
+
+    const handleChange = (field, key, value) => {
+        setLocalConfig(prev => ({
+            ...prev,
+            [field]: { ...prev[field], [key]: value }
+        }));
+    };
+
+    const handleSave = () => {
+        onSave(localConfig);
+    };
+
+    const fields = [
+        { id: 'salutation', label: 'Danh xưng' },
+        { id: 'phone', label: 'Số điện thoại' },
+        { id: 'email', label: 'Email' },
+        { id: 'subject', label: 'Tiêu đề' },
+        { id: 'message', label: 'Nội dung tin nhắn' }
+    ];
+
+    return (
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+            <DialogTitle>Cấu hình trường nhập liệu Form Liên hệ</DialogTitle>
+            <DialogContent>
+                <Stack spacing={3} sx={{ mt: 1 }}>
+                    <Typography variant="body2" color="textSecondary">
+                        Tùy chỉnh tiêu đề trang, nhãn (Label), gợi ý (Placeholder) và bắt buộc nhập (Required) cho từng trường.
+                    </Typography>
+                    <Paper variant="outlined" sx={{ p: 2 }}>
+                        <TextField
+                            label="Tiêu đề Trang Contact"
+                            value={localConfig.title || ''}
+                            onChange={(e) => setLocalConfig(prev => ({ ...prev, title: e.target.value }))}
+                            fullWidth
+                            placeholder="LET US CREATE THE PERFECT CUSTOM JEWELRY PIECE FOR YOU"
+                        />
+                    </Paper>
+                    {fields.map(field => (
+                        <Paper key={field.id} variant="outlined" sx={{ p: 2 }}>
+                            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
+                                {field.label}
+                            </Typography>
+                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
+                                <TextField
+                                    label="Nhãn (Label)"
+                                    value={localConfig[field.id]?.label || ''}
+                                    onChange={(e) => handleChange(field.id, 'label', e.target.value)}
+                                    fullWidth
+                                />
+                                <TextField
+                                    label="Gợi ý (Placeholder)"
+                                    value={localConfig[field.id]?.placeholder || ''}
+                                    onChange={(e) => handleChange(field.id, 'placeholder', e.target.value)}
+                                    fullWidth
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={!!localConfig[field.id]?.required}
+                                            onChange={(e) => handleChange(field.id, 'required', e.target.checked)}
+                                        />
+                                    }
+                                    label="Bắt buộc"
+                                    sx={{ minWidth: 120 }}
+                                />
+                            </Stack>
+                        </Paper>
+                    ))}
+                </Stack>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose} color="inherit">Hủy</Button>
+                <Button onClick={handleSave} variant="contained" color="primary">Lưu cấu hình</Button>
+            </DialogActions>
+        </Dialog>
+    );
+};
 
 const HeroConfigDialog = ({ open, onClose, settings, onSave, onChange, setSettings }) => {
     const [uploadedFonts, setUploadedFonts] = useState([]);
