@@ -109,8 +109,7 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
                             as="link"
                             to="/contact"
                             variant="default"
-                            size="large"
-                            fullWidth
+                            size="medium"
                         >
                             {t('common.contactUs').toUpperCase()}
                         </Button>

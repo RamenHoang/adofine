@@ -14,7 +14,7 @@ const PortfolioGrid = ({
   linkBasePath = '/portfolio',
   numColumns = 4
 }) => {
-  
+
   // Distribute items into columns vertically
   const distributeIntoColumns = (items, numColumns) => {
     const columns = Array.from({ length: numColumns }, () => []);
@@ -31,7 +31,7 @@ const PortfolioGrid = ({
   return (
     <section className="portfolio-section">
       <div className="container text-center">
-        
+
         {/* Header */}
         <h2 className="section-title">{sectionTitle}</h2>
         <p className="section-subtitle">{sectionSubtitle}</p>
@@ -54,7 +54,7 @@ const PortfolioGrid = ({
         {/* Gallery Grid */}
         <div className="grid">
           {columnsToDisplay.map((column, colIndex) => (
-            <div key={colIndex} className="column" style={{ maxWidth: `${columnWidth}%` }}>
+            <div key={colIndex} className="column" style={{ '--col-width': `${columnWidth}%` }}>
               {column.map(item => (
                 <div key={item.id} className="grid-item">
                   <div className="frame">
@@ -149,6 +149,8 @@ const PortfolioGrid = ({
           flex-direction: column;
           gap: 30px;
           justify-content: center;
+          max-width: var(--col-width);
+          width: 100%;
         }
         .grid-item {
           width: 100%;
@@ -226,12 +228,12 @@ const PortfolioGrid = ({
             gap: 20px;
           }
           .column {
-            max-width: 50%;
+            max-width: 50% !important;
           }
         }
         @media (max-width: 768px) {
           .column {
-            max-width: 100%;
+            max-width: 100% !important;
           }
           .grid {
             flex-direction: column;
