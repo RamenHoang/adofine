@@ -138,25 +138,31 @@ Please change the parent <Route path="${O}"> to <Route path="${O==="/"?"*":`${O}
             top: 0;
             right: -100%;
             width: 80%;
-            height: 100vh;
+            height: 100dvh;
             background: #000;
             flex-direction: column;
             justify-content: flex-start;
-            align-items: center;
+            align-items: stretch; /* Changed from center to stretch */
             transition: all 0.4s ease;
             margin: 0;
-            padding: 0;
+            padding: 80px 0 40px; /* Added padding top and bottom */
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
           }
-          .nav-links > li:nth-child(1) {
-            padding-top: 40px;
+          .nav-links > li {
+            width: 100%;
+            text-align: center;
           }
           .nav-links.show {
             right: 0;
           }
           .nav-links > li > a {
-            font-size: min(var(--nav-font-size, 0.9rem), 1.5rem);
+            display: block; /* Make link full width */
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.1rem; /* Slightly larger for mobile */
           }
           .nav-separator {
             display: none;
