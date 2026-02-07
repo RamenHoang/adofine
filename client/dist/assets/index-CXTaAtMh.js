@@ -141,12 +141,13 @@ Please change the parent <Route path="${O}"> to <Route path="${O==="/"?"*":`${O}
             height: 100vh;
             background: #000;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             transition: all 0.4s ease;
             gap: 20px;
             margin: 0;
-            padding: 0;
+            padding: 20px 0 20px;
+            overflow-y: auto;
           }
           .nav-links.show {
             right: 0;
