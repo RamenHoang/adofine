@@ -60,10 +60,18 @@ const Navbar = () => {
           }
 
           // Inject custom font if configured
-          if (data.NAVBAR_FONT_SOURCE === 'custom' && data.NAVBAR_FONT) {
-            // Custom font injection would require font files from uploaded_fonts table
-            // For now, just apply the font-family name
-            // In future, fetch from /api/fonts and create @font-face rules
+          if (data.NAVBAR_FONT_SOURCE === 'custom' && data.NAVBAR_FONT && data.NAVBAR_CUSTOM_FONT_URL) {
+            if (!document.getElementById('navbar-custom-font')) {
+              const style = document.createElement('style');
+              style.id = 'navbar-custom-font';
+              style.textContent = `
+                    @font-face {
+                        font-family: '${data.NAVBAR_FONT}';
+                        src: url('${data.NAVBAR_CUSTOM_FONT_URL}');
+                    }
+                `;
+              document.head.appendChild(style);
+            }
           }
 
           // Update CSS variable for navbar font

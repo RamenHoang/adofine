@@ -80,6 +80,29 @@ const Hero = () => {
               }
             }
           });
+
+          // Inject Custom Fonts
+          const customFontConfigs = [
+            { key: 'HERO_TITLE_FONT_SOURCE', urlKey: 'HERO_TITLE_CUSTOM_FONT_URL', nameKey: 'HERO_TITLE_FONT', id: 'hero-title-custom-font' },
+            { key: 'HERO_SUBTITLE_FONT_SOURCE', urlKey: 'HERO_SUBTITLE_CUSTOM_FONT_URL', nameKey: 'HERO_SUBTITLE_FONT', id: 'hero-subtitle-custom-font' },
+            { key: 'HERO_BUTTON_FONT_SOURCE', urlKey: 'HERO_BUTTON_CUSTOM_FONT_URL', nameKey: 'HERO_BUTTON_FONT', id: 'hero-button-custom-font' }
+          ];
+
+          customFontConfigs.forEach(config => {
+            if (data[config.key] === 'custom' && data[config.urlKey]) {
+              if (!document.getElementById(config.id)) {
+                const style = document.createElement('style');
+                style.id = config.id;
+                style.textContent = `
+                      @font-face {
+                          font-family: '${data[config.nameKey]}';
+                          src: url('${data[config.urlKey]}');
+                      }
+                  `;
+                document.head.appendChild(style);
+              }
+            }
+          });
         }
       } catch (error) {
         console.error('Error fetching settings:', error);

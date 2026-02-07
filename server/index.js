@@ -269,6 +269,109 @@ app.post('/api/upload', authenticateToken, upload.single('file'), async (req, re
     }
 });
 
+// --- FONT MANAGEMENT ENDPOINTS ---
+
+// GET /api/fonts - List all uploaded fonts
+app.get('/api/fonts', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM uploaded_fonts ORDER BY created_at DESC');
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// POST /api/fonts - Upload a new font
+app.post('/api/fonts', authenticateToken, upload.single('file'), async (req, res) => {
+    try {
+        const { name } = req.body;
+
+        if (!req.file || !name) {
+            return res.status(400).json({ error: 'Name and file are required' });
+        }
+
+        // Fetch Cloudinary config
+        const [rows] = await db.query('SELECT * FROM app_settings');
+        const config = {};
+        rows.forEach(r => config[r.setting_key] = r.setting_value);
+
+        if (!config.CLOUD_NAME || !config.API_KEY || !config.API_SECRET) {
+            return res.status(500).json({ error: 'Cloudinary not configured' });
+        }
+
+        cloudinary.config({
+            cloud_name: config.CLOUD_NAME,
+            api_key: config.API_KEY,
+            api_secret: config.API_SECRET
+        });
+
+        // Upload to Cloudinary (resource_type: 'auto' or 'raw' for fonts)
+        const result = await cloudinary.uploader.upload(req.file.path, {
+            resource_type: 'raw', // Fonts are often better as raw
+            folder: 'fonts',
+            public_id: `font_${Date.now()}`
+        });
+
+        // Save to DB
+        const [insertResult] = await db.query(
+            'INSERT INTO uploaded_fonts (name, url, public_id, format) VALUES (?, ?, ?, ?)',
+            [name, result.secure_url, result.public_id, path.extname(req.file.originalname).substring(1)]
+        );
+
+        // Cleanup
+        fs.unlinkSync(req.file.path);
+
+        res.json({
+            id: insertResult.insertId,
+            name,
+            url: result.secure_url,
+            public_id: result.public_id
+        });
+
+    } catch (err) {
+        console.error('Font Upload Error:', err);
+        if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+        res.status(500).json({ error: 'Font upload failed' });
+    }
+});
+
+// DELETE /api/fonts/:id - Delete a font
+app.delete('/api/fonts/:id', authenticateToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Get font details first
+        const [fonts] = await db.query('SELECT * FROM uploaded_fonts WHERE id = ?', [id]);
+        if (fonts.length === 0) {
+            return res.status(404).json({ error: 'Font not found' });
+        }
+        const font = fonts[0];
+
+        // Delete from Cloudinary
+        const [rows] = await db.query('SELECT * FROM app_settings');
+        const config = {};
+        rows.forEach(r => config[r.setting_key] = r.setting_value);
+
+        if (config.CLOUD_NAME && config.API_KEY && config.API_SECRET && font.public_id) {
+            cloudinary.config({
+                cloud_name: config.CLOUD_NAME,
+                api_key: config.API_KEY,
+                api_secret: config.API_SECRET
+            });
+            await cloudinary.uploader.destroy(font.public_id, { resource_type: 'raw' });
+        }
+
+        // Delete from DB
+        await db.query('DELETE FROM uploaded_fonts WHERE id = ?', [id]);
+
+        res.json({ message: 'Font deleted successfully' });
+    } catch (err) {
+        console.error('Delete Error:', err);
+        res.status(500).json({ error: 'Delete failed' });
+    }
+});
+
 // --- HELPER FUNCTIONS ---
 const saveGemstoneImages = async (gemstoneId, images) => {
     // images: [{ url: '...', public_id: '...', sort_order: 0 }, ...]
@@ -651,17 +754,17 @@ app.get('/api/posts', async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 10;
         const offset = parseInt(req.query.offset) || 0;
-        
+
         // Get total count
         const [countResult] = await db.query('SELECT COUNT(*) as total FROM posts');
         const total = countResult[0].total;
-        
+
         // Get posts with pagination
         const [rows] = await db.query(
             'SELECT * FROM posts ORDER BY created_at DESC LIMIT ? OFFSET ?',
             [limit, offset]
         );
-        
+
         res.json({
             posts: rows,
             total,
@@ -777,7 +880,7 @@ app.get('/api/collections/:id', async (req, res) => {
                 .filter(item => item.type === 'gemstone' && item.category_name)
                 .map(item => item.category_name)
         )];
-        
+
         const jewelryCategories = [...new Set(
             collection.items
                 .filter(item => item.type === 'jewelry' && item.category_name)
@@ -1059,7 +1162,7 @@ app.get('/api/contact-requests', authenticateToken, async (req, res) => {
         const [rows] = await db.query(
             'SELECT * FROM contact_requests ORDER BY created_at DESC'
         );
-        
+
         // Parse JSON fields
         const contacts = rows.map(contact => ({
             ...contact,
@@ -1160,15 +1263,15 @@ app.get('/api/navbar-items', async (req, res) => {
         const [rows] = await db.query(
             'SELECT * FROM navbar_items WHERE is_visible = TRUE ORDER BY sort_order ASC'
         );
-        
+
         // Build nested structure (parent-children)
         const items = rows.filter(item => !item.parent_id);
         const children = rows.filter(item => item.parent_id);
-        
+
         items.forEach(item => {
             item.children = children.filter(child => child.parent_id === item.id);
         });
-        
+
         res.json(items);
     } catch (err) {
         console.error(err);
@@ -1180,15 +1283,15 @@ app.get('/api/navbar-items', async (req, res) => {
 app.get('/api/navbar-items/all', authenticateToken, async (req, res) => {
     try {
         const [rows] = await db.query('SELECT * FROM navbar_items ORDER BY sort_order ASC');
-        
+
         // Build nested structure
         const items = rows.filter(item => !item.parent_id);
         const children = rows.filter(item => item.parent_id);
-        
+
         items.forEach(item => {
             item.children = children.filter(child => child.parent_id === item.id);
         });
-        
+
         res.json(items);
     } catch (err) {
         console.error(err);
@@ -1200,14 +1303,14 @@ app.get('/api/navbar-items/all', authenticateToken, async (req, res) => {
 app.post('/api/navbar-items', authenticateToken, async (req, res) => {
     try {
         const { label, type, identifier, url, parent_id, sort_order, is_visible, icon, open_in_new_tab } = req.body;
-        
+
         const [result] = await db.query(
             `INSERT INTO navbar_items 
             (label, type, identifier, url, parent_id, sort_order, is_visible, icon, open_in_new_tab) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [label, type || 'custom', identifier, url, parent_id || null, sort_order || 0, is_visible !== false, icon, open_in_new_tab || false]
         );
-        
+
         res.status(201).json({ id: result.insertId, ...req.body });
     } catch (err) {
         console.error(err);
@@ -1219,14 +1322,14 @@ app.post('/api/navbar-items', authenticateToken, async (req, res) => {
 app.put('/api/navbar-items/:id', authenticateToken, async (req, res) => {
     try {
         const { label, url, parent_id, sort_order, is_visible, icon, open_in_new_tab } = req.body;
-        
+
         const [result] = await db.query(
             `UPDATE navbar_items 
             SET label=?, url=?, parent_id=?, sort_order=?, is_visible=?, icon=?, open_in_new_tab=? 
             WHERE id=?`,
             [label, url, parent_id || null, sort_order, is_visible, icon, open_in_new_tab, req.params.id]
         );
-        
+
         if (result.affectedRows === 0) return res.status(404).json({ error: 'Not found' });
         res.json({ id: req.params.id, ...req.body });
     } catch (err) {
@@ -1244,7 +1347,7 @@ app.delete('/api/navbar-items/:id', authenticateToken, async (req, res) => {
         if (item[0].type === 'fixed') {
             return res.status(403).json({ error: 'Cannot delete fixed navigation items' });
         }
-        
+
         const [result] = await db.query('DELETE FROM navbar_items WHERE id = ?', [req.params.id]);
         res.json({ message: 'Deleted successfully' });
     } catch (err) {
@@ -1257,11 +1360,11 @@ app.delete('/api/navbar-items/:id', authenticateToken, async (req, res) => {
 app.post('/api/navbar-items/reorder', authenticateToken, async (req, res) => {
     try {
         const { items } = req.body; // Array of { id, sort_order }
-        
+
         for (const item of items) {
             await db.query('UPDATE navbar_items SET sort_order = ? WHERE id = ?', [item.sort_order, item.id]);
         }
-        
+
         res.json({ message: 'Reordered successfully' });
     } catch (err) {
         console.error(err);
@@ -1293,7 +1396,7 @@ app.post('/api/fonts/upload', authenticateToken, upload.single('font'), async (r
 
         const { name, font_family } = req.body;
         const file_format = path.extname(req.file.originalname).substring(1); // Remove the dot
-        
+
         // Upload to Cloudinary
         const result = await cloudinary.uploader.upload(req.file.path, {
             folder: 'fonts',
@@ -1321,7 +1424,7 @@ app.post('/api/fonts/upload', authenticateToken, upload.single('font'), async (r
         console.error(err);
         // Clean up temp file on error
         if (req.file?.path) {
-            try { fs.unlinkSync(req.file.path); } catch (e) {}
+            try { fs.unlinkSync(req.file.path); } catch (e) { }
         }
         res.status(500).json({ error: 'Upload failed' });
     }
