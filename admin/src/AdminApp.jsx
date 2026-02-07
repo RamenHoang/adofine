@@ -1021,7 +1021,7 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
 
                             <Grid container spacing={2}>
                                 <Grid item xs={4}><TextField label="Link Facebook" name="SOCIAL_FB" value={settings.SOCIAL_FB || ''} onChange={handleSettingsChange} fullWidth /></Grid>
-                                <Grid item xs={4}><TextField label="Link Twitter/X" name="SOCIAL_TW" value={settings.SOCIAL_TW || ''} onChange={handleSettingsChange} fullWidth /></Grid>
+                                <Grid item xs={4}><TextField label="Link Threads" name="SOCIAL_THREADS" value={settings.SOCIAL_THREADS || ''} onChange={handleSettingsChange} fullWidth /></Grid>
                                 <Grid item xs={4}><TextField label="Link Instagram" name="SOCIAL_IG" value={settings.SOCIAL_IG || ''} onChange={handleSettingsChange} fullWidth /></Grid>
                             </Grid>
 
