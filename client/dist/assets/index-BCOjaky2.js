@@ -528,7 +528,7 @@ Please change the parent <Route path="${D}"> to <Route path="${D==="/"?"*":`${D}
           left: 10px;
           right: 10px;
           bottom: 10px;
-          background: rgba(211, 30, 68, 0.85);
+          background: rgba(211, 30, 69, 0.39);
           opacity: 0;
           transition: opacity 0.3s ease;
           display: flex;
