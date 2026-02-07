@@ -83,6 +83,24 @@ function App() {
                 <Footer />
               </>
             } />
+            <Route path="/gemstones" element={
+              <>
+                <Navbar />
+                <div style={{ paddingTop: '80px' }}>
+                  <Gemstones />
+                </div>
+                <Footer />
+              </>
+            } />
+            <Route path="/jewelries" element={
+              <>
+                <Navbar />
+                <div style={{ paddingTop: '80px' }}>
+                  <Jewelries />
+                </div>
+                <Footer />
+              </>
+            } />
             <Route path="/contact" element={
               <>
                 <Navbar />

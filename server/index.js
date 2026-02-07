@@ -238,7 +238,7 @@ app.post('/api/settings', authenticateToken, async (req, res) => {
                 continue;
             }
 
-            if (value !== undefined && value !== null) {
+            if (value !== undefined && value !== null && value !== '') {
                 await db.query('INSERT INTO app_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value=?', [key, value, value]);
             }
         }

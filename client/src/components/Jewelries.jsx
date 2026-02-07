@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { API_URL } from '../config';
 import PortfolioGrid from './PortfolioGrid';
 
 const Frames = () => {
-  const [activeFilter, setActiveFilter] = useState('ALL');
+  const [searchParams] = useSearchParams();
+  const [activeFilter, setActiveFilter] = useState(searchParams.get('filter') || 'ALL');
   const [frames, setFrames] = useState([]);
   const [filters, setFilters] = useState(['ALL']);
   const [config, setConfig] = useState({});
@@ -19,7 +21,7 @@ const Frames = () => {
         // Fetch jewelry categories for filters
         const categoriesResponse = await fetch(`${API_URL}/api/jewelry-categories`);
         const categoriesData = await categoriesResponse.json();
-        
+
         // Create filters array with "ALL" first, then category names
         const categoryFilters = categoriesData.map(cat => cat.name.toUpperCase());
         setFilters(['ALL', ...categoryFilters]);
@@ -34,6 +36,15 @@ const Frames = () => {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const filterParam = searchParams.get('filter');
+    if (filterParam) {
+      setActiveFilter(filterParam);
+    } else {
+      setActiveFilter('ALL');
+    }
+  }, [searchParams]);
 
   const visibleFrames = activeFilter === 'ALL'
     ? frames

@@ -43,7 +43,9 @@ const runMigration = async () => {
             (1, 'HOME', 'fixed', 'home', 10, TRUE),
             (2, 'PAGES', 'fixed', 'pages', 20, TRUE),
             (3, 'COLLECTIONS', 'fixed', 'collections', 30, TRUE),
-            (4, 'NEWS', 'fixed', 'news', 40, TRUE)
+            (4, 'NEWS', 'fixed', 'news', 40, TRUE),
+            (5, 'GEMSTONES', 'fixed', 'gemstones', 15, TRUE),
+            (6, 'JEWELRIES', 'fixed', 'jewelries', 25, TRUE)
         `;
         await db.query(seedQuery);
         console.log('✓ Initial navbar items seeded.');

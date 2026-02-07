@@ -16,6 +16,8 @@ const Navbar = () => {
   const [collections, setCollections] = useState([]);
   const [pages, setPages] = useState([]);
   const [navbarItems, setNavbarItems] = useState([]);
+  const [gemstoneCategories, setGemstoneCategories] = useState([]);
+  const [jewelryCategories, setJewelryCategories] = useState([]);
 
   useEffect(() => {
     // Close menu on route change
@@ -144,6 +146,30 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const [gemRes, jewelryRes] = await Promise.all([
+          fetch(`${API_URL}/api/gemstone-categories`),
+          fetch(`${API_URL}/api/jewelry-categories`)
+        ]);
+
+        if (gemRes.ok) {
+          const gemData = await gemRes.json();
+          setGemstoneCategories(gemData);
+        }
+
+        if (jewelryRes.ok) {
+          const jewelryData = await jewelryRes.json();
+          setJewelryCategories(jewelryData);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
     const fetchNavbarItems = async () => {
       try {
         const res = await fetch(`${API_URL}/api/navbar-items`);
@@ -210,6 +236,42 @@ const Navbar = () => {
                   {collections.map(collection => (
                     <li key={collection.id}>
                       <Link to={`/collections/${collection.id}`}>{collection.title}</Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          );
+        case 'gemstones':
+          return (
+            <li key={item.id} className="dropdown">
+              <Link to="/gemstones" className={location.pathname.startsWith('/gemstones') ? 'active' : ''}>
+                {item.icon && <span style={{ marginRight: '5px' }}>{item.icon}</span>}
+                {item.label}
+              </Link>
+              {gemstoneCategories.length > 0 && (
+                <ul className="dropdown-menu">
+                  {gemstoneCategories.map(cat => (
+                    <li key={cat.id}>
+                      <Link to={`/gemstones?filter=${encodeURIComponent(cat.name.toUpperCase())}`}>{cat.name}</Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          );
+        case 'jewelries':
+          return (
+            <li key={item.id} className="dropdown">
+              <Link to="/jewelries" className={location.pathname.startsWith('/jewelries') ? 'active' : ''}>
+                {item.icon && <span style={{ marginRight: '5px' }}>{item.icon}</span>}
+                {item.label}
+              </Link>
+              {jewelryCategories.length > 0 && (
+                <ul className="dropdown-menu">
+                  {jewelryCategories.map(cat => (
+                    <li key={cat.id}>
+                      <Link to={`/jewelries?filter=${encodeURIComponent(cat.name.toUpperCase())}`}>{cat.name}</Link>
                     </li>
                   ))}
                 </ul>

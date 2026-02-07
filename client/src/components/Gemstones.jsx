@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 import PortfolioGrid from './PortfolioGrid';
 
 const Portfolio = () => {
     const { t } = useTranslation();
-    const [filter, setFilter] = useState('ALL');
+    const [searchParams] = useSearchParams();
+    const [filter, setFilter] = useState(searchParams.get('filter') || 'ALL');
     const [items, setItems] = useState([]);
     const [config, setConfig] = useState({});
     const [categories, setCategories] = useState([]);
@@ -33,6 +35,15 @@ const Portfolio = () => {
         };
         fetchData();
     }, []);
+
+    useEffect(() => {
+        const filterParam = searchParams.get('filter');
+        if (filterParam) {
+            setFilter(filterParam);
+        } else {
+            setFilter('ALL');
+        }
+    }, [searchParams]);
 
     const filteredItems = filter === 'ALL' ? items : items.filter(item => {
         // Filter by category name or gemstone_category_id
