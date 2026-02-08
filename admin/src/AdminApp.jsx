@@ -284,6 +284,9 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
     const [openAddUserDialog, setOpenAddUserDialog] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({});
+    const [openPreviewDialog, setOpenPreviewDialog] = useState(false);
+    const [previewItem, setPreviewItem] = useState(null);
+    const [previewType, setPreviewType] = useState(null);
 
     // Settings State
     const [settings, setSettings] = useState({ CLOUD_NAME: '', API_KEY: '', API_SECRET: '', UPLOAD_PRESET: '', GEM_GRID_COLUMNS: '4', JEWELRY_GRID_COLUMNS: '4', COLLECTION_GRID_COLUMNS: '4' });
@@ -459,8 +462,8 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
             } catch (err) { console.error(err); }
         }
 
-        // Load all products for selector if collections
-        if (activeTab === 'collections') {
+        // Load all products for selector if collections OR for image lookup if contacts
+        if (activeTab === 'collections' || activeTab === 'contacts') {
             try {
                 const [gems, jews] = await Promise.all([
                     fetch(`${API_URL}/api/gemstones`, { credentials: 'include' }).then(r => r.json()),
@@ -582,6 +585,24 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
 
     const handleCloseDialog = () => {
         setOpenDialog(false);
+    };
+
+    const handleOpenPreview = async (id, type) => {
+        try {
+            const endpoint = type === 'gemstone' ? `/api/gemstones/${id}` : `/api/jewelry-items/${id}`;
+            const res = await fetch(`${API_URL}${endpoint}`, { credentials: 'include' });
+            if (res.ok) {
+                const data = await res.json();
+                setPreviewItem(data);
+                setPreviewType(type);
+                setOpenPreviewDialog(true);
+            } else {
+                toast.error('Không tìm thấy thông tin sản phẩm');
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error('Lỗi khi tải thông tin sản phẩm');
+        }
     };
 
     const handleSubmit = async () => {
@@ -1428,6 +1449,90 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                 onSave={handleAddUser}
             />
 
+            {/* ITEM PREVIEW DIALOG */}
+            <Dialog open={openPreviewDialog} onClose={() => setOpenPreviewDialog(false)} fullWidth maxWidth="md" scroll="body">
+                <DialogTitle sx={{ pr: 6 }}>
+                    Chi tiết {previewType === 'gemstone' ? 'Đá quý' : 'Trang sức'}
+                    <IconButton
+                        aria-label="close"
+                        onClick={() => setOpenPreviewDialog(false)}
+                        sx={{ position: 'absolute', right: 8, top: 8 }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent dividers>
+                    {previewItem && (
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} md={5}>
+                                <Box
+                                    component="img"
+                                    src={previewItem.image || previewItem.image_url || 'https://placehold.co/400x400?text=No+Image'}
+                                    sx={{ width: '100%', borderRadius: 2, mb: 2, boxShadow: 1 }}
+                                />
+                                {previewItem.gallery && previewItem.gallery.length > 0 && (
+                                    <Stack direction="row" spacing={1} overflow="auto" pb={1} sx={{
+                                        '&::-webkit-scrollbar': { height: 4 },
+                                        '&::-webkit-scrollbar-thumb': { bgcolor: '#ccc', borderRadius: 4 }
+                                    }}>
+                                        {previewItem.gallery.map((gallery, i) => (
+                                            <Box
+                                                key={i}
+                                                component="img"
+                                                src={gallery.url}
+                                                sx={{ width: 80, height: 80, borderRadius: 1, objectFit: 'cover', border: '1px solid #eee' }}
+                                            />
+                                        ))}
+                                    </Stack>
+                                )}
+                            </Grid>
+                            <Grid item xs={12} md={7}>
+                                <Typography variant="h5" fontWeight="bold" gutterBottom>{previewItem.title}</Typography>
+                                <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
+                                    {previewItem.price ? (
+                                        (() => {
+                                            const rawPrice = String(previewItem.price).replace(/[^\d]/g, '');
+                                            const num = Number(rawPrice);
+                                            return !isNaN(num) && rawPrice !== ''
+                                                ? `${num.toLocaleString('vi-VN')} VND`
+                                                : `${previewItem.price} VND`;
+                                        })()
+                                    ) : 'Liên hệ'}
+                                </Typography>
+
+                                {previewType === 'gemstone' && (
+                                    <TableContainer component={Paper} variant="outlined" sx={{ mb: 3 }}>
+                                        <Table size="small">
+                                            <TableBody>
+                                                <TableRow><TableCell sx={{ bgcolor: '#f9f9f9', width: '40%' }}><b>Trọng lượng</b></TableCell><TableCell>{previewItem.weight || 'N/A'}</TableCell></TableRow>
+                                                <TableRow><TableCell sx={{ bgcolor: '#f9f9f9' }}><b>Kích thước</b></TableCell><TableCell>{previewItem.dimensions || 'N/A'}</TableCell></TableRow>
+                                                <TableRow><TableCell sx={{ bgcolor: '#f9f9f9' }}><b>Màu sắc</b></TableCell><TableCell>{previewItem.color || 'N/A'}</TableCell></TableRow>
+                                                <TableRow><TableCell sx={{ bgcolor: '#f9f9f9' }}><b>Độ tinh khiết</b></TableCell><TableCell>{previewItem.clarity || 'N/A'}</TableCell></TableRow>
+                                                <TableRow><TableCell sx={{ bgcolor: '#f9f9f9' }}><b>Giác cắt</b></TableCell><TableCell>{previewItem.cut || 'N/A'}</TableCell></TableRow>
+                                                <TableRow><TableCell sx={{ bgcolor: '#f9f9f9' }}><b>Nguồn gốc</b></TableCell><TableCell>{previewItem.origin || 'N/A'}</TableCell></TableRow>
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                )}
+
+                                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>Mô tả:</Typography>
+                                <Box
+                                    className="ck-content"
+                                    dangerouslySetInnerHTML={{ __html: previewItem.description || 'Chưa có mô tả' }}
+                                    sx={{
+                                        color: 'text.secondary',
+                                        '& img': { maxWidth: '100% !important', height: 'auto !important' }
+                                    }}
+                                />
+                            </Grid>
+                        </Grid>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenPreviewDialog(false)}>Đóng</Button>
+                </DialogActions>
+            </Dialog>
+
             {/* SHARED DIALOG FORM */}
             <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="md">
                 <DialogTitle>
@@ -1892,10 +1997,35 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                     <Card sx={{ mb: 2 }}>
                                         <CardContent>
                                             <Typography variant="subtitle1" gutterBottom>Đá quý tham khảo:</Typography>
-                                            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                                                {formData.selected_gemstones.map((gem, idx) => (
-                                                    <Chip key={idx} label={`${gem.title} - ${gem.price || 'N/A'}`} />
-                                                ))}
+                                            <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+                                                {formData.selected_gemstones.map((gem, idx) => {
+                                                    const product = allGemstones.find(p => p.id === gem.id);
+                                                    return (
+                                                        <Box
+                                                            key={idx}
+                                                            onClick={() => handleOpenPreview(gem.id, 'gemstone')}
+                                                            sx={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                p: 1,
+                                                                border: '1px solid #e0e0e0',
+                                                                borderRadius: 1,
+                                                                cursor: 'pointer',
+                                                                '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
+                                                            }}
+                                                        >
+                                                            <img
+                                                                src={(product && (product.image || product.image_url)) || 'https://placehold.co/40x40?text=N/A'}
+                                                                alt=""
+                                                                style={{ width: 40, height: 40, objectFit: 'cover', marginRight: 8, borderRadius: 4 }}
+                                                            />
+                                                            <Box>
+                                                                <Typography variant="body2" fontWeight="bold">{gem.title}</Typography>
+                                                                <Typography variant="caption" color="text.secondary">{gem.price || 'N/A'}</Typography>
+                                                            </Box>
+                                                        </Box>
+                                                    );
+                                                })}
                                             </Stack>
                                         </CardContent>
                                     </Card>
@@ -1905,10 +2035,35 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                     <Card sx={{ mb: 2 }}>
                                         <CardContent>
                                             <Typography variant="subtitle1" gutterBottom>Trang sức tham khảo:</Typography>
-                                            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                                                {formData.selected_jewelry.map((jewel, idx) => (
-                                                    <Chip key={idx} label={`${jewel.title} - ${jewel.price || 'N/A'}`} />
-                                                ))}
+                                            <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+                                                {formData.selected_jewelry.map((jewel, idx) => {
+                                                    const product = allJewelry.find(p => p.id === jewel.id);
+                                                    return (
+                                                        <Box
+                                                            key={idx}
+                                                            onClick={() => handleOpenPreview(jewel.id, 'jewelry')}
+                                                            sx={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                p: 1,
+                                                                border: '1px solid #e0e0e0',
+                                                                borderRadius: 1,
+                                                                cursor: 'pointer',
+                                                                '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
+                                                            }}
+                                                        >
+                                                            <img
+                                                                src={(product && (product.image || product.image_url)) || 'https://placehold.co/40x40?text=N/A'}
+                                                                alt=""
+                                                                style={{ width: 40, height: 40, objectFit: 'cover', marginRight: 8, borderRadius: 4 }}
+                                                            />
+                                                            <Box>
+                                                                <Typography variant="body2" fontWeight="bold">{jewel.title}</Typography>
+                                                                <Typography variant="caption" color="text.secondary">{jewel.price || 'N/A'}</Typography>
+                                                            </Box>
+                                                        </Box>
+                                                    );
+                                                })}
                                             </Stack>
                                         </CardContent>
                                     </Card>
