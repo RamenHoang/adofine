@@ -1536,8 +1536,8 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
             {/* SHARED DIALOG FORM */}
             <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="md">
                 <DialogTitle>
-                    {editingId ? 'Chỉnh sửa' : 'Thêm mới'}
-                    {activeTab === 'products' ? ' Đá Quý' :
+                    {editingId ? 'Chỉnh sửa' : 'Thêm mới'}&nbsp;
+                    {activeTab === 'products' ? 'Đá Quý' :
                         activeTab === 'jewelry' ? ' Trang Sức' :
                             activeTab === 'hero-slides' ? ' Hero Slide' :
                                 activeTab === 'menu' ? ' Menu Item' :
