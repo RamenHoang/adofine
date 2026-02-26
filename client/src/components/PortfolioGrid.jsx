@@ -5,14 +5,16 @@ import Button from './Button';
 const PortfolioGrid = ({
   items = [],
   filters = [],
-  activeFilter = 'TẤT CẢ',
+  activeFilter = '',
   onFilterChange,
   sectionTitle = '',
   sectionSubtitle = '',
-  sectionBg = 'https://placehold.co/1920x1080/111/FFF?text=BG',
+  sectionBg = '',
   categoryLabel = 'PORTFOLIO',
   linkBasePath = '/portfolio',
-  numColumns = 4
+  numColumns = 4,
+  showFilters = true,
+  sectionPadding = '80px 0'
 }) => {
 
   // Distribute items into columns vertically
@@ -37,19 +39,21 @@ const PortfolioGrid = ({
         <p className="section-subtitle">{sectionSubtitle}</p>
 
         {/* Filters */}
-        <div className="filters">
-          {filters.map(filter => (
-            <Button
-              key={filter}
-              variant="default"
-              size="medium"
-              active={activeFilter === filter}
-              onClick={() => onFilterChange(filter)}
-            >
-              {filter}
-            </Button>
-          ))}
-        </div>
+        {showFilters && filters.length > 0 && (
+          <div className="filters">
+            {filters.map(filter => (
+              <Button
+                key={filter}
+                variant="default"
+                size="medium"
+                active={activeFilter === filter}
+                onClick={() => onFilterChange(filter)}
+              >
+                {filter}
+              </Button>
+            ))}
+          </div>
+        )}
 
         {/* Gallery Grid */}
         <div className="grid">
@@ -66,9 +70,10 @@ const PortfolioGrid = ({
                         {/* <a href="#" className="icon-btn">🔍</a> */}
                         {/* </div> */}
                         <div className="details">
-                          <h3>{categoryLabel}</h3>
+                          {/* <h3>{categoryLabel}</h3> */}
                           <div className="meta">
-                            <span>{item.title}, {item.price}</span>
+                            <h3>{item.title}</h3>
+                            {item.price && <p>{item.price}</p>}
                           </div>
                         </div>
                       </div>
@@ -83,8 +88,8 @@ const PortfolioGrid = ({
       </div>
       <style>{`
         .portfolio-section {
-          padding: 80px 0;
-          background-image: url('${sectionBg}');
+          padding: ${sectionPadding};
+          ${sectionBg ? `background-image: url('${sectionBg}');` : 'background: transparent;'}
           background-attachment: fixed;
           background-position: center;
           background-repeat: no-repeat;
@@ -99,7 +104,7 @@ const PortfolioGrid = ({
           left: 0;
           width: 100%;
           height: 100%;
-          background: rgba(0,0,0,0.7);
+          background: ${sectionBg ? 'rgba(0,0,0,0.7)' : 'transparent'};
           pointer-events: none;
         }
         .container {

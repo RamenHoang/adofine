@@ -45,6 +45,7 @@ export default {
     description: "Description",
     composition: "Gemstone Composition",
     gallery: "Gallery",
+    related: "Related Jewelry",
     backToList: "Back to List"
   },
   collections: {

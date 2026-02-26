@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { API_URL } from '../config';
 import PageHeader from './PageHeader';
 import Button from './Button';
+import PortfolioGrid from './PortfolioGrid';
 
 import { useLoading } from '../context/LoadingContext';
 
@@ -12,6 +13,7 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
     const { id } = useParams();
     const { showLoading, hideLoading } = useLoading();
     const [item, setItem] = useState(null);
+    const [relatedJewelry, setRelatedJewelry] = useState([]);
 
     // Scroll to top
     useEffect(() => { window.scrollTo(0, 0); }, [id]);
@@ -41,6 +43,26 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
         };
         fetchDetail();
     }, [id, type]);
+
+    // Fetch related jewelry if it's a gemstone
+    useEffect(() => {
+        if (type === 'gemstone' && item?.gemstone_category_id) {
+            const fetchRelated = async () => {
+                try {
+                    const res = await fetch(`${API_URL}/api/jewelry/by-gemstone-category/${item.gemstone_category_id}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        setRelatedJewelry(data);
+                    }
+                } catch (err) {
+                    console.error('Error fetching related jewelry:', err);
+                }
+            };
+            fetchRelated();
+        } else {
+            setRelatedJewelry([]);
+        }
+    }, [item?.gemstone_category_id, type]);
 
     if (!item) return null; // Loading handled by global overlay
 
@@ -129,6 +151,19 @@ const PortfolioDetail = ({ type }) => { // type: 'gemstone' or 'jewelry'
                         ))}
                     </div>
                 </div>
+            )}
+
+            {/* RELATED JEWELRY SECTION */}
+            {type === 'gemstone' && relatedJewelry.length > 0 && (
+                <PortfolioGrid
+                    items={relatedJewelry}
+                    showFilters={false}
+                    sectionTitle={t('jewelry.related').toUpperCase()}
+                    categoryLabel="JEWELRY"
+                    linkBasePath="/jewelry"
+                    numColumns={3}
+                    sectionPadding="0 0 80px 0"
+                />
             )}
 
             <div className="container" style={{ marginBottom: '50px' }}>

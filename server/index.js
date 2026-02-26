@@ -682,6 +682,23 @@ app.delete('/api/jewelry-items/:id', authenticateToken, async (req, res) => {
     }
 });
 
+app.get('/api/jewelry/by-gemstone-category/:categoryId', async (req, res) => {
+    try {
+        const { categoryId } = req.params;
+        const [rows] = await db.query(`
+            SELECT j.*, c.name as category_name 
+            FROM jewelry_items j
+            JOIN jewelry_gemstone_composition jgc ON j.id = jgc.jewelry_id
+            LEFT JOIN jewelry_categories c ON j.jewelry_category_id = c.id
+            WHERE jgc.gemstone_category_id = ?
+        `, [categoryId]);
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
 // --- LEGACY/CATEGORY ROUTES ---
 app.get('/api/jewelry', async (req, res) => {
     try {
