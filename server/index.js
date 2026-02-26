@@ -798,10 +798,10 @@ app.get('/api/hero-slides', async (req, res) => {
 
 app.post('/api/hero-slides', authenticateToken, async (req, res) => {
     try {
-        const { image_url, title, subtitle, link, sort_order } = req.body;
+        const { image_url, title, subtitle, link, button_text, sort_order } = req.body;
         const [result] = await db.query(
-            'INSERT INTO hero_slides (image_url, title, subtitle, link, sort_order) VALUES (?, ?, ?, ?, ?)',
-            [image_url, title, subtitle, link, sort_order || 0]
+            'INSERT INTO hero_slides (image_url, title, subtitle, link, button_text, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
+            [image_url, title, subtitle, link, button_text || null, sort_order || 0]
         );
         res.status(201).json({ id: result.insertId, ...req.body });
     } catch (err) {
@@ -812,10 +812,10 @@ app.post('/api/hero-slides', authenticateToken, async (req, res) => {
 
 app.put('/api/hero-slides/:id', authenticateToken, async (req, res) => {
     try {
-        const { image_url, title, subtitle, link, sort_order, is_active } = req.body;
+        const { image_url, title, subtitle, link, button_text, sort_order, is_active } = req.body;
         const [result] = await db.query(
-            'UPDATE hero_slides SET image_url=?, title=?, subtitle=?, link=?, sort_order=?, is_active=? WHERE id=?',
-            [image_url, title, subtitle, link, sort_order, is_active, req.params.id]
+            'UPDATE hero_slides SET image_url=?, title=?, subtitle=?, link=?, button_text=?, sort_order=?, is_active=? WHERE id=?',
+            [image_url, title, subtitle, link, button_text, sort_order, is_active, req.params.id]
         );
         if (result.affectedRows === 0) return res.status(404).json({ error: 'Not found' });
         res.json({ id: req.params.id, ...req.body });

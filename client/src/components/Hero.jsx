@@ -157,7 +157,8 @@ const Hero = () => {
     image_url: 'https://placehold.co/1920x1080/222/FFF?text=Hero+Image',
     title: t('hero.subtitle'),
     subtitle: t('hero.welcome'),
-    link: ''
+    link: '',
+    button_text: 'KHÁM PHÁ NGAY'
   };
 
   const activeSlide = slides.length > 0 ? slides[currentSlide] : defaultSlide;
@@ -198,7 +199,7 @@ const Hero = () => {
               variant="default"
               size="large"
             >
-              KHÁM PHÁ NGAY
+              {activeSlide.button_text || 'KHÁM PHÁ NGAY'}
             </Button>
           </div>
         )}

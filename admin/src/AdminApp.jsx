@@ -1592,6 +1592,9 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
                                         <Box sx={{ flex: 1, minWidth: { xs: '100%', sm: '48%' } }}>
                                             <TextField fullWidth label="Link liên kết (Optional)" name="link" value={formData.link || ''} onChange={handleInputChange} placeholder="/portfolio/1" />
                                         </Box>
+                                        <Box sx={{ flex: 1, minWidth: { xs: '100%', sm: '48%' } }}>
+                                            <TextField fullWidth label="Chữ trên nút (Button Text)" name="button_text" value={formData.button_text || ''} onChange={handleInputChange} placeholder="Mặc định: KHÁM PHÁ NGAY" />
+                                        </Box>
                                     </Stack>
                                 </Paper>
                             </>
