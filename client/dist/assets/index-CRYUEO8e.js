@@ -595,7 +595,7 @@ Please change the parent <Route path="${N}"> to <Route path="${N==="/"?"*":`${N}
         }
         .meta {
           font-size: 0.9rem;
-          font-style: italic;
+          font-style: bold;
         }
 
         @media (max-width: 1024px) {
