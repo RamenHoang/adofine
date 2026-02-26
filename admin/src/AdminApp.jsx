@@ -503,9 +503,11 @@ const AuthenticatedAdminApp = ({ user, logout }) => {
         } else if (activeTab === 'hero-slides') {
             setFormData(fullItem ? {
                 image_url: fullItem.image_url, title: fullItem.title,
-                subtitle: fullItem.subtitle, link: fullItem.link, sort_order: fullItem.sort_order
+                subtitle: fullItem.subtitle, link: fullItem.link,
+                button_text: fullItem.button_text, sort_order: fullItem.sort_order
             } : {
-                image_url: '', title: '', subtitle: '', link: '', sort_order: 0
+                image_url: '', title: '', subtitle: '', link: '',
+                button_text: '', sort_order: 0
             });
         } else if (activeTab === 'blogs') {
             setFormData(fullItem ? {
