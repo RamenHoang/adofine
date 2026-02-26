@@ -444,7 +444,7 @@ Please change the parent <Route path="${N}"> to <Route path="${N==="/"?"*":`${N}
                     color: #fff;
                     text-align: center;
                 }
-            `})]})},li=({items:s=[],filters:i=[],activeFilter:u="",onFilterChange:r,sectionTitle:c="",sectionSubtitle:f="",sectionBg:h="",categoryLabel:g="PORTFOLIO",linkBasePath:y="/portfolio",numColumns:p=4,showFilters:x=!0,sectionPadding:b="80px 0"})=>{const A=((z,U)=>{const O=Array.from({length:U},()=>[]);return z.forEach((N,w)=>{const Q=w%U;O[Q].push(N)}),O})(s,p),R=(100/p).toFixed(2);return m.jsxs("section",{className:"portfolio-section",children:[m.jsxs("div",{className:"container text-center",children:[m.jsx("h2",{className:"section-title",children:c}),m.jsx("p",{className:"section-subtitle",children:f}),x&&i.length>0&&m.jsx("div",{className:"filters",children:i.map(z=>m.jsx(Mt,{variant:"default",size:"medium",active:u===z,onClick:()=>r(z),children:z},z))}),m.jsx("div",{className:"grid",children:A.map((z,U)=>m.jsx("div",{className:"column",style:{"--col-width":`${R}%`},children:z.map(O=>m.jsx("div",{className:"grid-item",children:m.jsx(Ve,{to:`${y}/${O.id}`,className:"frame-link",children:m.jsxs("div",{className:"frame",children:[m.jsx("img",{src:O.image,alt:O.title}),m.jsx("div",{className:"overlay",children:m.jsx("div",{className:"details",children:m.jsxs("div",{className:"meta",children:[m.jsx("h3",{children:O.title}),O.price&&m.jsx("p",{children:O.price})]})})})]})})},O.id))},U))})]}),m.jsx("style",{children:`
+            `})]})},li=({items:s=[],filters:i=[],activeFilter:u="",onFilterChange:r,sectionTitle:c="",sectionSubtitle:f="",sectionBg:h="",categoryLabel:g="PORTFOLIO",linkBasePath:y="/portfolio",numColumns:p=4,showFilters:x=!0,sectionPadding:b="80px 0"})=>{const A=((z,U)=>{const O=Array.from({length:U},()=>[]);return z.forEach((N,w)=>{const Q=w%U;O[Q].push(N)}),O})(s,p),R=(100/p).toFixed(2);return m.jsxs("section",{className:"portfolio-section",children:[m.jsxs("div",{className:"container text-center",children:[m.jsx("h2",{className:"section-title",children:c}),m.jsx("p",{className:"section-subtitle",children:f}),x&&i.length>0&&m.jsx("div",{className:"filters",children:i.map(z=>m.jsx(Mt,{variant:"default",size:"medium",active:u===z,onClick:()=>r(z),children:z},z))}),m.jsx("div",{className:"grid",children:A.map((z,U)=>m.jsx("div",{className:"column",style:{"--col-width":`${R}%`},children:z.map(O=>m.jsx("div",{className:"grid-item",children:m.jsx(Ve,{to:`${y}/${O.id}`,className:"frame-link",children:m.jsxs("div",{className:"frame",children:[m.jsx("img",{src:O.image,alt:O.title}),m.jsx("div",{className:"overlay",children:m.jsx("div",{className:"details",children:m.jsxs("div",{className:"meta",children:[m.jsx("h3",{children:m.jsx("strong",{children:O.title})}),O.price&&m.jsx("p",{children:O.price})]})})})]})})},O.id))},U))})]}),m.jsx("style",{children:`
         .portfolio-section {
           padding: ${b};
           ${h?`background-image: url('${h}');`:"background: transparent;"}
@@ -551,7 +551,7 @@ Please change the parent <Route path="${N}"> to <Route path="${N==="/"?"*":`${N}
           left: 10px;
           right: 10px;
           bottom: 10px;
-          background: rgba(211, 30, 69, 0.39);
+          background: rgba(0, 0, 0, 0.5);
           opacity: 0;
           transition: opacity 0.3s ease;
           display: flex;

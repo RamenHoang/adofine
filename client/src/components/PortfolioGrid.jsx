@@ -72,7 +72,7 @@ const PortfolioGrid = ({
                         <div className="details">
                           {/* <h3>{categoryLabel}</h3> */}
                           <div className="meta">
-                            <h3>{item.title}</h3>
+                            <h3><strong>{item.title}</strong></h3>
                             {item.price && <p>{item.price}</p>}
                           </div>
                         </div>
@@ -193,7 +193,7 @@ const PortfolioGrid = ({
           left: 10px;
           right: 10px;
           bottom: 10px;
-          background: rgba(211, 30, 69, 0.39);
+          background: rgba(0, 0, 0, 0.5);
           opacity: 0;
           transition: opacity 0.3s ease;
           display: flex;
