@@ -9,6 +9,8 @@ const Frames = () => {
   const [frames, setFrames] = useState([]);
   const [filters, setFilters] = useState(['ALL']);
   const [config, setConfig] = useState({});
+  const [categories, setCategories] = useState([]);
+  const [relatedGemstones, setRelatedGemstones] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,6 +27,7 @@ const Frames = () => {
         // Create filters array with "ALL" first, then category names
         const categoryFilters = categoriesData.map(cat => cat.name.toUpperCase());
         setFilters(['ALL', ...categoryFilters]);
+        setCategories(categoriesData);
 
         // Fetch section configuration
         const settingsRes = await fetch(`${API_URL}/api/settings`);
@@ -46,6 +49,19 @@ const Frames = () => {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    if (activeFilter === 'ALL' || categories.length === 0) {
+      setRelatedGemstones([]);
+      return;
+    }
+    const category = categories.find(cat => cat.name.toUpperCase() === activeFilter);
+    if (!category) return;
+    fetch(`${API_URL}/api/gemstones/by-jewelry-category/${category.id}`)
+      .then(res => res.json())
+      .then(data => setRelatedGemstones(data.map(item => ({ ...item, _linkBasePath: '/portfolio' }))))
+      .catch(err => console.error('Error fetching related gemstones:', err));
+  }, [activeFilter, categories]);
+
   const visibleFrames = activeFilter === 'ALL'
     ? frames
     : frames.filter(f => (f.category_name || '').toUpperCase() === activeFilter);
@@ -56,9 +72,11 @@ const Frames = () => {
   const sectionBg = config.JEWELRY_SECTION_BG || 'https://placehold.co/1920x1080/111/FFF?text=Jewelry+BG';
   const numColumns = parseInt(config.JEWELRY_GRID_COLUMNS) || 4;
 
+  const displayedFrames = [...visibleFrames, ...relatedGemstones];
+
   return (
     <PortfolioGrid
-      items={visibleFrames}
+      items={displayedFrames}
       filters={filters}
       activeFilter={activeFilter}
       onFilterChange={setActiveFilter}

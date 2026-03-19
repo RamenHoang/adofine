@@ -502,6 +502,24 @@ app.get('/api/gemstones', async (req, res) => {
     }
 });
 
+app.get('/api/gemstones/by-jewelry-category/:categoryId', async (req, res) => {
+    try {
+        const { categoryId } = req.params;
+        const [rows] = await db.query(`
+            SELECT DISTINCT g.*, gc.name as category_name
+            FROM gemstones g
+            JOIN gemstone_categories gc ON g.gemstone_category_id = gc.id
+            JOIN jewelry_gemstone_composition jgc ON gc.id = jgc.gemstone_category_id
+            JOIN jewelry_items ji ON jgc.jewelry_id = ji.id
+            WHERE ji.jewelry_category_id = ?
+        `, [categoryId]);
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
 app.get('/api/gemstones/:id', async (req, res) => {
     try {
         const [rows] = await db.query('SELECT * FROM gemstones WHERE id = ?', [req.params.id]);

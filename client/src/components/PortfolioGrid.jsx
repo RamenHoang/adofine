@@ -61,7 +61,7 @@ const PortfolioGrid = ({
             <div key={colIndex} className="column" style={{ '--col-width': `${columnWidth}%` }}>
               {column.map(item => (
                 <div key={item.id} className="grid-item">
-                  <Link to={`${linkBasePath}/${item.id}`} className="frame-link">
+                  <Link to={`${item._linkBasePath || linkBasePath}/${item.id}`} className="frame-link">
                     <div className="frame">
                       <img src={item.image} alt={item.title} />
                       <div className="overlay">

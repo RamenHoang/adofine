@@ -11,6 +11,7 @@ const Portfolio = () => {
     const [items, setItems] = useState([]);
     const [config, setConfig] = useState({});
     const [categories, setCategories] = useState([]);
+    const [relatedJewelry, setRelatedJewelry] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -45,6 +46,19 @@ const Portfolio = () => {
         }
     }, [searchParams]);
 
+    useEffect(() => {
+        if (filter === 'ALL' || categories.length === 0) {
+            setRelatedJewelry([]);
+            return;
+        }
+        const category = categories.find(cat => cat.name === filter);
+        if (!category) return;
+        fetch(`${API_URL}/api/jewelry/by-gemstone-category/${category.id}`)
+            .then(res => res.json())
+            .then(data => setRelatedJewelry(data.map(item => ({ ...item, _linkBasePath: '/jewelry' }))))
+            .catch(err => console.error('Error fetching related jewelry:', err));
+    }, [filter, categories]);
+
     const filteredItems = filter === 'ALL' ? items : items.filter(item => {
         // Filter by category name or gemstone_category_id
         if (item.gemstone_category_id) {
@@ -62,9 +76,11 @@ const Portfolio = () => {
 
     const filters = ['ALL', ...categories.map(cat => cat.name)];
 
+    const displayedItems = [...filteredItems, ...relatedJewelry];
+
     return (
         <PortfolioGrid
-            items={filteredItems}
+            items={displayedItems}
             filters={filters}
             activeFilter={filter}
             onFilterChange={setFilter}

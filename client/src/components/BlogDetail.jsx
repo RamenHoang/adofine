@@ -68,99 +68,104 @@ const BlogDetail = () => {
             </div>
 
             <style>{`
-    .blog - detail - page {
+    .blog-detail-page {
     background: #111;
-    min - height: 100vh;
+    min-height: 100vh;
     color: #ddd;
-    padding - bottom: 80px;
+    padding-bottom: 80px;
 }
                 .loading {
     color: #fff;
-    text - align: center;
-    padding - top: 100px;
+    text-align: center;
+    padding-top: 100px;
 }
-                .blog - hero {
+                .blog-hero {
     height: 60vh;
-    background - size: cover;
-    background - position: center;
+    background-size: cover;
+    background-position: center;
     position: relative;
     display: flex;
-    align - items: flex - end;
-    justify - content: center;
-    margin - bottom: 60px;
+    align-items: flex-end;
+    justify-content: center;
+    margin-bottom: 60px;
 }
-                .hero - overlay {
-    width: 100 %;
-    height: 100 %;
-    background: linear - gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(17, 17, 17, 1));
+                .hero-overlay {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(17, 17, 17, 1));
     display: flex;
-    align - items: flex - end;
-    padding - bottom: 60px;
+    align-items: flex-end;
+    padding-bottom: 60px;
 }
-                .post - title {
+                .post-title {
     color: #fff;
-    font - size: 3rem;
-    text - align: center;
-    margin - bottom: 20px;
-    text - transform: uppercase;
-    text - shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
-                .post - meta {
+                .post-meta {
     color: #aaa;
-    text - align: center;
-    font - size: 1rem;
-    font - style: italic;
+    text-align: center;
+    font-size: 1rem;
+    font-style: italic;
 }
-                .post - content {
-    max - width: 800px;
+                .post-content {
+    max-width: 800px;
     margin: 0 auto;
     background: #1a1a1a;
     padding: 40px;
-    border - radius: 8px;
-    box - shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
-                .content - body {
-    font - size: 1.1rem;
-    line - height: 1.8;
+                .content-body {
+    font-size: 1.1rem;
+    line-height: 1.8;
     color: #ccc;
 }
-                .content - body h2, .content - body h3 {
+                .content-body h2, .content-body h3 {
     color: #fff;
-    margin - top: 30px;
-    margin - bottom: 15px;
+    margin-top: 30px;
+    margin-bottom: 15px;
 }
-                .content - body p {
-    margin - bottom: 20px;
+                .content-body p {
+    margin-bottom: 20px;
 }
-                .content - body img {
-    max - width: 100 %;
-    height: auto;
-    border - radius: 4px;
+                .content-body figure.image {
     margin: 20px 0;
+    max-width: 100%;
 }
-                .content - body ul {
-    padding - left: 20px;
-    margin - bottom: 20px;
+                .content-body img {
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 4px;
+    display: block;
 }
-                .content - body blockquote {
-    border - left: 4px solid #d31e44;
-    padding - left: 20px;
-    font - style: italic;
+                .content-body ul {
+    padding-left: 20px;
+    margin-bottom: 20px;
+}
+                .content-body blockquote {
+    border-left: 4px solid #d31e44;
+    padding-left: 20px;
+    font-style: italic;
     color: #aaa;
     margin: 20px 0;
 }
-                .post - footer {
-    margin - top: 60px;
+                .post-footer {
+    margin-top: 60px;
 }
-                .btn - back {
+                .btn-back {
     color: #d31e44;
-    text - decoration: none;
-    font - weight: bold;
+    text-decoration: none;
+    font-weight: bold;
     border: 1px solid #d31e44;
     padding: 10px 20px;
     transition: all 0.3s;
 }
-                .btn - back:hover {
+                .btn-back:hover {
     background: #d31e44;
     color: #fff;
 }

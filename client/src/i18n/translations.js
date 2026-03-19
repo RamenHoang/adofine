@@ -35,6 +35,7 @@ export default {
     cut: "Cut",
     origin: "Origin",
     gallery: "Gallery",
+    related: "Related Gemstones",
     backToList: "Back to List"
   },
   jewelry: {
