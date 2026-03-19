@@ -155,7 +155,28 @@ const BlogRows = ({ posts = [], showButton = true }) => {
                     to { opacity: 1; transform: translateY(0); }
                 }
 
-
+                @media (max-width: 768px) {
+                    .blog-rows {
+                        width: 100%;
+                    }
+                    .blog-row,
+                    .blog-row.reverse {
+                        flex-direction: column;
+                    }
+                    .blog-row-image {
+                        flex: none;
+                        max-width: 100%;
+                        width: 100%;
+                        height: 240px;
+                    }
+                    .blog-row-content {
+                        flex: none;
+                        max-width: 100%;
+                        width: 100%;
+                        height: auto;
+                        padding: 24px 16px;
+                    }
+                }
             `}</style>
         </>
     );
